@@ -1,0 +1,65 @@
+═══════════════════════════════════════════════════════
+  İSMAİL COŞAR TURİZM – FİYAT & TARİH GÜNCELLEME REHBERİ
+═══════════════════════════════════════════════════════
+
+Tüm fiyat ve tarihler "turlar.json" dosyasında saklanır.
+Bu dosyayı herhangi bir metin editörüyle düzenleyebilirsiniz.
+(Not Defteri, Notepad++, vs.)
+
+───────────────────────────────────────────────────────
+ADIM 1 – turlar.json dosyasını açın
+───────────────────────────────────────────────────────
+Windows: Dosyaya sağ tıklayın → "Birlikte Aç" → Not Defteri
+Mac    : Dosyaya sağ tıklayın → "Birlikte Aç" → TextEdit
+
+───────────────────────────────────────────────────────
+ADIM 2 – Değiştirmek istediğiniz alanı bulun
+───────────────────────────────────────────────────────
+
+FİYAT DEĞİŞTİRMEK:
+  "fiyat": "65.000"   →   "fiyat": "75.000"
+
+TARİH DEĞİŞTİRMEK:
+  "tarih": "Haziran 2025"   →   "tarih": "Haziran 2026"
+
+KONTENJAN DURUMU:
+  "kontenjan": "var"    = Yer Var  (yeşil)
+  "kontenjan": "az"     = Az Kaldı (turuncu)
+  "kontenjan": "dolu"   = Dolu     (kırmızı)
+
+TURU GİZLEMEK (silmeden):
+  "aktif": true   →   "aktif": false
+
+───────────────────────────────────────────────────────
+ADIM 3 – Kaydedin ve Netlify'a yükleyin
+───────────────────────────────────────────────────────
+Dosyayı kaydedin (Ctrl+S)
+Netlify panelinde "Deploys" → "Drag and drop" ile
+tüm site klasörünü tekrar yükleyin.
+
+───────────────────────────────────────────────────────
+YENİ TUR EKLEMEK
+───────────────────────────────────────────────────────
+"turlar" listesindeki bir bloğu kopyalayıp yapıştırın,
+bilgileri değiştirin. Dikkat: id benzersiz olmalı.
+
+Örnek:
+    {
+      "id": "yeni-tur-2026",
+      "kategori": "umre",
+      "baslik": "Yeni Tur Adı",
+      "icon": "🌙",
+      "tarih": "Ocak 2026",
+      "konum": "Mekke & Medine",
+      "sure": "10 gece",
+      "kapasite": "40 kişi",
+      "fiyat": "30.000",
+      "para_birimi": "₺",
+      "kontenjan": "var",
+      "aktif": true
+    }
+
+═══════════════════════════════════════════════════════
+Sorun yaşarsanız: 0533 198 07 81
+(Bu satırı silebilirsiniz 😊)
+═══════════════════════════════════════════════════════
