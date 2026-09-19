@@ -67,8 +67,8 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin:32px 0 28px}
 .filter-btn{padding:9px 20px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--ff-body)}
 .filter-btn:hover{border-color:var(--gold);color:var(--gold)}.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.gallery-grid{columns:3 260px;gap:14px}
-.gallery-item{break-inside:avoid;margin-bottom:0;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;aspect-ratio:4/3;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gallery-item{position:relative;overflow:hidden;border-radius:12px;cursor:pointer;background:#000;height:220px;}
 .gallery-item:hover .g-overlay{opacity:1}
 .g-placeholder{width:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:transform .3s}
 .gallery-item:hover .g-placeholder{transform:scale(1.04)}
@@ -98,8 +98,10 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .lb-content{background:var(--navy);border-radius:var(--r-lg);padding:48px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;min-height:360px;color:rgba(255,255,255,.45)}
 .lb-close{position:absolute;top:-14px;right:-14px;width:38px;height:38px;background:var(--gold);color:var(--navy);border:none;border-radius:50%;font-size:16px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
 .note-box{background:rgba(201,151,43,.08);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;font-size:13.5px;color:var(--text-muted);margin-top:28px}
-@media(max-width:700px){.gallery-grid{columns:2 180px}}
-@media(max-width:450px){.gallery-grid{columns:1}}
+@media(max-width:700px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}}
+@media(max-width:450px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}}
+@media(max-width:768px){.gallery-grid{grid-template-columns:repeat(2,1fr)}.gallery-item{height:160px}}
+@media(max-width:480px){.gallery-grid{grid-template-columns:1fr}.gallery-item{height:200px}}
 </style>
 
   <!-- SEO Meta Etiketleri -->
