@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yurt Dışı Kültür Turları – Kudüs, Balkanlar, Endülüs | İsmail Coşar Turizm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1F3A;--navy-mid:#132d52;--navy-light:#1a3d6e;--gold:#C9972B;--gold-light:#E4B84A;--gold-pale:#F5E6C0;--cream:#FAF7F0;--white:#FFFFFF;--text-dark:#0B1F3A;--text-mid:#3a4a62;--text-muted:#6b7a94;--border:rgba(201,151,43,0.18);--shadow-sm:0 2px 12px rgba(11,31,58,0.08);--shadow-md:0 8px 32px rgba(11,31,58,0.12);--shadow-lg:0 20px 60px rgba(11,31,58,0.18);--r:12px;--r-lg:20px;--ff-head:"Playfair Display",Georgia,serif;--ff-body:"DM Sans",sans-serif}
+html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,31,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,151,43,0.2);padding:0 3vw;height:68px;display:flex;align-items:center;justify-content:space-between}
+.navbar-logo{display:flex;align-items:center;text-decoration:none}
+.navbar-logo-img{height:52px;width:auto;object-fit:contain;display:block}
+.navbar-logo-text{display:flex;flex-direction:column;justify-content:center;gap:2px}
+.navbar-logo-text strong{display:block;color:#fff;font-family:var(--ff-head);font-size:15px;font-weight:600}
+.navbar-logo-text span{font-size:11px;color:var(--gold-light);letter-spacing:.5px}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 9px;border-radius:6px;transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--gold-light);background:rgba(201,151,43,.1)}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
+.nav-cta:hover{background:var(--gold-light)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:.3s}
+section{padding:80px 5vw}
+.section-eyebrow{display:flex;align-items:center;gap:12px;font-size:11.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.section-eyebrow::after{content:"";flex:1;max-width:48px;height:1px;background:var(--gold)}
+.section-title{font-family:var(--ff-head);font-size:clamp(26px,3.2vw,42px);font-weight:700;color:var(--text-dark);line-height:1.18;letter-spacing:-.3px;margin-bottom:14px}
+.section-sub{font-size:16px;color:var(--text-muted);line-height:1.65;max-width:560px}
+.page-hero{padding:148px 5vw 80px;position:relative;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
+.hero-glow{position:absolute;right:0;top:0;width:55%;height:100%;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(201,151,43,.12),transparent 65%)}
+.page-hero-content{position:relative;z-index:2;max-width:720px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.4);margin-bottom:20px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}.breadcrumb a:hover{color:var(--gold-light)}.breadcrumb span{color:var(--gold-light)}
+.page-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,151,43,.15);border:1px solid rgba(201,151,43,.35);color:var(--gold-light);font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:50px;margin-bottom:20px}
+.page-hero h1{font-family:var(--ff-head);font-size:clamp(32px,5vw,58px);font-weight:700;color:#fff;line-height:1.12;letter-spacing:-.4px;margin-bottom:16px}
+.page-hero h1 em{font-style:normal;color:var(--gold-light)}
+.page-hero-desc{font-size:clamp(15px,1.5vw,17px);color:rgba(255,255,255,.65);line-height:1.7;max-width:560px;font-weight:300}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 20px rgba(201,151,43,.3)}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px)}
+.btn-navy{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}
+.btn-navy:hover{background:var(--navy-light)}
+.btn-wa{display:inline-flex;align-items:center;gap:9px;background:#25D366;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}
+.btn-wa:hover{background:#20bb5a}
+.cta-band{background:var(--gold);padding:56px 5vw;text-align:center}
+.cta-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,36px);font-weight:700;color:var(--navy);margin-bottom:10px}
+.cta-band p{font-size:15px;color:rgba(11,31,58,.7);margin-bottom:28px}
+.cta-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;border-top:1px solid rgba(201,151,43,.15)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px}
+.footer-logo-img{height:48px;width:auto;object-fit:contain;background:#fff;border-radius:8px;padding:5px 8px}
+.footer-brand-desc{font-size:13px;line-height:1.7;margin-top:12px;max-width:260px}
+.footer-title{font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s}
+.footer-links a:hover{color:var(--gold-light)}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.footer-badge{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--gold-pale)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,.3)}
+.floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45);transition:transform .2s}
+.floating-wa:hover{transform:scale(1.1)}
+@media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px 20px;gap:4px;border-bottom:1px solid rgba(201,151,43,.15)}.nav-links.open{display:flex}.hamburger{display:flex}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){section{padding:56px 5vw}.footer-grid{grid-template-columns:1fr}}
+
+
+.page-hero{background:linear-gradient(135deg,#3a1a08 0%,#0B1F3A 60%)}
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin:32px 0 28px}
+.filter-btn{padding:9px 20px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--ff-body)}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold)}.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tours-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+.tour-card{background:var(--cream);border-radius:var(--r-lg);border:1.5px solid var(--border);overflow:hidden;transition:transform .25s,box-shadow .25s}
+.tour-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.tc-hero{height:170px;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;overflow:hidden}
+.tc-pattern{position:absolute;inset:0;opacity:.05;background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px}
+.tc-icon{position:relative;z-index:1}
+.tc-tags{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:2}
+.tc-tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:50px}
+.tc-tag-gold{background:var(--gold);color:var(--navy)}.tc-tag-light{background:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px)}
+.tc-body{padding:20px 22px 24px}
+.tc-body h3{font-family:var(--ff-head);font-size:18px;font-weight:700;color:var(--text-dark);margin-bottom:9px;line-height:1.3}
+.tc-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.tc-meta-item{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--text-muted)}
+.tc-meta-item strong{color:var(--text-mid);font-weight:600}
+.tc-desc{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px}
+.tc-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:14px;border-top:1px solid var(--border)}
+.tc-price{font-family:var(--ff-head);font-size:20px;font-weight:700;color:var(--gold)}
+.tc-price small{font-size:11px;color:var(--text-muted);font-family:var(--ff-body);font-weight:400;display:block}
+.kontenjan{font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px}
+.k-az{background:#fff3e0;color:#c65f00}.k-var{background:#e8f5e9;color:#2e7d32}
+.btn-sm-navy{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;text-decoration:none;transition:background .2s}
+.btn-sm-navy:hover{background:var(--navy-light)}
+.dest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:36px}
+.dest-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:18px;text-align:center;transition:transform .2s,box-shadow .2s}
+.dest-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.dest-flag{font-size:34px;margin-bottom:8px}.dest-name{font-size:13.5px;font-weight:700;color:var(--text-dark);margin-bottom:3px}.dest-count{font-size:11.5px;color:var(--text-muted)}
+</style>
+
+  <!-- SEO Meta Etiketleri -->
+  <meta name="description" content="Balkanlar İslam mirası, Endülüs ve daha fazlası. Rehberli kültür turları. Rehberli, konforlu, manevi yolculuklar. Bilgi: 0533 198 07 81">
+  <meta name="keywords" content="filistin turu, balkanlar turu, endülüs turu, mısır turu, islam kültür turu, yurt dışı tur, kültür turu 2025">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="İsmail Coşar Turizm">
+  <link rel="canonical" href="https://ismailcosarturizm.com/turlar.html">
+
+  <!-- Open Graph (WhatsApp, Facebook paylaşım önizlemesi) -->
+  <meta property="og:title" content="Yurt Dışı Kültür Turları – Kudüs, Balkanlar, Endülüs | İsmail Coşar Turizm">
+  <meta property="og:description" content="Balkanlar İslam mirası, Endülüs ve daha fazlası. Rehberli kültür turları. Rehberli, konforlu, manevi yolculuklar. Bilgi: 0533 198 07 81">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ismailcosarturizm.com/turlar.html">
+  <meta property="og:image" content="logo.png">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="İsmail Coşar Turizm">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Yurt Dışı Kültür Turları – Kudüs, Balkanlar, Endülüs | İsmail Coşar Turizm">
+  <meta name="twitter:description" content="Balkanlar İslam mirası, Endülüs ve daha fazlası. Rehberli kültür turları. Rehberli, konforlu, manevi yolculuklar. Bilgi: 0533 198 07 81">
+
+  <!-- Schema.org Yapısal Veri -->
+  <script type="application/ld+json">
+  {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Yurt Dışı Kültür Turları 2025",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Kudüs & Filistin Turu", "url": "https://ismailcosarturizm.com/turlar.html"},
+        {"@type": "ListItem", "position": 2, "name": "Balkanlar Turu", "url": "https://ismailcosarturizm.com/turlar.html"},
+        {"@type": "ListItem", "position": 3, "name": "Endülüs Turu", "url": "https://ismailcosarturizm.com/turlar.html"}
+      ]
+    }
+  </script>
+
+<script>window.turlarData = {"guncelleme": "2025-01-01", "turlar": [{"id": "hac-ekonomi", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Ekonomi Paket", "icon": "🕋", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "21 gece", "kapasite": "40 kişi", "fiyat": "58.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Uygun fiyatlı, eksiksiz hac deneyimi", "one_cikan": false}, {"id": "hac-standart", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Standart Paket", "icon": "🌟", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "25 gece", "kapasite": "40 kişi", "fiyat": "72.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Huzurlu ve konforlu hac yolculuğu", "one_cikan": true}, {"id": "hac-vip", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – VIP Paket", "icon": "👑", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "30 gece", "kapasite": "20 kişi", "fiyat": "115.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Maksimum konfor, özel hizmet", "one_cikan": false}, {"id": "umre-ramazan-2025", "kategori": "umre", "baslik": "Ramazan Umre Turu 2025 – 10 Günlük", "icon": "🌙", "tarih": "Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "kudus-2025", "kategori": "diger", "baslik": "Kudüs & Filistin Ziyaret Turu – 7 Gün", "icon": "🕌", "tarih": "Şubat 2025", "konum": "Kudüs & Ramallah", "sure": "7 gece", "kapasite": "35 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-yaz-2025", "kategori": "umre", "baslik": "Yaz Umresi 2025 – 10 Gece Aile Paketi", "icon": "☀️", "tarih": "Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "45 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "balkanlar-2025", "kategori": "diger", "baslik": "Balkanlar İslam Mirası Turu", "icon": "🌍", "tarih": "Mayıs 2025", "konum": "Bosna & Makedonya", "sure": "8 gece", "kapasite": "40 kişi", "fiyat": "26.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "endulus-2025", "kategori": "diger", "baslik": "Endülüs Kültür & Tarih Turu", "icon": "🏰", "tarih": "Eylül 2025", "konum": "İspanya", "sure": "10 gece", "kapasite": "35 kişi", "fiyat": "42.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-ramazan-ekonomi", "kategori": "umre", "baslik": "Ramazan Umresi – 10 Gece Ekonomi", "icon": "🌙", "tarih": "1–11 Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 4★", "one_cikan": false}, {"id": "umre-ramazan-premium", "kategori": "umre", "baslik": "Ramazan Umresi – 14 Gece Premium", "icon": "🌙", "tarih": "8–22 Mart 2025", "konum": "Mekke & Medine", "sure": "14 gece", "kapasite": "50 kişi", "fiyat": "38.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Mekke 5★ + Medine 5★", "one_cikan": false}, {"id": "umre-kis", "kategori": "umre", "baslik": "Kış Umresi – 7 Gece", "icon": "🌙", "tarih": "15–22 Şubat 2025", "konum": "Mekke & Medine", "sure": "7 gece", "kapasite": "50 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 3★", "one_cikan": false}, {"id": "umre-yaz-aile", "kategori": "umre", "baslik": "Yaz Umresi – 10 Gece Aile", "icon": "🌙", "tarih": "10–20 Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 5★ + Medine 4★", "one_cikan": false}], "fiyat_tablolari": {"hac": [{"grup": "1. Grup – Yürüme Mesafeli", "satirlar": [{"sure": "9 Gece / 10 Gün", "fiyat_2": 1750, "fiyat_3": 1700, "fiyat_4": 1650}, {"sure": "13 Gece / 14 Gün", "fiyat_2": 1900, "fiyat_3": 1850, "fiyat_4": 1800}]}, {"grup": "2. Grup – Ekonomik", "satirlar": [{"sure": "13 Gece / 14 Gün", "fiyat_2": 1550, "fiyat_3": 1500, "fiyat_4": 1450}, {"sure": "19 Gece / 20 Gün", "fiyat_2": 1650, "fiyat_3": 1600, "fiyat_4": 1550}]}, {"grup": "3. Grup – 5 Yıldız", "satirlar": [{"sure": "6 Gece / 7 Gün", "fiyat_2": 2500, "fiyat_3": 2400, "fiyat_4": null}, {"sure": "9 Gece / 10 Gün", "fiyat_2": 2800, "fiyat_3": 2700, "fiyat_4": null}]}], "umre": []}};</script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo"><img src="logo.png" alt="İsmail Coşar Turizm" class="navbar-logo-img" style="height:44px;width:auto;"></a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Ana Sayfa</a><a href="hac.html">Hac</a><a href="umre.html">Umre</a>
+    <a href="turlar.html" class="active">Turlar</a><a href="galeri.html">Galeri</a>
+    <a href="hakkimizda.html">Hakkımızda</a><a href="sss.html">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a><a href="iletisim.html" class="nav-cta">📞 İletişim</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-pattern"></div><div class="hero-glow"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <span>Yurt Dışı Turlar</span></div>
+    <div class="page-badge">✈️ İslam Coğrafyası Turları</div>
+    <h1>Yurt Dışı <em>Kültür Turları</em></h1>
+    <p class="page-hero-desc">Kudüs'ten Endülüs'e, Balkanlar'dan Mısır'a İslam medeniyetinin izlerini takip eden anlamlı yolculuklar.</p>
+  </div>
+</div>
+
+<section style="background:var(--white)">
+  <div class="section-eyebrow">Tüm Programlar</div>
+  <h2 class="section-title">2025 Tur Programları</h2>
+  <p class="section-sub">İslam tarihinin en önemli duraklarını kapsayan kültür ve ziyaret turlarımız.</p>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterTours('all',this)">Tümü</button>
+    <button class="filter-btn" onclick="filterTours('diger',this)">✈️ Kültür Turları</button>
+  </div>
+  <div class="tours-grid" id="toursGrid"></div>
+</section>
+
+<section style="background:var(--cream)">
+  <div class="section-eyebrow">Destinasyonlar</div>
+  <h2 class="section-title">Gittiğimiz Ülkeler</h2>
+  <div class="dest-grid">
+    <div class="dest-card"><div class="dest-flag">🇲🇰</div><div class="dest-name">Kuzey Makedonya</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇽🇰</div><div class="dest-name">Kosova</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇷🇸</div><div class="dest-name">Sırbistan</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇧🇦</div><div class="dest-name">Bosna Hersek</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇲🇪</div><div class="dest-name">Karadağ</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇦🇱</div><div class="dest-name">Arnavutluk</div><div class="dest-count">1 program</div></div>
+    <div class="dest-card"><div class="dest-flag">🇪🇸</div><div class="dest-name">İspanya</div><div class="dest-count">1 program</div></div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <h2>Hayalinizdeki Tura Katılın</h2><p>Programa kayıt veya özel grup turu için bize ulaşın.</p>
+  <div class="cta-actions">
+    <a href="iletisim.html" class="btn-navy">📋 Bilgi Al &amp; Kayıt</a>
+    <a href="https://wa.me/905331980781" class="btn-wa" target="_blank">💬 WhatsApp</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><img src="logo.png" alt="İsmail Coşar Turizm" class="footer-logo-img"><p class="footer-brand-desc">20 yılı aşkın tecrübemizle hac, umre ve yurt dışı turlarında güvenilir çözüm ortağınız.</p><div class="footer-badges"><span class="footer-badge">TURSAB</span><span class="footer-badge">Diyanet Onaylı</span></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <a href="https://www.instagram.com/ismailcosarturizm" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </a>
+        <a href="https://www.facebook.com/share/16EmdzsymFJ/?mibextid=wwXIfr" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+      </div></div>
+    <div><div class="footer-title">Hizmetler</div><ul class="footer-links"><li><a href="hac.html">Hac</a></li><li><a href="umre.html">Umre</a></li><li><a href="turlar.html">Turlar</a></li><li><a href="galeri.html">Galeri</a></li></ul></div>
+    <div><div class="footer-title">Kurumsal</div><ul class="footer-links"><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="belgelerimiz.html">Belgelerimiz</a></li><li><a href="sss.html">SSS</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+    <div><div class="footer-title">İletişim</div><ul class="footer-links"><li><a href="tel:+905331980781">📞 0533 198 07 81</a></li><li><a href="mailto:info@ismailcosarturizm.com.tr">✉ info@ismailcosarturizm.com.tr</a></li></ul></div>
+  </div>
+                    <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Anlaşmalı Havayolları</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img src="logo-thy.png" alt="Turkish Airlines" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-ajet.png" alt="AJet" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-pegasus.png" alt="Pegasus" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+        </div>
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">🔒 Güvenli Ödeme İmkânı</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="background:#fff;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:15px;color:#1A1F71;letter-spacing:-1px">VISA</div>
+          <div style="background:#fff;border-radius:6px;padding:4px 8px;height:30px;display:flex;align-items:center;gap:3px">
+            <div style="width:18px;height:18px;border-radius:50%;background:#EB001B"></div>
+            <div style="width:18px;height:18px;border-radius:50%;background:#F79E1B;margin-left:-8px"></div>
+          </div>
+          <div style="background:#003087;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:13px;color:#fff;letter-spacing:1px">TROY</div>
+          <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
+        </div>
+      </div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm</span><span>TURSAB · Diyanet Onaylı</span></div>
+</footer>
+<a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
+
+
+
+<script>
+fetch('./turlar.json')
+  .then(function(r){return r.json()})
+  .then(function(data){
+    var turlar = data.turlar.filter(function(t){return t.aktif && t.kategori==='diger'});
+    var kMap = {az:'k-az',var:'k-var',dolu:'k-dolu'};
+    var kLabel = {az:'Az Kaldı',var:'Yer Var',dolu:'Dolu'};
+    var bgMap = {hac:'linear-gradient(135deg,#0B1F3A,#1a3d6e)',umre:'linear-gradient(135deg,#1a2f0e,#2e5016)',diger:'url(\'balkan-foto.jpg\') center/cover no-repeat'};
+    var html = '';
+    turlar.forEach(function(t){
+      var bg = t.id && t.id.includes('balkan') ? bgMap.diger : (bgMap[t.kategori]||bgMap.diger);
+      html += '<div class="tour-card" data-cat="'+t.kategori+'">';
+      html += '<div class="tc-hero" style="background:'+bg+'">';
+      html += '<div class="tc-pattern"></div><span class="tc-icon">'+t.icon+'</span>';
+      html += '<div class="tc-tags"><span class="tc-tag tc-tag-light">'+t.konum+'</span></div>';
+      html += '</div><div class="tc-body"><h3>'+t.baslik+'</h3>';
+      html += '<div class="tc-meta">';
+      html += '<span class="tc-meta-item">📅 <strong>'+t.tarih+'</strong></span>';
+      html += '<span class="tc-meta-item">⏱ <strong>'+t.sure+'</strong></span>';
+      html += '<span class="tc-meta-item">👥 '+t.kapasite+'</span>';
+      html += '</div>';
+      html += '<p class="tc-desc">'+t.konum+' programı. Türkçe rehber ve konaklama dahil.</p>';
+      html += '<div class="tc-footer">';
+      html += '<div class="tc-price"><small>Kişi başı</small>'+t.fiyat+' '+t.para_birimi+'</div>';
+      html += '<span class="kontenjan '+(kMap[t.kontenjan]||'k-var')+'">'+(kLabel[t.kontenjan]||'Yer Var')+'</span>';
+      var detayLink = t.id && t.id.includes('balkan') ? 'balkan-programi.html' : 'iletisim.html';
+      html += '<a href="'+detayLink+'" class="btn-sm-navy">Detay →</a>';
+      html += '</div></div></div>';
+    });
+    document.getElementById('toursGrid').innerHTML = html || '<p style="color:var(--text-muted);padding:20px">Henüz aktif tur bulunmuyor.</p>';
+  });
+
+function filterTours(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.tour-card').forEach(function(c){
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'block':'none';
+  });
+}
+</script>
+
+<script>
+(function(){
+  var data = window.turlarData;
+  if(!data) return;
+  var turlar = data.turlar.filter(function(t){return t.aktif && t.kategori==='diger'});
+  var kMap = {az:'k-az',var:'k-var',dolu:'k-dolu'};
+  var kLabel = {az:'Az Kaldı',var:'Yer Var',dolu:'Dolu'};
+  var html = '';
+  turlar.forEach(function(t){
+    var bg = t.id && t.id.indexOf('balkan')>-1 ? "url('balkan-foto.jpg') center/cover no-repeat" : (t.kategori==='hac'?'linear-gradient(135deg,#0B1F3A,#1a3d6e)':t.kategori==='umre'?'linear-gradient(135deg,#1a2f0e,#2e5016)':'linear-gradient(135deg,#3a1a08,#6b3212)');
+    html += '<div class="tour-card" data-cat="'+t.kategori+'">';
+    html += '<div class="tc-hero" style="background:'+bg+'">';
+    html += '<div class="tc-pattern"></div><span class="tc-icon">'+t.icon+'</span>';
+    html += '<div class="tc-tags"><span class="tc-tag tc-tag-light">'+t.konum+'</span></div>';
+    html += '</div><div class="tc-body"><h3>'+t.baslik+'</h3>';
+    html += '<div class="tc-meta"><span class="tc-meta-item">📅 <strong>'+t.tarih+'</strong></span>';
+    html += '<span class="tc-meta-item">⏱ <strong>'+t.sure+'</strong></span>';
+    html += '<span class="tc-meta-item">👥 '+t.kapasite+'</span></div>';
+    html += '<p class="tc-desc">'+t.konum+' programı. Türkçe rehber ve konaklama dahil.</p>';
+    html += '<div class="tc-footer"><div class="tc-price"><small>Kişi başı</small>'+t.fiyat+' '+t.para_birimi+'</div>';
+    html += '<span class="kontenjan '+(kMap[t.kontenjan]||'k-var')+'">'+(kLabel[t.kontenjan]||'Yer Var')+'</span>';
+    var detay = t.id && t.id.indexOf('balkan')>-1 ? 'balkan-programi.html' : 'iletisim.html';
+    html += '<a href="'+detay+'" class="btn-sm-navy">Detay →</a>';
+    html += '</div></div></div>';
+  });
+  var el = document.getElementById('toursGrid');
+  if(el) el.innerHTML = html || '<p>Henüz aktif tur bulunmuyor.</p>';
+})();
+
+function filterTours(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.tour-card').forEach(function(c){
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'block':'none';
+  });
+}
+</script>
+</body>
+</html>
