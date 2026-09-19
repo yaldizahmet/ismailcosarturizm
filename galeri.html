@@ -67,8 +67,8 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin:32px 0 28px}
 .filter-btn{padding:9px 20px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--ff-body)}
 .filter-btn:hover{border-color:var(--gold);color:var(--gold)}.filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.gallery-item{position:relative;overflow:hidden;border-radius:10px;cursor:pointer;height:180px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.gallery-item{position:relative;padding-top:75%;overflow:hidden;border-radius:10px;cursor:pointer;background:#eee;}
 .gallery-item:hover .g-overlay{opacity:1}
 .g-placeholder{width:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:transform .3s}
 .gallery-item:hover .g-placeholder{transform:scale(1.04)}
@@ -98,10 +98,11 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .lb-content{background:var(--navy);border-radius:var(--r-lg);padding:48px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;min-height:360px;color:rgba(255,255,255,.45)}
 .lb-close{position:absolute;top:-14px;right:-14px;width:38px;height:38px;background:var(--gold);color:var(--navy);border:none;border-radius:50%;font-size:16px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center}
 .note-box{background:rgba(201,151,43,.08);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;font-size:13.5px;color:var(--text-muted);margin-top:28px}
-@media(max-width:700px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}}
-@media(max-width:450px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}}
-@media(max-width:768px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}.gallery-item{position:relative;overflow:hidden;border-radius:10px;cursor:pointer;height:180px;}}
-@media(max-width:480px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}.gallery-item{position:relative;overflow:hidden;border-radius:10px;cursor:pointer;height:180px;}}
+@media(max-width:700px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}}
+@media(max-width:450px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}}
+@media(max-width:768px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.gallery-item{position:relative;padding-top:75%;overflow:hidden;border-radius:10px;cursor:pointer;background:#eee;}}
+@media(max-width:480px){.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.gallery-item{position:relative;padding-top:75%;overflow:hidden;border-radius:10px;cursor:pointer;background:#eee;}}
+@media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 
   <!-- SEO Meta Etiketleri -->
@@ -162,139 +163,139 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
     <button class="filter-btn" onclick="filterGallery('diger',this)">✈️ Turlar</button>
   </div>
   <div class="gallery-grid" id="galleryGrid">
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-01.jpg" alt="Mescid-i Nebevi Yeşil Kubbe" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mescid-i Nebevi Yeşil Kubbe')">
     <div class="gallery-overlay"><span>Mescid-i Nebevi Yeşil Kubbe</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-02.jpg" alt="Mescid-i Nebevi Gece" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mescid-i Nebevi Gece')">
     <div class="gallery-overlay"><span>Mescid-i Nebevi Gece</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-03.jpg" alt="Medine Ziyareti" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Medine Ziyareti')">
     <div class="gallery-overlay"><span>Medine Ziyareti</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-04.jpg" alt="Mescid-i Nebevi Avlusu" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mescid-i Nebevi Avlusu')">
     <div class="gallery-overlay"><span>Mescid-i Nebevi Avlusu</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-05.jpg" alt="Mekke Rehberli Tur" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mekke Rehberli Tur')">
     <div class="gallery-overlay"><span>Mekke Rehberli Tur</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-06.jpg" alt="Cebel-i Nur Grup Fotoğrafı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Cebel-i Nur Grup Fotoğrafı')">
     <div class="gallery-overlay"><span>Cebel-i Nur Grup Fotoğrafı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-07.jpg" alt="Mekke Gece Manzarası" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mekke Gece Manzarası')">
     <div class="gallery-overlay"><span>Mekke Gece Manzarası</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-08.jpg" alt="Mekke Tur Grubu Brifing" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mekke Tur Grubu Brifing')">
     <div class="gallery-overlay"><span>Mekke Tur Grubu Brifing</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-09.jpg" alt="Cebel-i Nur Grup" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Cebel-i Nur Grup')">
     <div class="gallery-overlay"><span>Cebel-i Nur Grup</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-10.jpg" alt="Kâbe İçeriden" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Kâbe İçeriden')">
     <div class="gallery-overlay"><span>Kâbe İçeriden</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-11.jpg" alt="Kâbe Kapısı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Kâbe Kapısı')">
     <div class="gallery-overlay"><span>Kâbe Kapısı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-12.jpg" alt="Kâbe Önünde Grup" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Kâbe Önünde Grup')">
     <div class="gallery-overlay"><span>Kâbe Önünde Grup</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-13.jpg" alt="Tavaf" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Tavaf')">
     <div class="gallery-overlay"><span>Tavaf</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-14.jpg" alt="Kâbe Önünde Hanımlar" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Kâbe Önünde Hanımlar')">
     <div class="gallery-overlay"><span>Kâbe Önünde Hanımlar</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-15.jpg" alt="Kâbe Gece" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Kâbe Gece')">
     <div class="gallery-overlay"><span>Kâbe Gece</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-16.jpg" alt="Arafat Grup Fotoğrafı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Arafat Grup Fotoğrafı')">
     <div class="gallery-overlay"><span>Arafat Grup Fotoğrafı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="hac-umre">
+  <div class="gallery-item">
     <img src="hac-17.jpg" alt="Medine Camii Gece" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Medine Camii Gece')">
     <div class="gallery-overlay"><span>Medine Camii Gece</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-01.jpg" alt="Saraybosna Savaş Müzesi" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Saraybosna Savaş Müzesi')">
     <div class="gallery-overlay"><span>Saraybosna Savaş Müzesi</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-02.jpg" alt="Belgrad Kalemegdan" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Belgrad Kalemegdan')">
     <div class="gallery-overlay"><span>Belgrad Kalemegdan</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-03.jpg" alt="Üsküp Gece Manzarası" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Üsküp Gece Manzarası')">
     <div class="gallery-overlay"><span>Üsküp Gece Manzarası</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-04.jpg" alt="Üsküp Arkeoloji Müzesi" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Üsküp Arkeoloji Müzesi')">
     <div class="gallery-overlay"><span>Üsküp Arkeoloji Müzesi</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-05.jpg" alt="Saraybosna Başçarşı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Saraybosna Başçarşı')">
     <div class="gallery-overlay"><span>Saraybosna Başçarşı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-06.jpg" alt="Mostar Köprüsü" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Mostar Köprüsü')">
     <div class="gallery-overlay"><span>Mostar Köprüsü</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-07.jpg" alt="Saraybosna Başçarşı Meydanı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Saraybosna Başçarşı Meydanı')">
     <div class="gallery-overlay"><span>Saraybosna Başçarşı Meydanı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-08.jpg" alt="Ohrid Gölü Tekne Turu" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Ohrid Gölü Tekne Turu')">
     <div class="gallery-overlay"><span>Ohrid Gölü Tekne Turu</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-09.jpg" alt="Alaca Camii İçi" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Alaca Camii İçi')">
     <div class="gallery-overlay"><span>Alaca Camii İçi</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-10.jpg" alt="Ohrid Göl Manzarası" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Ohrid Göl Manzarası')">
     <div class="gallery-overlay"><span>Ohrid Göl Manzarası</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-11.jpg" alt="Matka Kanyonu" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Matka Kanyonu')">
     <div class="gallery-overlay"><span>Matka Kanyonu</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-12.jpg" alt="Matka Kanyonu Teknesi" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Matka Kanyonu Teknesi')">
     <div class="gallery-overlay"><span>Matka Kanyonu Teknesi</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-13.jpg" alt="Matka Kanyonu Yolculuğu" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Matka Kanyonu Yolculuğu')">
     <div class="gallery-overlay"><span>Matka Kanyonu Yolculuğu</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-14.jpg" alt="Saraybosna Katedrali" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Saraybosna Katedrali')">
     <div class="gallery-overlay"><span>Saraybosna Katedrali</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-15.jpg" alt="Ohrid Halveti Tekkesi" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Ohrid Halveti Tekkesi')">
     <div class="gallery-overlay"><span>Ohrid Halveti Tekkesi</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-16.jpg" alt="Prizren Tarihi Çarşı" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Prizren Tarihi Çarşı')">
     <div class="gallery-overlay"><span>Prizren Tarihi Çarşı</span></div>
   </div>
-  <div class="gallery-item" style="position:relative;overflow:hidden;height:180px;border-radius:10px;" data-cat="diger">
+  <div class="gallery-item">
     <img src="galeri-17.jpg" alt="Üsküp İskender Heykeli" style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;position:absolute;top:0;left:0;" loading="lazy" onclick="openLightbox(this.src,'Üsküp İskender Heykeli')">
     <div class="gallery-overlay"><span>Üsküp İskender Heykeli</span></div>
   </div>
