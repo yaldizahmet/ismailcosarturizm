@@ -97,9 +97,10 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 // ── VERİ ──────────────────────────────────────────
 const KULLANICI = 'ismail';
 const SIFRE = 'ismail123';
-const SITE_ID = '90ef0531-6a60-4636-816c-a7dedaec900f';
+const GITHUB_TOKEN = localStorage.getItem('gh_token') || '';
+  const GITHUB_REPO = 'yaldizahmet/ismailcosarturizm';
 const TOKEN = 'nfp_GnCy2oPXs9GuPFFAKc9GT3NGtYE94yxP3903';
-const SITE_URL = 'https://chimerical-kataifi-0b28de.netlify.app';
+const SITE_URL = 'https://yaldizahmet.github.io/ismailcosarturizm';
 
 const VARSAYILAN = {"guncelleme": "2025-01-01", "turlar": [{"id": "hac-ekonomi", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Ekonomi Paket", "icon": "🕋", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "21 gece", "kapasite": "40 kişi", "fiyat": "58.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Uygun fiyatlı, eksiksiz hac deneyimi", "one_cikan": false}, {"id": "hac-standart", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Standart Paket", "icon": "🌟", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "25 gece", "kapasite": "40 kişi", "fiyat": "72.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Huzurlu ve konforlu hac yolculuğu", "one_cikan": true}, {"id": "hac-vip", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – VIP Paket", "icon": "👑", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "30 gece", "kapasite": "20 kişi", "fiyat": "115.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Maksimum konfor, özel hizmet", "one_cikan": false}, {"id": "umre-ramazan-2025", "kategori": "umre", "baslik": "Ramazan Umre Turu 2025 – 10 Günlük", "icon": "🌙", "tarih": "Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "kudus-2025", "kategori": "diger", "baslik": "Kudüs & Filistin Ziyaret Turu – 7 Gün", "icon": "🕌", "tarih": "Şubat 2025", "konum": "Kudüs & Ramallah", "sure": "7 gece", "kapasite": "35 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-yaz-2025", "kategori": "umre", "baslik": "Yaz Umresi 2025 – 10 Gece Aile Paketi", "icon": "☀️", "tarih": "Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "45 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "balkanlar-2025", "kategori": "diger", "baslik": "Balkanlar İslam Mirası Turu", "icon": "🌍", "tarih": "Mayıs 2025", "konum": "Bosna & Makedonya", "sure": "8 gece", "kapasite": "40 kişi", "fiyat": "26.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "endulus-2025", "kategori": "diger", "baslik": "Endülüs Kültür & Tarih Turu", "icon": "🏰", "tarih": "Eylül 2025", "konum": "İspanya", "sure": "10 gece", "kapasite": "35 kişi", "fiyat": "42.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-ramazan-ekonomi", "kategori": "umre", "baslik": "Ramazan Umresi – 10 Gece Ekonomi", "icon": "🌙", "tarih": "1–11 Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 4★", "one_cikan": false}, {"id": "umre-ramazan-premium", "kategori": "umre", "baslik": "Ramazan Umresi – 14 Gece Premium", "icon": "🌙", "tarih": "8–22 Mart 2025", "konum": "Mekke & Medine", "sure": "14 gece", "kapasite": "50 kişi", "fiyat": "38.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Mekke 5★ + Medine 5★", "one_cikan": false}, {"id": "umre-kis", "kategori": "umre", "baslik": "Kış Umresi – 7 Gece", "icon": "🌙", "tarih": "15–22 Şubat 2025", "konum": "Mekke & Medine", "sure": "7 gece", "kapasite": "50 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 3★", "one_cikan": false}, {"id": "umre-yaz-aile", "kategori": "umre", "baslik": "Yaz Umresi – 10 Gece Aile", "icon": "🌙", "tarih": "10–20 Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 5★ + Medine 4★", "one_cikan": false}], "fiyat_tablolari": {"hac": [{"grup": "1. Grup – Yürüme Mesafeli", "satirlar": [{"sure": "9 Gece / 10 Gün", "fiyat_2": 1750, "fiyat_3": 1700, "fiyat_4": 1650}, {"sure": "13 Gece / 14 Gün", "fiyat_2": 1900, "fiyat_3": 1850, "fiyat_4": 1800}]}, {"grup": "2. Grup – Ekonomik", "satirlar": [{"sure": "13 Gece / 14 Gün", "fiyat_2": 1550, "fiyat_3": 1500, "fiyat_4": 1450}, {"sure": "19 Gece / 20 Gün", "fiyat_2": 1650, "fiyat_3": 1600, "fiyat_4": 1550}]}, {"grup": "3. Grup – 5 Yıldız", "satirlar": [{"sure": "6 Gece / 7 Gün", "fiyat_2": 2500, "fiyat_3": 2400, "fiyat_4": null}, {"sure": "9 Gece / 10 Gün", "fiyat_2": 2800, "fiyat_3": 2700, "fiyat_4": null}]}], "umre": []}};
 
@@ -369,11 +370,16 @@ function fiyatKaydet() {
 
 // ── SİTEYİ GÜNCELLE ──────────────────────────────────
 function renderGuncelle() {
+  const savedToken = localStorage.getItem('gh_token') || '';
   const el = document.getElementById('sayfa-guncelle');
   el.innerHTML = `
     <div class="header"><h2>🚀 Siteyi Güncelle</h2></div>
     <div class="card">
-      <p style="margin-bottom:16px;color:#666">Admin panelindeki değişiklikleri canlı siteye yansıtmak için butona tıklayın.</p>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>GitHub Token</label>
+        <input type="password" id="ghTokenInput" value="${savedToken}" placeholder="ghp_..." style="font-family:monospace">
+        <div style="font-size:12px;color:#999;margin-top:4px">Token bir kez kaydedilir, tekrar girilmez.</div>
+      </div>
       <button class="btn btn-gold" id="guncBtn" onclick="siteGuncelle()" style="font-size:15px;padding:14px 28px">🚀 Siteyi Güncelle</button>
       <div id="guncLog" style="margin-top:16px;font-size:13px;color:#666;line-height:1.8"></div>
     </div>`;
@@ -385,61 +391,80 @@ async function siteGuncelle() {
   btn.disabled = true;
   btn.textContent = '⏳ Güncelleniyor...';
   log.innerHTML = '';
-  
-  const data = veriYukle();
-  const jsonStr = JSON.stringify(data, null, 2);
-  
-  function logEkle(msg) {
-    log.innerHTML += msg + '<br>';
+
+  // Token kaydet
+  const tokenInput = document.getElementById('ghTokenInput');
+  if (tokenInput && tokenInput.value) {
+    localStorage.setItem('gh_token', tokenInput.value);
+  }
+  const GITHUB_TOKEN = localStorage.getItem('gh_token');
+  if (!GITHUB_TOKEN) {
+    log.innerHTML = '❌ Lütfen GitHub token girin!';
+    btn.disabled = false;
+    btn.textContent = '🚀 Siteyi Güncelle';
+    return;
   }
   
+  const data = veriYukle();
+  
+  function logEkle(msg) { log.innerHTML += msg + '<br>'; }
+
+  async function githubUpload(path, contentStr) {
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
+    // Mevcut SHA al
+    let sha = null;
+    try {
+      const r = await fetch(url, {headers: {'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json'}});
+      if (r.ok) { const d = await r.json(); sha = d.sha; }
+    } catch(e) {}
+    
+    const body = {
+      message: 'Admin güncelleme: ' + path,
+      content: btoa(unescape(encodeURIComponent(contentStr)))
+    };
+    if (sha) body.sha = sha;
+    
+    const r2 = await fetch(url, {
+      method: 'PUT',
+      headers: {'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    return r2.ok;
+  }
+
   try {
     // 1. turlar.json
     logEkle('📤 turlar.json yükleniyor...');
-    const r1 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/turlar.json`, {
-      method: 'PUT',
-      headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
-      body: jsonStr
-    });
-    logEkle(r1.ok ? '✅ turlar.json güncellendi' : '❌ turlar.json hatası: ' + r1.status);
-    
+    const jsonStr = JSON.stringify(data, null, 2);
+    const ok1 = await githubUpload('turlar.json', jsonStr);
+    logEkle(ok1 ? '✅ turlar.json güncellendi' : '❌ turlar.json hatası');
+
     // 2. hac.html
     logEkle('📤 hac.html yükleniyor...');
     const hacRes = await fetch(SITE_URL + '/hac.html');
     if (hacRes.ok) {
       let hacHTML = await hacRes.text();
-      // Paket kartlarını güncelle
       const hacKartlar = buildHacKartlar(data);
-      hacHTML = hacHTML.replace(/<div class="paket-grid" id="paketGrid">[\s\S]*?<\/div>/, 
-        `<div class="paket-grid" id="paketGrid">${hacKartlar}</div>`);
-      const r2 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/hac.html`, {
-        method: 'PUT',
-        headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
-        body: hacHTML
-      });
-      logEkle(r2.ok ? '✅ hac.html güncellendi' : '❌ hac.html hatası: ' + r2.status);
+      hacHTML = hacHTML.replace(/<div class="paket-grid" id="paketGrid">[\s\S]*?<\/div>/, `<div class="paket-grid" id="paketGrid">${hacKartlar}</div>`);
+      const ok2 = await githubUpload('hac.html', hacHTML);
+      logEkle(ok2 ? '✅ hac.html güncellendi' : '❌ hac.html hatası');
     }
-    
+
     // 3. umre.html
     logEkle('📤 umre.html yükleniyor...');
     const umreRes = await fetch(SITE_URL + '/umre.html');
     if (umreRes.ok) {
       let umreHTML = await umreRes.text();
       const umreProgs = buildUmreProgs(data);
-      umreHTML = umreHTML.replace(/<div class="prog-list" id="progList">[\s\S]*?<\/div>/,
-        `<div class="prog-list" id="progList">${umreProgs}</div>`);
-      const r3 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/umre.html`, {
-        method: 'PUT',
-        headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
-        body: umreHTML
-      });
-      logEkle(r3.ok ? '✅ umre.html güncellendi' : '❌ umre.html hatası: ' + r3.status);
+      umreHTML = umreHTML.replace(/<div class="prog-list" id="progList">[\s\S]*?<\/div>/, `<div class="prog-list" id="progList">${umreProgs}</div>`);
+      const ok3 = await githubUpload('umre.html', umreHTML);
+      logEkle(ok3 ? '✅ umre.html güncellendi' : '❌ umre.html hatası');
     }
-    
-    logEkle('<strong style="color:green">🎉 Tüm güncellemeler tamamlandı!</strong>');
+
+    logEkle('<strong style="color:green">🎉 Güncelleme tamamlandı! Site 1-2 dk içinde yansır.</strong>');
     btn.textContent = '✅ Güncellendi!';
     setTimeout(() => { btn.textContent = '🚀 Siteyi Güncelle'; btn.disabled = false; }, 3000);
-    
+
   } catch(e) {
     logEkle('❌ Hata: ' + e.message);
     btn.textContent = '🚀 Siteyi Güncelle';
