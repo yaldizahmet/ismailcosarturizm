@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Büyük Balkan Turu Programı – İsmail Coşar Turizm</title>
+<meta name="description" content="Vizesiz uçaklı Büyük Balkan Turu. 6 ülke, 8 gün. Makedonya, Kosova, Sırbistan, Bosna Hersek, Karadağ, Arnavutluk.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1F3A;--navy-light:#1a3d6e;--gold:#C9972B;--gold-light:#E4B84A;--cream:#FAF7F0;--white:#fff;--text-dark:#0B1F3A;--text-mid:#3a4a62;--text-muted:#6b7a94;--border:rgba(201,151,43,0.18);--shadow-md:0 8px 32px rgba(11,31,58,0.12);--r:12px;--r-lg:20px;--ff-head:'Playfair Display',Georgia,serif;--ff-body:'DM Sans',sans-serif}
+html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,31,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,151,43,0.2);padding:0 3vw;height:68px;display:flex;align-items:center;justify-content:space-between}
+.navbar-logo{display:flex;align-items:center;text-decoration:none}
+.navbar-logo-img{height:52px;width:auto;object-fit:contain;display:block}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 9px;border-radius:6px;transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--gold-light);background:rgba(201,151,43,.1)}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px}
+
+.page-hero{padding:148px 5vw 80px;background:linear-gradient(135deg,rgba(26,47,14,0.88),rgba(11,31,58,0.92)),url("balkan-foto.jpg") center/cover no-repeat;position:relative;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
+.hero-glow{position:absolute;right:0;top:0;width:55%;height:100%;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(201,151,43,.12),transparent 65%)}
+.page-hero-content{position:relative;z-index:2;max-width:760px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.4);margin-bottom:20px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}.breadcrumb a:hover{color:var(--gold-light)}.breadcrumb span{color:var(--gold-light)}
+.page-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,151,43,.15);border:1px solid rgba(201,151,43,.35);color:var(--gold-light);font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:50px;margin-bottom:20px}
+.page-hero h1{font-family:var(--ff-head);font-size:clamp(28px,4vw,48px);font-weight:700;color:#fff;line-height:1.15;margin-bottom:16px}
+.page-hero h1 em{font-style:normal;color:var(--gold-light)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
+.hero-meta-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;font-size:13px;color:rgba(255,255,255,.8)}
+.hero-meta-item strong{color:var(--gold-light)}
+
+/* ÜLKELER */
+.ulkeler-bar{background:var(--navy);padding:20px 5vw;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.ulke-tag{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:50px;padding:6px 14px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.7)}
+
+/* PROGRAM */
+.program-wrap{padding:72px 5vw;background:var(--white);max-width:900px;margin:0 auto}
+.gun-item{margin-bottom:48px;position:relative;padding-left:28px;border-left:2px solid var(--border)}
+.gun-item::before{content:'';position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid var(--white);box-shadow:0 0 0 2px var(--gold)}
+.gun-baslik{font-family:var(--ff-head);font-size:20px;font-weight:700;color:var(--gold);margin-bottom:12px}
+.gun-rota{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.gun-metin{font-size:14.5px;color:var(--text-mid);line-height:1.85}
+
+/* DAHİL */
+.dahil-section{background:var(--cream);padding:56px 5vw}
+.dahil-wrap{max-width:900px;margin:0 auto}
+.dahil-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.dahil-item{display:flex;align-items:flex-start;gap:10px;background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;font-size:13.5px;color:var(--text-mid);line-height:1.5}
+.dahil-item span{flex-shrink:0;font-size:16px}
+
+/* CTA */
+.cta-band{background:var(--gold);padding:56px 5vw;text-align:center}
+.cta-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,34px);font-weight:700;color:var(--navy);margin-bottom:10px}
+.cta-band p{font-size:15px;color:rgba(11,31,58,.7);margin-bottom:28px}
+.cta-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.btn-navy{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}.btn-navy:hover{background:var(--navy-light)}
+.btn-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none}
+
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;border-top:1px solid rgba(201,151,43,.15)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px}
+.footer-logo-img{height:48px;width:auto;object-fit:contain;background:#fff;border-radius:8px;padding:5px 8px}
+.footer-brand-desc{font-size:13px;line-height:1.7;margin-top:12px;max-width:260px}
+.footer-title{font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s}.footer-links a:hover{color:var(--gold-light)}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.footer-badge{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:#F5E6C0}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,.3)}
+.floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45)}.floating-wa:hover{transform:scale(1.1)}
+
+@media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px 20px;gap:4px;border-bottom:1px solid rgba(201,151,43,.15)}.nav-links.open{display:flex}.hamburger{display:flex}.dahil-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.footer-grid{grid-template-columns:1fr}.program-wrap{padding:48px 5vw}}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <img src="logo.png" alt="İsmail Coşar Turizm" class="navbar-logo-img" style="height:44px;width:auto;">
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="hac.html">Hac</a>
+    <a href="umre.html">Umre</a>
+    <a href="turlar.html" class="active">Turlar</a>
+    <a href="galeri.html">Galeri</a>
+    <a href="hakkimizda.html">Hakkımızda</a>
+    <a href="sss.html">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a>
+    <a href="iletisim.html" class="nav-cta">📞 İletişim</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-pattern"></div><div class="hero-glow"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <a href="turlar.html">Turlar</a> › <span>Büyük Balkan Turu</span></div>
+    <div class="page-badge">🌍 6 Ülke · 8 Gün · Vizesiz</div>
+    <h1>Vizesiz Uçaklı <em>Büyük Balkan Turu</em></h1>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📅 <strong>22 – 29 Ağustos 2026</strong></div>
+      <div class="hero-meta-item">🏨 <strong>4★ Otel · Yarım Pansiyon</strong></div>
+      <div class="hero-meta-item">⏱ <strong>7 Gece 8 Gün</strong></div>
+      <div class="hero-meta-item">✈️ <strong>TIA – TIA</strong></div>
+    </div>
+  </div>
+</div>
+
+<div class="ulkeler-bar">
+  <div class="ulke-tag">🇲🇰 Makedonya</div>
+  <div class="ulke-tag">🇽🇰 Kosova</div>
+  <div class="ulke-tag">🇷🇸 Sırbistan</div>
+  <div class="ulke-tag">🇧🇦 Bosna Hersek</div>
+  <div class="ulke-tag">🇲🇪 Karadağ</div>
+  <div class="ulke-tag">🇦🇱 Arnavutluk</div>
+</div>
+
+<div style="background:var(--white);padding:24px 5vw;text-align:center;border-bottom:1px solid var(--border)">
+  <p style="font-size:13.5px;color:var(--text-muted);max-width:700px;margin:0 auto">
+    <strong style="color:var(--navy)">Güzergah:</strong> Ohrid · St.Naum · Tetova · Üsküp · Prizren · Belgrad · Saraybosna · Mostar · Blagaj · Kotor · İşkodra · Tiran
+  </p>
+</div>
+
+<div class="program-wrap">
+  <h2 style="font-family:var(--ff-head);font-size:28px;font-weight:700;color:var(--navy);margin-bottom:40px">Gün Gün Program</h2>
+
+  <div class="gun-item">
+    <div class="gun-rota">1. Gün</div>
+    <div class="gun-baslik">İstanbul – Tiran – St.Naum – Ohrid</div>
+    <p class="gun-metin">Saat 08:45 itibariyle Arnavutluk başkenti Tiran Uluslararası Havalimanına varış ile program başlangıcı. Araç ve Rehberle buluşmanın ardından Kuzey Makedonya ülkesine yolculuk. Sınır geçişinin ardından Ohrid gölünün doğduğu yer olup, muhteşem manzaralara ev sahipliği yapan St.Naum Milli Parkı Turunu gerçekleştiriyoruz. Turumuzun ardından Balkanların en büyük göllerinden biri olan Ohrid Gölünden ismini alan Ohrid şehrine varış. Burada yapacağımız tur esnasında; 17 yy. dan beri varlığını sürdüren Halveti Tekkesi, Ohrid'in sembolü Çınar ağacı, Türk Çarşısı, Ali Paşa Camii, Ohrid Limanı, Karantina kilisesi, Türk ve Horasan evleri, Abbaralar, Antik Egnatia yolu, Saat Kulesi, Aya Dimitri Kilisesi, Ayasofya Klisesi, Aya Klement Manastırı, Aya Kaneo Kilisesi, Aya Pantelejmon Kilisesi, Samoil Kalesi panoramik olarak görülecek yerler arasındadır. Programın ardından çarşıda keyifli serbest zamanlar. Buluşma sonrası otele transfer. Akşam yemeği ve geceleme Ohrid otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">2. Gün</div>
+    <div class="gun-baslik">Ohrid – Kalkandelen – Matka Kanyonu – Üsküp</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından Ohri'den ayrılarak ülkenin kuzeyine doğru yolculuk. Mavrovo dağı eteklerinden devam eden doğa manzaralı yolculukla Şar Dağının eteğine kurulu, ülkede Arnavut Nüfusun en yoğun olarak yaşadığı Tetova (Kalkandelen) şehrine varıyoruz. İpek yolu üzerinde kurulmuş olan kentte mimarisi ile ünlü Alaca Camiini ziyaret ediyoruz. Ziyaretin ardından devam eden yolculukla başkent Üsküp merkeze 14.km uzaklıktaki ünlü Matka Kanyonunu ziyaret ediyoruz. Keyifli doğa yürüyüşü ve fotoğraf molasının ardından Matka Kanyonundan ayrılarak varılan başkent Üsküp'te şehir turumuza başlıyoruz. Yahya Kemal Beyatlı'nın doğduğu şehir olan Üsküp'ü tanıtan panoramik turumuzda; Taş Köprü, Kale Surları, Osmanlı döneminden kalma Eski Şehir, Çarşı ve Osmanlı'nın Balkanlar'daki en güzel mimari mirasları arasında yer alan Mustafa Paşa, Sultan Murad ve Gazi İsa Bey Camileri, Davud Paşa Hamamı, Kapan, Sulu ve Kurşunlu Hanlar dış mekân anlatımları ile gezilecek yerler arasında bulunmaktadır. Turumuzun ardından tarihi çarşıda alınacak akşam yemeği sonrası otele transfer. Geceleme Üsküp otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">3. Gün</div>
+    <div class="gun-baslik">Üsküp – Priştine – Prizren – Üsküp</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından Priştina – Prizren turunu gerçekleştirmek üzere Kosova yolculuğu başlangıcı. Sınır geçişi sonrasında nüfusunun büyük çoğunluğu Müslüman Arnavutlardan oluşan, dünyanın en genç devletlerinden Kosova'nın başkenti Priştina'ya yolculuk. Priştine panoramik turumuz sonrası, Kosova Meydan Muharebesi'ne sahne olan Kosova Ovası ve burada şehit düşen Sultan Murat Hüdavendigar türbesini ziyaret. Ziyaretin ardından devam eden yolculukla Prizren kentine varış. Ülkede Türk nüfusunun en yoğun olduğu ve Balkanlar'ın en şirin şehirlerinden biri olan Prizren'de kent turu. Şadırvan Meydanı, Halveti Tekkesi, Sinan Paşa Cami, Bayraklı Cami ve Prizren Köprüsü ziyaretleri sonrası öğle yemeği ve şehirde keyifli keşifler için serbest zaman. Buluşmanın ardından Üsküp dönüş yolculuğu. Sınır geçişinin ardından devam eden yolculukla Üsküp otelimize varış. Akşam yemeği ve geceleme Üsküp otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">4. Gün</div>
+    <div class="gun-baslik">Üsküp – Belgrad</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından Belgrad yolculuğu başlangıcı. Sırbistan sınır geçişi sonrası ara molalarla devam eden yolculukla öğle saatlerinde Eski Yugoslavya'nın ve günümüz Sırbistan'ın başkenti Belgrad'a varış. Avrupanın en eski kentlerinden biri olan Belgrad şehir turumuzda; Yeni Belgrad, Usce Alışveriş merkezi, Tarihi Brankov Köprüsü, Taş Meydan, Slaviya Meydanı, Aziz Sava Kilisesi, Eski Saray, Yeni Saray ve Meclis binası, Kanuni Sultan Süleyman tarafından fethedilen Kale Megdan, Mora fatihi Damat Ali Paşa Türbesi, Belgrad galibi heykeli, Sokollu Mehmet Paşa Çeşmesi, Askeri müze, Saat Kapı ve Müzesi, İstanbul Kapı, Nebojşa Kulesi, Saborna Kilisesi yapıları, Bayraklı Cami ile Kale Meydan panoramik olarak gördükten sonra Cumhuriyet Meydanı'nda yürüyüş turumuza başlıyoruz. Otelimize yerleşme. Geceleme Belgrad otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">5. Gün</div>
+    <div class="gun-baslik">Belgrad – Saraybosna</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından Bosna Hersek ülkesine yolculuk. Bosna Hersek sınır geçişinin ardından ara molalarla devam eden yolculukla öğle saatlerinde varılan başkent Saraybosna Turunu gerçekleştirmek üzere kent merkezine varış. Yüzyıllar boyunca Balkanlar'ın kültür başkentliğini yapmış, 1914'te Avusturya-Macaristan Veliahdı Arşidük Franz Ferdinand'ın Sırplar tarafından öldürülmesi üzerine Birinci Dünya Savaşı'nın çıktığı yer olmuş, 1992 savaşında ise Sırp, Hırvat ve Boşnaklar'ın kendi aralarındaki yıkıcı savaşları sonucu büyük tahribata uğramış Saraybosna'da panoramik şehir turumuzu gerçekleştiriyoruz. Turumuz esnasında meşhur Başçarşı, tarihi Osmanlı hanı Morica Han, şehrin dini kozmopolitliğini yansıtan Katolik Katedrali, Sinagog, Hüsrev Bey ve Ferhadiye Camileri, 1914'te Franz Ferdinand suikastinin gerçekleştiği Latin Köprüsü, Eski Kütüphane ziyaretleri ile turumuzu tamamlıyoruz. Turun ardından otele transfer. Akşam yemeği ve geceleme Saraybosna otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">6. Gün</div>
+    <div class="gun-baslik">Saraybosna – Mostar – Blagaj – Poçitel – Mostar</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından adını Bosna'dan alan Vrelo Bosna Milli Parkı ve su kaynaklarını ziyaret ediyoruz. Bu keyifli ziyaret sonrasında Saraybosna'dan ayrılarak Bosna Hersek'in sembol şehirlerinden Mostar'a yolculuk. Neretva nehrinin bize eşlik edeceği keyifli manzaralar eşliğinde Mostar'a varış. 600 yıllık geçmişe sahip, 1557'de Mimar Sinan'ın öğrencilerinden Mimar Hayreddin'in inşa ettiği, ancak 1992'de Hırvat topçu ateşiyle yıkılan, daha sonra 2004'te Türkiye'nin de büyük desteğiyle orijinal malzeme ve dönemin inşa teknolojisiyle yeniden yapılan, UNESCO Dünya Mirası Listesi'ndeki Mostar Köprüsü, Kuyumcular Çarşısı, Koski Mehmed Paşa Camii ziyaretleri ile fotoğraf molası. Buluşmanın ardından Mostar merkeze 12 km uzaklıktaki Blagay Tekkesi ve Buna Nehir kaynağının olduğu Blagay yerleşimini ziyaret ediyoruz. Bu özel ziyaretin ardından taş çatıları ve otantik mimarisiyle dikkat çeken şirin Osmanlı Köyü Poçitel'i ziyaret ediyoruz. Poçitel ziyareti sonrasında Mostar şehrine hareket. Akşam yemeği ve geceleme Mostar otelimizde.</p>
+  </div>
+
+  <div class="gun-item">
+    <div class="gun-rota">7. Gün</div>
+    <div class="gun-baslik">Mostar – Kotor – Budva – İşkodra</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından Avrupa'nın en genç ülkelerinden Karadağ'a yolculuk. Sınır geçişinin ardından kısa yolculukla önemli tarih - doğa cenneti ve turistik cazibe merkezi durumunda bulunan Kotor kentine varıyoruz. Kotor Stari Grad'da (Eski Şehir-Kale) yürüyerek yapacağınız turda bu şirin beldeyi tanıyacaksınız. Kotor gezimizden sonra araçla buluşma ve keyifli kıyı manzaralarıyla devam ederek Budva Şehrinin içinden otobüsle panoramik olarak geçiyor ve bir sonraki durağımız olan St.Stefan'a varıyoruz. Fotoğraf molasının ardından Arnavutluk yolculuğu. Sınır geçişinin ardından İşkodra şehrine varış. Panoramik olarak İşkodra'daki tarihi kale ve şehir surlarını gördükten sonra otele transfer. Akşam yemeği ve geceleme İşkodra otelimizde.</p>
+  </div>
+
+  <div class="gun-item" style="border-left-color:var(--gold)">
+    <div class="gun-rota">8. Gün</div>
+    <div class="gun-baslik">İşkodra – Tiran – İstanbul</div>
+    <p class="gun-metin">Otelde alınan kahvaltının ardından başkent Tiran'a hareket. 20. yüzyıl boyunca savaş ve iç karışıklıklarla mücadele etmiş, 40 yıl boyunca Enver Hoca'nın diktatörlük rejimini yaşamış, Balkanlar'ın dağlık ülkesi Arnavutluk'un başkenti Tiran'a varış. 1614'te Süleyman Paşa tarafından inşa edilen ve 1920'de Arnavutluk'un başkenti olan bu güzel şehri tanıtan panoramik bir tur gerçekleştireceğiz. Turumuz esnasında; Ethem Bey Camii, tarihi Saat Kulesi, Ulusal Müze, Opera ve Bale Binası, Parlamento ve Başbakanlık Binaları, Cumhurbaşkanlığı Köşkü, Rahibe Teresa Heykeli ve İskender Bey Meydanı göreceğimiz yerlerden bazılarıdır. Tiran turumuzun ardından Tiran Uluslararası Havalimanına transfer. Valiz ve pasaport işlemlerinin ardından 19:50 İstanbul uçuşunu gerçekleştiriyoruz. İstanbul varışı ile program sonu.</p>
+  </div>
+</div>
+
+<div class="dahil-section">
+  <div class="dahil-wrap">
+    <h2 style="font-family:var(--ff-head);font-size:26px;font-weight:700;color:var(--navy);margin-bottom:8px">Fiyata Dahil Olan Hizmetler</h2>
+    <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:4px">Aşağıdaki tüm hizmetler tur fiyatına dahildir.</p>
+    <div class="dahil-grid">
+      <div class="dahil-item"><span>🚌</span> Program boyunca Turistik Otobüs ile tüm ulaşım hizmetleri (46 Koltuklu)</div>
+      <div class="dahil-item"><span>🎙️</span> Program boyunca Profesyonel Türkçe rehberlik hizmeti</div>
+      <div class="dahil-item"><span>🏨</span> 4★ Otellerde 7 gece kahvaltı dahil konaklama (Ohrid, Üsküp x2, Belgrad, Saraybosna, Mostar, İşkodra)</div>
+      <div class="dahil-item"><span>🍽️</span> Otel veya dış mekanlarda alınacak 7 akşam yemeği</div>
+      <div class="dahil-item"><span>🗺️</span> Bazı şehirlerde alınan mecburi yerel rehberlik hizmetleri</div>
+      <div class="dahil-item"><span>🌿</span> St.Naum Ohri Göl Kaynağı Milli Park Turu</div>
+      <div class="dahil-item"><span>🏔️</span> Matka Kanyonu Turu</div>
+      <div class="dahil-item"><span>🕌</span> Blagay Turu</div>
+      <div class="dahil-item"><span>🏰</span> Kotor Sur İçi Turu ve giriş ücretleri</div>
+      <div class="dahil-item"><span>🛣️</span> Tüm otoyol, otoban ve gümrük geçiş ücretleri</div>
+      <div class="dahil-item"><span>🏙️</span> Şehir ve konaklama vergileri</div>
+      <div class="dahil-item"><span>✈️</span> İstanbul – Tiran – İstanbul uçak bileti</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-band">
+  <h2>Bu Tura Katılmak İster misiniz?</h2>
+  <p>Yer ayırtmak veya detaylı bilgi almak için bize ulaşın.</p>
+  <div class="cta-actions">
+    <a href="iletisim.html" class="btn-navy">📋 Kayıt Formu</a>
+    <a href="https://wa.me/905331980781?text=Merhaba%2C%20B%C3%BCy%C3%BCk%20Balkan%20Turu%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." class="btn-wa" target="_blank">💬 WhatsApp</a>
+    <a href="tel:+905331980781" class="btn-navy">📞 0533 198 07 81</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><img src="logo.png" alt="İsmail Coşar Turizm" class="footer-logo-img"><p class="footer-brand-desc">20 yılı aşkın tecrübemizle hac, umre ve yurt dışı turlarında güvenilir çözüm ortağınız.</p><div class="footer-badges"><span class="footer-badge">TURSAB</span><span class="footer-badge">Diyanet Onaylı</span></div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Anlaşmalı Havayolları</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img src="logo-thy.png" alt="Turkish Airlines" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-ajet.png" alt="AJet" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-pegasus.png" alt="Pegasus" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+        </div>
+      </div></div>
+    <div><div class="footer-title">Hizmetler</div><ul class="footer-links"><li><a href="hac.html">Hac</a></li><li><a href="umre.html">Umre</a></li><li><a href="turlar.html">Turlar</a></li><li><a href="galeri.html">Galeri</a></li></ul></div>
+    <div><div class="footer-title">Kurumsal</div><ul class="footer-links"><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="sss.html">SSS</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+    <div><div class="footer-title">İletişim</div><ul class="footer-links"><li><a href="tel:+905331980781">📞 0533 198 07 81</a></li><li><a href="mailto:ismailcosarturizm@gmail.com">✉ ismailcosarturizm@gmail.com</a></li><li>📍 Ankara & Bursa</li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span></div>
+</footer>
+<a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
+</body>
+</html>
