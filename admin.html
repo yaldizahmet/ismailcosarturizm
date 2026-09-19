@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – İsmail Coşar Turizm</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0B1F3A}
+.login-box{background:#fff;border-radius:12px;padding:40px;width:360px;text-align:center}
+.login-box h1{color:#0B1F3A;margin-bottom:8px;font-size:22px}
+.login-box p{color:#666;font-size:14px;margin-bottom:24px}
+.login-box input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:#C9972B}
+.login-box button{width:100%;padding:12px;background:#C9972B;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}
+.login-box button:hover{background:#b8861f}
+.err{color:red;font-size:13px;margin-top:10px;display:none}
+.app{display:none;min-height:100vh}
+.sidebar{width:220px;background:#0B1F3A;min-height:100vh;padding:20px 0;position:fixed}
+.sidebar-logo{text-align:center;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo img{height:40px;width:auto}
+.nav-item{display:block;padding:12px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover,.nav-item.active{background:rgba(201,151,43,.15);color:#E4B84A}
+.main{margin-left:220px;padding:24px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.header h2{color:#0B1F3A;font-size:20px}
+.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+.btn-gold{background:#C9972B;color:#fff}
+.btn-red{background:#dc3545;color:#fff}
+.btn-navy{background:#0B1F3A;color:#fff}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card h3{color:#0B1F3A;margin-bottom:16px;font-size:16px;border-bottom:1px solid #eee;padding-bottom:10px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:#C9972B}
+.tur-list{display:flex;flex-direction:column;gap:10px}
+.tur-item{background:#f8f9fa;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+.tur-item-info h4{font-size:14px;color:#0B1F3A;margin-bottom:4px}
+.tur-item-info p{font-size:12px;color:#666}
+.tur-item-actions{display:flex;gap:8px}
+.badge{font-size:11px;padding:3px 8px;border-radius:50px;font-weight:600}
+.badge-green{background:#e8f5e9;color:#2e7d32}
+.badge-red{background:#ffebee;color:#c62828}
+.fiyat-tablo{width:100%;border-collapse:collapse;font-size:13px}
+.fiyat-tablo th,.fiyat-tablo td{padding:8px 12px;border:1px solid #eee;text-align:left}
+.fiyat-tablo th{background:#f8f9fa;font-weight:600;color:#0B1F3A}
+.fiyat-tablo input{border:none;background:transparent;width:100%;font-size:13px;outline:none;text-align:center}
+.fiyat-tablo input:focus{background:#fff3e0;border-radius:4px}
+.toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;font-weight:600;z-index:9999;display:none}
+.toast-success{background:#2e7d32}
+.toast-error{background:#c62828}
+.tab-btns{display:flex;gap:8px;margin-bottom:20px}
+.tab-btn{padding:8px 16px;border:1.5px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+.tab-btn.active{background:#0B1F3A;color:#fff;border-color:#0B1F3A}
+</style>
+</head>
+<body>
+
+<!-- GİRİŞ -->
+<div class="login" id="loginDiv">
+  <div class="login-box">
+    <h1>🔐 Admin Paneli</h1>
+    <p>İsmail Coşar Turizm Yönetim Paneli</p>
+    <input type="text" id="uname" placeholder="Kullanıcı Adı">
+    <input type="password" id="upass" placeholder="Şifre">
+    <button onclick="girisYap()">Giriş Yap</button>
+    <div class="err" id="loginErr">Kullanıcı adı veya şifre yanlış!</div>
+  </div>
+</div>
+
+<!-- ANA UYGULAMA -->
+<div class="app" id="appDiv">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="Logo">
+    </div>
+    <button class="nav-item active" onclick="sayfaGoster('turlar')">📋 Tur Listesi</button>
+    <button class="nav-item" onclick="sayfaGoster('ekle')">➕ Tur Ekle</button>
+    <button class="nav-item" onclick="sayfaGoster('fiyat')">💲 Fiyat Tabloları</button>
+    <button class="nav-item" onclick="sayfaGoster('guncelle')">🚀 Siteyi Güncelle</button>
+    <button class="nav-item" style="margin-top:auto;color:rgba(255,100,100,.7)" onclick="cikisYap()">🚪 Çıkış</button>
+  </div>
+  <div class="main">
+    <div id="sayfa-turlar"></div>
+    <div id="sayfa-ekle" style="display:none"></div>
+    <div id="sayfa-fiyat" style="display:none"></div>
+    <div id="sayfa-guncelle" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── VERİ ──────────────────────────────────────────
+const KULLANICI = 'ismail';
+const SIFRE = 'ismail123';
+const SITE_ID = '90ef0531-6a60-4636-816c-a7dedaec900f';
+const TOKEN = 'nfp_GnCy2oPXs9GuPFFAKc9GT3NGtYE94yxP3903';
+const SITE_URL = 'https://chimerical-kataifi-0b28de.netlify.app';
+
+const VARSAYILAN = {"guncelleme": "2025-01-01", "turlar": [{"id": "hac-ekonomi", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Ekonomi Paket", "icon": "🕋", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "21 gece", "kapasite": "40 kişi", "fiyat": "58.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Uygun fiyatlı, eksiksiz hac deneyimi", "one_cikan": false}, {"id": "hac-standart", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – Standart Paket", "icon": "🌟", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "25 gece", "kapasite": "40 kişi", "fiyat": "72.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Huzurlu ve konforlu hac yolculuğu", "one_cikan": true}, {"id": "hac-vip", "kategori": "hac", "tip": "paket", "baslik": "Hac Organizasyonu 2025 – VIP Paket", "icon": "👑", "tarih": "Haziran 2025", "konum": "Mekke & Medine", "sure": "30 gece", "kapasite": "20 kişi", "fiyat": "115.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Maksimum konfor, özel hizmet", "one_cikan": false}, {"id": "umre-ramazan-2025", "kategori": "umre", "baslik": "Ramazan Umre Turu 2025 – 10 Günlük", "icon": "🌙", "tarih": "Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "kudus-2025", "kategori": "diger", "baslik": "Kudüs & Filistin Ziyaret Turu – 7 Gün", "icon": "🕌", "tarih": "Şubat 2025", "konum": "Kudüs & Ramallah", "sure": "7 gece", "kapasite": "35 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-yaz-2025", "kategori": "umre", "baslik": "Yaz Umresi 2025 – 10 Gece Aile Paketi", "icon": "☀️", "tarih": "Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "45 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "balkanlar-2025", "kategori": "diger", "baslik": "Balkanlar İslam Mirası Turu", "icon": "🌍", "tarih": "Mayıs 2025", "konum": "Bosna & Makedonya", "sure": "8 gece", "kapasite": "40 kişi", "fiyat": "26.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "endulus-2025", "kategori": "diger", "baslik": "Endülüs Kültür & Tarih Turu", "icon": "🏰", "tarih": "Eylül 2025", "konum": "İspanya", "sure": "10 gece", "kapasite": "35 kişi", "fiyat": "42.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true}, {"id": "umre-ramazan-ekonomi", "kategori": "umre", "baslik": "Ramazan Umresi – 10 Gece Ekonomi", "icon": "🌙", "tarih": "1–11 Mart 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "28.500", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 4★", "one_cikan": false}, {"id": "umre-ramazan-premium", "kategori": "umre", "baslik": "Ramazan Umresi – 14 Gece Premium", "icon": "🌙", "tarih": "8–22 Mart 2025", "konum": "Mekke & Medine", "sure": "14 gece", "kapasite": "50 kişi", "fiyat": "38.000", "para_birimi": "₺", "kontenjan": "az", "aktif": true, "aciklama": "Mekke 5★ + Medine 5★", "one_cikan": false}, {"id": "umre-kis", "kategori": "umre", "baslik": "Kış Umresi – 7 Gece", "icon": "🌙", "tarih": "15–22 Şubat 2025", "konum": "Mekke & Medine", "sure": "7 gece", "kapasite": "50 kişi", "fiyat": "22.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 4★ + Medine 3★", "one_cikan": false}, {"id": "umre-yaz-aile", "kategori": "umre", "baslik": "Yaz Umresi – 10 Gece Aile", "icon": "🌙", "tarih": "10–20 Temmuz 2025", "konum": "Mekke & Medine", "sure": "10 gece", "kapasite": "50 kişi", "fiyat": "32.000", "para_birimi": "₺", "kontenjan": "var", "aktif": true, "aciklama": "Mekke 5★ + Medine 4★", "one_cikan": false}], "fiyat_tablolari": {"hac": [{"grup": "1. Grup – Yürüme Mesafeli", "satirlar": [{"sure": "9 Gece / 10 Gün", "fiyat_2": 1750, "fiyat_3": 1700, "fiyat_4": 1650}, {"sure": "13 Gece / 14 Gün", "fiyat_2": 1900, "fiyat_3": 1850, "fiyat_4": 1800}]}, {"grup": "2. Grup – Ekonomik", "satirlar": [{"sure": "13 Gece / 14 Gün", "fiyat_2": 1550, "fiyat_3": 1500, "fiyat_4": 1450}, {"sure": "19 Gece / 20 Gün", "fiyat_2": 1650, "fiyat_3": 1600, "fiyat_4": 1550}]}, {"grup": "3. Grup – 5 Yıldız", "satirlar": [{"sure": "6 Gece / 7 Gün", "fiyat_2": 2500, "fiyat_3": 2400, "fiyat_4": null}, {"sure": "9 Gece / 10 Gün", "fiyat_2": 2800, "fiyat_3": 2700, "fiyat_4": null}]}], "umre": []}};
+
+function veriYukle() {
+  const k = localStorage.getItem('ict_v2');
+  return k ? JSON.parse(k) : JSON.parse(JSON.stringify(VARSAYILAN));
+}
+
+function veriKaydet(d) {
+  localStorage.setItem('ict_v2', JSON.stringify(d));
+}
+
+// ── GİRİŞ ──────────────────────────────────────────
+function girisYap() {
+  const u = document.getElementById('uname').value.trim();
+  const p = document.getElementById('upass').value.trim();
+  if (u === KULLANICI && p === SIFRE) {
+    document.getElementById('loginDiv').style.display = 'none';
+    document.getElementById('appDiv').style.display = 'flex';
+    sayfaGoster('turlar');
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
+  }
+}
+
+function cikisYap() {
+  document.getElementById('loginDiv').style.display = 'flex';
+  document.getElementById('appDiv').style.display = 'none';
+  document.getElementById('uname').value = '';
+  document.getElementById('upass').value = '';
+}
+
+document.querySelectorAll('input').forEach(i => {
+  i.addEventListener('keydown', e => { if(e.key === 'Enter') girisYap(); });
+});
+
+// ── SAYFA YÖNETİMİ ──────────────────────────────────
+function sayfaGoster(ad) {
+  ['turlar','ekle','fiyat','guncelle'].forEach(s => {
+    document.getElementById('sayfa-'+s).style.display = s === ad ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (ad === 'turlar') renderTurlar();
+  if (ad === 'ekle') renderEkle();
+  if (ad === 'fiyat') renderFiyat();
+  if (ad === 'guncelle') renderGuncelle();
+}
+
+// ── TUR LİSTESİ ──────────────────────────────────────
+function renderTurlar() {
+  const data = veriYukle();
+  const el = document.getElementById('sayfa-turlar');
+  
+  const katMap = {hac:'🕋 Hac', umre:'🌙 Umre', diger:'✈️ Diğer'};
+  
+  el.innerHTML = `
+    <div class="header"><h2>📋 Tur Listesi</h2></div>
+    <div class="card">
+      <div class="tur-list">
+        ${data.turlar.map((t,i) => `
+          <div class="tur-item">
+            <div class="tur-item-info">
+              <h4>${t.icon} ${t.baslik}</h4>
+              <p>${katMap[t.kategori] || t.kategori} · ${t.tarih} · ${t.fiyat} ${t.para_birimi}</p>
+            </div>
+            <div class="tur-item-actions">
+              <span class="badge ${t.aktif ? 'badge-green' : 'badge-red'}">${t.aktif ? 'Aktif' : 'Pasif'}</span>
+              <button class="btn btn-navy" onclick="turDuzenle(${i})">Düzenle</button>
+              <button class="btn btn-red" onclick="turSil(${i})">Sil</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+function turSil(i) {
+  if (!confirm('Bu turu silmek istediğinizden emin misiniz?')) return;
+  const data = veriYukle();
+  data.turlar.splice(i, 1);
+  veriKaydet(data);
+  renderTurlar();
+  toast('✅ Tur silindi', 'success');
+}
+
+function turDuzenle(i) {
+  const data = veriYukle();
+  const t = data.turlar[i];
+  const el = document.getElementById('sayfa-turlar');
+  el.innerHTML = `
+    <div class="header"><h2>✏️ Tur Düzenle</h2></div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>Başlık</label><input id="e_baslik" value="${t.baslik}"></div>
+        <div class="form-group"><label>Kategori</label>
+          <select id="e_kategori">
+            <option value="hac" ${t.kategori==='hac'?'selected':''}>Hac</option>
+            <option value="umre" ${t.kategori==='umre'?'selected':''}>Umre</option>
+            <option value="diger" ${t.kategori==='diger'?'selected':''}>Diğer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fiyat</label><input id="e_fiyat" value="${t.fiyat}"></div>
+        <div class="form-group"><label>Para Birimi</label>
+          <select id="e_pb">
+            <option value="₺" ${t.para_birimi==='₺'?'selected':''}>₺ TL</option>
+            <option value="$" ${t.para_birimi==='$'?'selected':''}>$ USD</option>
+            <option value="€" ${t.para_birimi==='€'?'selected':''}>€ EUR</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tarih</label><input id="e_tarih" type="date" value="${t.tarih}"></div>
+        <div class="form-group"><label>Süre</label><input id="e_sure" value="${t.sure}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Konum</label><input id="e_konum" value="${t.konum}"></div>
+        <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${t.kapasite}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Kontenjan</label>
+          <select id="e_kontenjan">
+            <option value="var" ${t.kontenjan==='var'?'selected':''}>Yer Var</option>
+            <option value="az" ${t.kontenjan==='az'?'selected':''}>Az Kaldı</option>
+            <option value="dolu" ${t.kontenjan==='dolu'?'selected':''}>Dolu</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Durum</label>
+          <select id="e_aktif">
+            <option value="true" ${t.aktif?'selected':''}>Aktif</option>
+            <option value="false" ${!t.aktif?'selected':''}>Pasif</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-gold" onclick="turKaydet(${i})">💾 Kaydet</button>
+        <button class="btn btn-navy" onclick="renderTurlar()">İptal</button>
+      </div>
+    </div>`;
+}
+
+function turKaydet(i) {
+  const data = veriYukle();
+  data.turlar[i].baslik = document.getElementById('e_baslik').value;
+  data.turlar[i].kategori = document.getElementById('e_kategori').value;
+  data.turlar[i].fiyat = document.getElementById('e_fiyat').value;
+  data.turlar[i].para_birimi = document.getElementById('e_pb').value;
+  data.turlar[i].tarih = document.getElementById('e_tarih').value;
+  data.turlar[i].sure = document.getElementById('e_sure').value;
+  data.turlar[i].konum = document.getElementById('e_konum').value;
+  data.turlar[i].kapasite = document.getElementById('e_kapasite').value;
+  data.turlar[i].kontenjan = document.getElementById('e_kontenjan').value;
+  data.turlar[i].aktif = document.getElementById('e_aktif').value === 'true';
+  veriKaydet(data);
+  renderTurlar();
+  toast('✅ Tur kaydedildi', 'success');
+}
+
+// ── TUR EKLE ──────────────────────────────────────────
+function renderEkle() {
+  const el = document.getElementById('sayfa-ekle');
+  el.innerHTML = `
+    <div class="header"><h2>➕ Yeni Tur Ekle</h2></div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>Başlık *</label><input id="n_baslik" placeholder="Tur adı"></div>
+        <div class="form-group"><label>Kategori</label>
+          <select id="n_kategori">
+            <option value="hac">Hac</option>
+            <option value="umre">Umre</option>
+            <option value="diger">Diğer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fiyat</label><input id="n_fiyat" placeholder="58.000"></div>
+        <div class="form-group"><label>Para Birimi</label>
+          <select id="n_pb"><option value="₺">₺ TL</option><option value="$">$ USD</option><option value="€">€ EUR</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tarih</label><input id="n_tarih" type="date"></div>
+        <div class="form-group"><label>Süre</label><input id="n_sure" placeholder="10 gece"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
+        <div class="form-group"><label>Kapasite</label><input id="n_kapasite" placeholder="40 kişi"></div>
+      </div>
+      <button class="btn btn-gold" onclick="turEkle()">➕ Tur Ekle</button>
+    </div>`;
+}
+
+function turEkle() {
+  const baslik = document.getElementById('n_baslik').value.trim();
+  if (!baslik) { toast('Başlık zorunlu!', 'error'); return; }
+  
+  const data = veriYukle();
+  const kat = document.getElementById('n_kategori').value;
+  const icons = {hac:'🕋', umre:'🌙', diger:'✈️'};
+  
+  data.turlar.push({
+    id: 'tur-' + Date.now(),
+    kategori: kat,
+    baslik: baslik,
+    icon: icons[kat] || '✈️',
+    tarih: document.getElementById('n_tarih').value,
+    sure: document.getElementById('n_sure').value,
+    konum: document.getElementById('n_konum').value,
+    kapasite: document.getElementById('n_kapasite').value,
+    fiyat: document.getElementById('n_fiyat').value,
+    para_birimi: document.getElementById('n_pb').value,
+    kontenjan: 'var',
+    aktif: true
+  });
+  
+  veriKaydet(data);
+  toast('✅ Tur eklendi!', 'success');
+  renderEkle();
+}
+
+// ── FİYAT TABLOLARI ──────────────────────────────────
+function renderFiyat() {
+  const data = veriYukle();
+  const el = document.getElementById('sayfa-fiyat');
+  
+  let html = '<div class="header"><h2>💲 Fiyat Tabloları</h2><button class="btn btn-gold" onclick="fiyatKaydet()">💾 Kaydet</button></div>';
+  
+  ['hac', 'umre'].forEach(tip => {
+    const gruplar = (data.fiyat_tablolari && data.fiyat_tablolari[tip]) || [];
+    html += `<div class="card"><h3>${tip === 'hac' ? '🕋 Hac' : '🌙 Umre'} Fiyat Tablosu</h3>
+      <table class="fiyat-tablo">
+        <thead><tr><th>Grup</th><th>Süre</th><th>2 Kişilik ($)</th><th>3 Kişilik ($)</th><th>4 Kişilik ($)</th></tr></thead>
+        <tbody id="fiyat-${tip}">
+          ${gruplar.map((g,gi) => g.satirlar.map((s,si) => `
+            <tr>
+              <td>${si===0 ? g.grup : ''}</td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="sure" value="${s.sure}"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_2" value="${s.fiyat_2||''}"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_3" value="${s.fiyat_3||''}"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_4" value="${s.fiyat_4||''}"></td>
+            </tr>`).join('')).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  });
+  
+  el.innerHTML = html;
+}
+
+function fiyatKaydet() {
+  const data = veriYukle();
+  document.querySelectorAll('.fiyat-tablo input[data-tip]').forEach(inp => {
+    const {tip, gi, si, f} = inp.dataset;
+    if (!data.fiyat_tablolari) data.fiyat_tablolari = {};
+    if (!data.fiyat_tablolari[tip]) data.fiyat_tablolari[tip] = [];
+    if (!data.fiyat_tablolari[tip][gi]) data.fiyat_tablolari[tip][gi] = {grup:'', satirlar:[]};
+    if (!data.fiyat_tablolari[tip][gi].satirlar[si]) data.fiyat_tablolari[tip][gi].satirlar[si] = {};
+    data.fiyat_tablolari[tip][gi].satirlar[si][f] = inp.value;
+  });
+  veriKaydet(data);
+  toast('✅ Fiyatlar kaydedildi', 'success');
+}
+
+// ── SİTEYİ GÜNCELLE ──────────────────────────────────
+function renderGuncelle() {
+  const el = document.getElementById('sayfa-guncelle');
+  el.innerHTML = `
+    <div class="header"><h2>🚀 Siteyi Güncelle</h2></div>
+    <div class="card">
+      <p style="margin-bottom:16px;color:#666">Admin panelindeki değişiklikleri canlı siteye yansıtmak için butona tıklayın.</p>
+      <button class="btn btn-gold" id="guncBtn" onclick="siteGuncelle()" style="font-size:15px;padding:14px 28px">🚀 Siteyi Güncelle</button>
+      <div id="guncLog" style="margin-top:16px;font-size:13px;color:#666;line-height:1.8"></div>
+    </div>`;
+}
+
+async function siteGuncelle() {
+  const btn = document.getElementById('guncBtn');
+  const log = document.getElementById('guncLog');
+  btn.disabled = true;
+  btn.textContent = '⏳ Güncelleniyor...';
+  log.innerHTML = '';
+  
+  const data = veriYukle();
+  const jsonStr = JSON.stringify(data, null, 2);
+  
+  function logEkle(msg) {
+    log.innerHTML += msg + '<br>';
+  }
+  
+  try {
+    // 1. turlar.json
+    logEkle('📤 turlar.json yükleniyor...');
+    const r1 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/turlar.json`, {
+      method: 'PUT',
+      headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
+      body: jsonStr
+    });
+    logEkle(r1.ok ? '✅ turlar.json güncellendi' : '❌ turlar.json hatası: ' + r1.status);
+    
+    // 2. hac.html
+    logEkle('📤 hac.html yükleniyor...');
+    const hacRes = await fetch(SITE_URL + '/hac.html');
+    if (hacRes.ok) {
+      let hacHTML = await hacRes.text();
+      // Paket kartlarını güncelle
+      const hacKartlar = buildHacKartlar(data);
+      hacHTML = hacHTML.replace(/<div class="paket-grid" id="paketGrid">[\s\S]*?<\/div>/, 
+        `<div class="paket-grid" id="paketGrid">${hacKartlar}</div>`);
+      const r2 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/hac.html`, {
+        method: 'PUT',
+        headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
+        body: hacHTML
+      });
+      logEkle(r2.ok ? '✅ hac.html güncellendi' : '❌ hac.html hatası: ' + r2.status);
+    }
+    
+    // 3. umre.html
+    logEkle('📤 umre.html yükleniyor...');
+    const umreRes = await fetch(SITE_URL + '/umre.html');
+    if (umreRes.ok) {
+      let umreHTML = await umreRes.text();
+      const umreProgs = buildUmreProgs(data);
+      umreHTML = umreHTML.replace(/<div class="prog-list" id="progList">[\s\S]*?<\/div>/,
+        `<div class="prog-list" id="progList">${umreProgs}</div>`);
+      const r3 = await fetch(`https://api.netlify.com/api/v1/sites/${SITE_ID}/files/umre.html`, {
+        method: 'PUT',
+        headers: {'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/octet-stream'},
+        body: umreHTML
+      });
+      logEkle(r3.ok ? '✅ umre.html güncellendi' : '❌ umre.html hatası: ' + r3.status);
+    }
+    
+    logEkle('<strong style="color:green">🎉 Tüm güncellemeler tamamlandı!</strong>');
+    btn.textContent = '✅ Güncellendi!';
+    setTimeout(() => { btn.textContent = '🚀 Siteyi Güncelle'; btn.disabled = false; }, 3000);
+    
+  } catch(e) {
+    logEkle('❌ Hata: ' + e.message);
+    btn.textContent = '🚀 Siteyi Güncelle';
+    btn.disabled = false;
+  }
+}
+
+function buildHacKartlar(data) {
+  return data.turlar.filter(t => t.kategori === 'hac' && t.aktif).map(p => {
+    const featured = p.one_cikan || false;
+    const bg = featured ? 'linear-gradient(135deg,#132d52,#1a3d6e)' : '#0B1F3A';
+    const btnCls = featured ? 'btn-paket-gold' : 'btn-paket-outline';
+    const badge = featured ? '<span class="paket-feat-badge">⭐ En Çok Tercih</span>' : '';
+    const title = p.baslik.includes('–') ? p.baslik.split('–').pop().trim() : p.baslik;
+    const safe = p.baslik.replace(/'/g, "\'");
+    return `<div class="paket-card${featured?' featured':''}">${badge}
+      <div class="paket-header" style="background:${bg}">
+        <div class="paket-header-icon">${p.icon}</div><h3>${title}</h3><p>${p.aciklama||''}</p>
+      </div>
+      <div class="paket-body">
+        <div class="paket-price"><span style="font-size:12px;color:var(--text-muted)">Kişi başı</span>
+        <span class="paket-price-num">${p.fiyat} ${p.para_birimi}</span></div>
+        <ul class="paket-includes">
+          <li>Direkt uçuş (Türkiye–Cidde)</li>
+          <li>Mekke ve Medine'de otel (${p.sure})</li>
+          <li>Türkçe din görevlisi rehber</li>
+          <li>Vize, kurban ve sigorta desteği</li>
+        </ul>
+        <button class="${btnCls}" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer;width:100%">Hemen Kayıt Ol →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildUmreProgs(data) {
+  const kL = {az:'Az Kaldı',var:'Yer Var',dolu:'Dolu'};
+  const kS = {az:'background:rgba(198,40,40,.1);color:#c62828',var:'background:#e8f5e9;color:#2e7d32',dolu:'background:#ffebee;color:#c62828'};
+  return data.turlar.filter(t => t.kategori === 'umre' && t.aktif).map(p => {
+    const safe = p.baslik.replace(/'/g, "\'");
+    return `<div class="prog-item">
+      <div class="prog-body">
+        <div class="prog-badges">
+          <span class="pb pb-gold">🌙 ${p.sezon||'Umre'}</span>
+          <span class="pb" style="${kS[p.kontenjan]||kS.var}">${kL[p.kontenjan]||'Yer Var'}</span>
+        </div>
+        <h3>${p.baslik}</h3>
+        <div class="prog-meta">
+          <span class="prog-detail">📅 <strong>${p.tarih}</strong></span>
+          <span class="prog-detail">⏱ <strong>${p.sure}</strong></span>
+          <span class="prog-detail">📍 ${p.konum}</span>
+        </div>
+      </div>
+      <div class="prog-action">
+        <div><div class="prog-price-lbl">Kişi başı</div><div class="prog-price">${p.fiyat} ${p.para_birimi}</div></div>
+        <button class="btn-prog" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TOAST ──────────────────────────────────────────
+function toast(msg, tip) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + tip;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+</script>
+</body>
+</html>
