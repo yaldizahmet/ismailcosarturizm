@@ -375,11 +375,7 @@ function renderGuncelle() {
   el.innerHTML = `
     <div class="header"><h2>🚀 Siteyi Güncelle</h2></div>
     <div class="card">
-      <div class="form-group" style="margin-bottom:16px">
-        <label>GitHub Token</label>
-        <input type="password" id="ghTokenInput" value="${savedToken}" placeholder="ghp_..." style="font-family:monospace">
-        <div style="font-size:12px;color:#999;margin-top:4px">Token bir kez kaydedilir, tekrar girilmez.</div>
-      </div>
+      <div style="display:none"><input type="hidden" id="ghTokenInput" value="${savedToken}"></div>
       <button class="btn btn-gold" id="guncBtn" onclick="siteGuncelle()" style="font-size:15px;padding:14px 28px">🚀 Siteyi Güncelle</button>
       <div id="guncLog" style="margin-top:16px;font-size:13px;color:#666;line-height:1.8"></div>
     </div>`;
