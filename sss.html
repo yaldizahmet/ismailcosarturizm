@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sıkça Sorulan Sorular – İsmail Coşar Turizm</title>
+<meta name="description" content="Hac, Umre, Balkan turları ve rezervasyon hakkında sıkça sorulan sorular ve cevapları.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1F3A;--navy-mid:#132d52;--navy-light:#1a3d6e;--gold:#C9972B;--gold-light:#E4B84A;--gold-pale:#F5E6C0;--cream:#FAF7F0;--white:#FFFFFF;--text-dark:#0B1F3A;--text-mid:#3a4a62;--text-muted:#6b7a94;--border:rgba(201,151,43,0.18);--shadow-sm:0 2px 12px rgba(11,31,58,0.08);--shadow-md:0 8px 32px rgba(11,31,58,0.12);--r:12px;--r-lg:20px;--ff-head:'Playfair Display',Georgia,serif;--ff-body:'DM Sans',sans-serif}
+html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,31,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,151,43,0.2);padding:0 3vw;height:68px;display:flex;align-items:center;justify-content:space-between}
+.navbar-logo{display:flex;align-items:center;text-decoration:none}
+.navbar-logo-img{height:52px;width:auto;object-fit:contain;display:block}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 9px;border-radius:6px;transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--gold-light);background:rgba(201,151,43,.1)}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px}
+
+/* PAGE HERO */
+.page-hero{padding:148px 5vw 80px;background:linear-gradient(135deg,#0B1F3A,#132d52);position:relative;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
+.hero-glow{position:absolute;right:0;top:0;width:55%;height:100%;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(201,151,43,.12),transparent 65%)}
+.page-hero-content{position:relative;z-index:2;max-width:720px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.4);margin-bottom:20px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}.breadcrumb a:hover{color:var(--gold-light)}.breadcrumb span{color:var(--gold-light)}
+.page-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,151,43,.15);border:1px solid rgba(201,151,43,.35);color:var(--gold-light);font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:50px;margin-bottom:20px}
+.page-hero h1{font-family:var(--ff-head);font-size:clamp(32px,5vw,56px);font-weight:700;color:#fff;line-height:1.12;letter-spacing:-.4px;margin-bottom:16px}
+.page-hero h1 em{font-style:normal;color:var(--gold-light)}
+.page-hero-desc{font-size:clamp(15px,1.5vw,17px);color:rgba(255,255,255,.65);line-height:1.7;max-width:560px;font-weight:300}
+
+/* SSS */
+.sss-wrap{padding:72px 5vw;background:var(--white)}
+.sss-category{margin-bottom:52px}
+.sss-category-title{display:flex;align-items:center;gap:12px;font-family:var(--ff-head);font-size:22px;font-weight:700;color:var(--navy);margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--gold)}
+.sss-category-title span{font-size:22px}
+.sss-list{display:flex;flex-direction:column;gap:10px}
+.sss-item{background:var(--cream);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;transition:border-color .2s}
+.sss-item:hover{border-color:rgba(201,151,43,.4)}
+.sss-item.open{border-color:var(--gold);background:var(--white)}
+.sss-q{padding:17px 20px;font-size:14.5px;font-weight:600;color:var(--text-dark);cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .2s;user-select:none}
+.sss-q:hover{background:rgba(201,151,43,.04)}
+.sss-item.open .sss-q{background:rgba(201,151,43,.06)}
+.sss-num{font-size:11px;font-weight:700;color:var(--gold);background:rgba(201,151,43,.12);padding:3px 8px;border-radius:50px;flex-shrink:0;min-width:28px;text-align:center}
+.sss-q-text{flex:1;line-height:1.4}
+.sss-q-icon{color:var(--gold);font-size:20px;transition:transform .25s;flex-shrink:0;line-height:1;font-weight:300}
+.sss-item.open .sss-q-icon{transform:rotate(45deg)}
+.sss-a{display:none;padding:0 20px 18px 60px;font-size:14px;color:var(--text-muted);line-height:1.8}
+.sss-item.open .sss-a{display:block}
+
+/* NEDEN BİZ */
+.neden-band{background:var(--navy);padding:56px 5vw;text-align:center}
+.neden-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,32px);font-weight:700;color:#fff;margin-bottom:28px}
+.neden-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:800px;margin:0 auto 28px}
+.neden-tag{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:50px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--gold-light)}
+.neden-desc{font-size:15px;color:rgba(255,255,255,.5);line-height:1.8;max-width:580px;margin:0 auto}
+
+/* CTA */
+.cta-band{background:var(--gold);padding:56px 5vw;text-align:center}
+.cta-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,34px);font-weight:700;color:var(--navy);margin-bottom:10px}
+.cta-band p{font-size:15px;color:rgba(11,31,58,.7);margin-bottom:28px}
+.cta-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.btn-navy{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}.btn-navy:hover{background:var(--navy-light)}
+.btn-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}.btn-wa:hover{background:#20bb5a}
+
+/* FOOTER */
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;border-top:1px solid rgba(201,151,43,.15)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px}
+.footer-logo-img{height:48px;width:auto;object-fit:contain;background:#fff;border-radius:8px;padding:5px 8px}
+.footer-brand-desc{font-size:13px;line-height:1.7;margin-top:12px;max-width:260px}
+.footer-title{font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s}.footer-links a:hover{color:var(--gold-light)}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.footer-badge{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--gold-pale)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,.3)}
+.floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45);transition:transform .2s}.floating-wa:hover{transform:scale(1.1)}
+
+@media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px 20px;gap:4px;border-bottom:1px solid rgba(201,151,43,.15)}.nav-links.open{display:flex}.hamburger{display:flex}.sss-a{padding-left:20px}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.sss-wrap{padding:56px 5vw}.footer-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo">
+    <img src="logo.png" alt="İsmail Coşar Turizm" class="navbar-logo-img" style="height:44px;width:auto;">
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Ana Sayfa</a>
+    <a href="hac.html">Hac</a>
+    <a href="umre.html">Umre</a>
+    <a href="turlar.html">Turlar</a>
+    <a href="galeri.html">Galeri</a>
+    <a href="hakkimizda.html">Hakkımızda</a>
+    <a href="sss.html" class="active">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a>
+    <a href="iletisim.html" class="nav-cta">📞 İletişim</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-pattern"></div><div class="hero-glow"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <span>SSS</span></div>
+    <div class="page-badge">❓ Merak Ettikleriniz</div>
+    <h1>Sıkça Sorulan <em>Sorular</em></h1>
+    <p class="page-hero-desc">Hac, Umre, Balkan turları ve rezervasyon hakkında en çok sorulan sorular ve cevapları.</p>
+  </div>
+</div>
+
+<div class="sss-wrap">
+
+  <!-- GENEL -->
+  <div class="sss-category">
+    <div class="sss-category-title"><span>🌍</span> Genel Sorular</div>
+    <div class="sss-list">
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">1</span><span class="sss-q-text">Hangi tur ve seyahat hizmetlerini düzenliyorsunuz?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac ve Umre organizasyonlarının yanı sıra Balkanlar ve Avrupa başta olmak üzere yurt içi ve yurt dışı kültür, inanç ve grup turları düzenliyoruz. Farklı bütçe ve beklentilere uygun alternatifler sunuyoruz.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">2</span><span class="sss-q-text">Turlarınıza nereden katılım sağlanabilir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Organizasyonlarımızın kalkış noktaları tur programına göre değişmektedir. Ankara başta olmak üzere farklı şehirlerden katılım seçenekleri sunulabilmektedir. Güncel kalkış noktaları her turun programında belirtilmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">3</span><span class="sss-q-text">Tur fiyatlarına neler dahildir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Tur programına göre değişmekle birlikte konaklama, ulaşım, transferler, rehberlik hizmetleri ve programda belirtilen öğünler fiyata dahil olabilir. Her turun dahil olan ve olmayan hizmetleri program detaylarında açıkça belirtilmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">4</span><span class="sss-q-text">Tur ücretlerine dahil olmayan hizmetler nelerdir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Kişisel harcamalar, ekstra geziler, programda belirtilmeyen yemekler, yurt dışı çıkış harcı ve benzeri kişisel giderler tur paketine göre ayrıca ücretlendirilebilir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">5</span><span class="sss-q-text">Ödeme seçenekleriniz nelerdir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Turun niteliğine ve rezervasyon tarihine göre peşin veya taksitli ödeme seçenekleri sunulabilir. Güncel ödeme koşulları için bizimle iletişime geçebilirsiniz.</div></div>
+    </div>
+  </div>
+
+  <!-- UMRE -->
+  <div class="sss-category">
+    <div class="sss-category-title"><span>🌙</span> Umre Hakkında</div>
+    <div class="sss-list">
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">6</span><span class="sss-q-text">Umre turlarınız hangi dönemlerde düzenleniyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Yıl içerisinde her ay olmak üzere Umre organizasyonları düzenliyoruz. Özellikle sömestr ve tatil dönemlerinde farklı süre ve konaklama seçenekleri sunulmaktadır.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">7</span><span class="sss-q-text">Umre paketlerinde oteller nerede bulunuyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Umre programına göre Mekke ve Medine'de farklı konum ve standartlarda oteller kullanılmaktadır. Otelin Kâbe-i Şerif'e veya Mescid-i Nebevî'ye olan mesafesi programda belirtilmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">8</span><span class="sss-q-text">Umre sırasında rehberlik hizmeti veriliyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Umre programlarımızda grup boyunca deneyimli kafile başkanı ve rehberlik hizmeti sunulmaktadır. İbadetlerin daha bilinçli ve düzenli şekilde yerine getirilmesine yardımcı oluyoruz.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">9</span><span class="sss-q-text">Umre programlarında Mekke ve Medine'de kaç gün kalınıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Konaklama süresi seçilen pakete göre değişmektedir. 10, 14 gün ve farklı sürelerde alternatif Umre programları hazırlanabilmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">10</span><span class="sss-q-text">Umreye ilk defa gidecekler için bilgilendirme yapılıyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Umre öncesinde yolculuk, ihram, umre ibadeti, dikkat edilmesi gereken hususlar ve programın işleyişi hakkında bilgilendirme yapılmaktadır.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">11</span><span class="sss-q-text">Yaşlı veya özel desteğe ihtiyaç duyan kişiler Umreye katılabilir mi?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Elbette. Yaşlı misafirlerimizin ve özel ihtiyaçları bulunan yolcularımızın durumlarını rezervasyon öncesinde bildirerek gerekli planlamayı birlikte yapıyoruz.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">12</span><span class="sss-q-text">Aile olarak Umreye katılabilir miyiz?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Aileler için uygun oda ve konaklama seçenekleri sunulmaktadır. Aynı aileden katılacak kişilerin mümkün olduğunca birlikte konaklaması için rezervasyon aşamasında gerekli planlama yapılır.</div></div>
+    </div>
+  </div>
+
+  <!-- HAC -->
+  <div class="sss-category">
+    <div class="sss-category-title"><span>🕋</span> Hac Hakkında</div>
+    <div class="sss-list">
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">13</span><span class="sss-q-text">Hac organizasyonunuz nasıl gerçekleştiriliyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac organizasyonları ilgili resmi mevzuat ve yetkili kurumların belirlediği şartlar doğrultusunda gerçekleştirilir. Kontenjan, başvuru ve kayıt süreçleri dönemsel olarak değişebildiğinden güncel bilgiler tarafımızdan paylaşılır.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">14</span><span class="sss-q-text">Hac için hangi belgeler gereklidir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Gerekli belgeler dönemsel uygulamalara göre değişebilir. Pasaport, başvuru belgeleri, sağlık belgeleri ve ilgili resmi evraklar konusunda kayıt sürecinde misafirlerimize gerekli bilgilendirme yapılmaktadır.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">15</span><span class="sss-q-text">Hac ve Umre arasında ne gibi farklar vardır?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac, belirli zaman diliminde ve belirli şartları bulunan farz bir ibadettir. Umre ise yılın farklı dönemlerinde gerçekleştirilebilen bir ibadettir. Her iki ibadet için de program ve hazırlık süreçleri farklıdır.</div></div>
+    </div>
+  </div>
+
+  <!-- BALKAN -->
+  <div class="sss-category">
+    <div class="sss-category-title"><span>🗺️</span> Balkan Turları</div>
+    <div class="sss-list">
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">16</span><span class="sss-q-text">Balkan turlarınız hangi ülkeleri kapsıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Programlara göre değişmekle birlikte Makedonya, Kosova, Arnavutluk, Karadağ, Bosna-Hersek, Sırbistan ve çevre ülkeleri kapsayan farklı Balkan rotaları düzenlenmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">17</span><span class="sss-q-text">Balkan turuna katılmak için Schengen vizesi gerekiyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Tur programında ziyaret edilecek ülkelere göre vize şartları değişmektedir. Balkan ülkelerinin her biri için farklı giriş kuralları bulunabileceğinden, rezervasyon öncesinde pasaport ve vize durumunuz kontrol edilmelidir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">18</span><span class="sss-q-text">Balkan turlarında hangi otellerde konaklanıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Programın kategorisine göre seçilen 4 ve 5 yıldızlı otellerde konaklama yapılmaktadır. Otel bilgileri tur programı kesinleştiğinde misafirlerimize bildirilir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">19</span><span class="sss-q-text">Balkan turlarında rehber bulunuyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Programın özelliğine göre profesyonel rehberlik hizmeti sunulmaktadır. Gezilecek şehirler, tarihi yapılar ve kültürel noktalar hakkında kapsamlı bilgi verilmektedir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">20</span><span class="sss-q-text">Balkan turlarında yemekler fiyata dahil mi?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Turdan tura değişmektedir. Dahil olan öğünler tur programında açıkça belirtilir. Bazı programlarda kahvaltı ve akşam yemeği dahil olabilir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">21</span><span class="sss-q-text">Balkan turuna tek başıma katılabilir miyim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Tek başına seyahat eden misafirlerimiz de grup turlarımıza katılabilir. Tek kişilik oda isteyen misafirlerimiz için tur paketine göre single oda farkı uygulanabilir.</div></div>
+    </div>
+  </div>
+
+  <!-- REZERVASYON -->
+  <div class="sss-category">
+    <div class="sss-category-title"><span>📋</span> Rezervasyon ve Seyahat</div>
+    <div class="sss-list">
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">22</span><span class="sss-q-text">Tur rezervasyonunu nasıl yapabilirim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Web sitemiz, telefon, WhatsApp veya ofisimiz üzerinden rezervasyon talebinizi oluşturabilirsiniz. Kontenjan ve uygunluk kontrolünden sonra kayıt işleminiz tamamlanır.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">23</span><span class="sss-q-text">Rezervasyon yaptıktan sonra turumu iptal edebilir miyim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">İptal ve iade koşulları seçilen tur, rezervasyon tarihi ve ilgili hizmet sağlayıcılarının kurallarına göre değişebilir. Kayıt sırasında geçerli olan iptal ve iade şartları misafirimize bildirilir.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">24</span><span class="sss-q-text">Pasaportumun geçerlilik süresi ne kadar olmalı?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Pasaport geçerlilik şartları gidilecek ülkeye ve seyahatin türüne göre değişebilir. Seyahat öncesinde pasaportunuzun geçerlilik süresini kontrol etmenizi ve rezervasyon sırasında pasaport durumunuzu bildirmenizi öneriyoruz.</div></div>
+      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">25</span><span class="sss-q-text">Seyahat öncesinde bilgilendirme yapılıyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Tur tarihinden önce uçuş, buluşma noktası, otel, transfer, bagaj, gerekli belgeler ve tur programıyla ilgili tüm önemli bilgiler misafirlerimizle paylaşılır. Amacımız, seyahatinizin başlangıcından dönüşünüze kadar süreci güvenli, düzenli ve konforlu şekilde yönetmektir.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NEDEN BİZ -->
+<div class="neden-band">
+  <h2>Neden İsmail Coşar Turizm?</h2>
+  <div class="neden-grid">
+    <span class="neden-tag">✅ Güvenilir Organizasyon</span>
+    <span class="neden-tag">👨‍💼 Deneyimli Ekip</span>
+    <span class="neden-tag">🎓 Profesyonel Rehberlik</span>
+    <span class="neden-tag">📋 Şeffaf Program</span>
+    <span class="neden-tag">🏨 Konforlu Konaklama</span>
+  </div>
+  <p class="neden-desc">Her seyahatin sizin için özel olduğunun bilinciyle, ibadet ve tatil amaçlı yolculuklarınızı güven ve huzur içerisinde gerçekleştirmeniz için yanınızdayız.</p>
+</div>
+
+<div class="cta-band">
+  <h2>Aklınızdaki Soruyu Sormak İster misiniz?</h2>
+  <p>Cevabını bulamadığınız sorular için bize doğrudan ulaşın.</p>
+  <div class="cta-actions">
+    <a href="iletisim.html" class="btn-navy">📋 İletişim Formu</a>
+    <a href="https://wa.me/905331980781?text=Merhaba%2C%20sormak%20istedi%C4%9Fim%20bir%20soru%20var." class="btn-wa" target="_blank">💬 WhatsApp</a>
+    <a href="tel:+905331980781" class="btn-navy">📞 0533 198 07 81</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><img src="logo.png" alt="İsmail Coşar Turizm" class="footer-logo-img"><p class="footer-brand-desc">20 yılı aşkın tecrübemizle hac, umre ve yurt dışı turlarında güvenilir çözüm ortağınız.</p><div class="footer-badges"><span class="footer-badge">TURSAB</span><span class="footer-badge">Diyanet Onaylı</span></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <a href="https://www.instagram.com/ismailcosarturizm" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </a>
+        <a href="https://www.facebook.com/share/16EmdzsymFJ/?mibextid=wwXIfr" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+      </div></div>
+    <div><div class="footer-title">Hizmetler</div><ul class="footer-links"><li><a href="hac.html">Hac</a></li><li><a href="umre.html">Umre</a></li><li><a href="turlar.html">Turlar</a></li><li><a href="galeri.html">Galeri</a></li></ul></div>
+    <div><div class="footer-title">Kurumsal</div><ul class="footer-links"><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="sss.html">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+    <div><div class="footer-title">İletişim</div><ul class="footer-links"><li><a href="tel:+905331980781">📞 0533 198 07 81</a></li><li><a href="mailto:ismailcosarturizm@gmail.com">✉ ismailcosarturizm@gmail.com</a></li><li>📍 Ankara & Bursa</li></ul></div>
+  </div>
+                    <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Anlaşmalı Havayolları</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img src="logo-thy.png" alt="Turkish Airlines" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-ajet.png" alt="AJet" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-pegasus.png" alt="Pegasus" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+        </div>
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">🔒 Güvenli Ödeme İmkânı</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="background:#fff;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:15px;color:#1A1F71;letter-spacing:-1px">VISA</div>
+          <div style="background:#fff;border-radius:6px;padding:4px 8px;height:30px;display:flex;align-items:center;gap:3px">
+            <div style="width:18px;height:18px;border-radius:50%;background:#EB001B"></div>
+            <div style="width:18px;height:18px;border-radius:50%;background:#F79E1B;margin-left:-8px"></div>
+          </div>
+          <div style="background:#003087;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:13px;color:#fff;letter-spacing:1px">TROY</div>
+          <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
+        </div>
+      </div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span></div>
+</footer>
+<a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
+
+<script>
+function toggleSSS(el){
+  var item=el.closest('.sss-item');
+  var was=item.classList.contains('open');
+  document.querySelectorAll('.sss-item').forEach(function(i){i.classList.remove('open')});
+  if(!was) item.classList.add('open');
+}
+</script>
+</body>
+</html>
