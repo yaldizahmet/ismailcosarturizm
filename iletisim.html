@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İletişim – Bize Ulaşın | İsmail Coşar Turizm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1F3A;--navy-mid:#132d52;--navy-light:#1a3d6e;--gold:#C9972B;--gold-light:#E4B84A;--gold-pale:#F5E6C0;--cream:#FAF7F0;--white:#FFFFFF;--text-dark:#0B1F3A;--text-mid:#3a4a62;--text-muted:#6b7a94;--border:rgba(201,151,43,0.18);--shadow-sm:0 2px 12px rgba(11,31,58,0.08);--shadow-md:0 8px 32px rgba(11,31,58,0.12);--shadow-lg:0 20px 60px rgba(11,31,58,0.18);--r:12px;--r-lg:20px;--ff-head:"Playfair Display",Georgia,serif;--ff-body:"DM Sans",sans-serif}
+html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,31,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,151,43,0.2);padding:0 3vw;height:68px;display:flex;align-items:center;justify-content:space-between}
+.navbar-logo{display:flex;align-items:center;text-decoration:none}
+.navbar-logo-img{height:52px;width:auto;object-fit:contain;display:block}
+.navbar-logo-text{display:flex;flex-direction:column;justify-content:center;gap:2px}
+.navbar-logo-text strong{display:block;color:#fff;font-family:var(--ff-head);font-size:15px;font-weight:600}
+.navbar-logo-text span{font-size:11px;color:var(--gold-light);letter-spacing:.5px}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 9px;border-radius:6px;transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--gold-light);background:rgba(201,151,43,.1)}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
+.nav-cta:hover{background:var(--gold-light)!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:.3s}
+section{padding:80px 5vw}
+.section-eyebrow{display:flex;align-items:center;gap:12px;font-size:11.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.section-eyebrow::after{content:"";flex:1;max-width:48px;height:1px;background:var(--gold)}
+.section-title{font-family:var(--ff-head);font-size:clamp(26px,3.2vw,42px);font-weight:700;color:var(--text-dark);line-height:1.18;letter-spacing:-.3px;margin-bottom:14px}
+.section-sub{font-size:16px;color:var(--text-muted);line-height:1.65;max-width:560px}
+.page-hero{padding:148px 5vw 80px;position:relative;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
+.hero-glow{position:absolute;right:0;top:0;width:55%;height:100%;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(201,151,43,.12),transparent 65%)}
+.page-hero-content{position:relative;z-index:2;max-width:720px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.4);margin-bottom:20px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}.breadcrumb a:hover{color:var(--gold-light)}.breadcrumb span{color:var(--gold-light)}
+.page-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,151,43,.15);border:1px solid rgba(201,151,43,.35);color:var(--gold-light);font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:50px;margin-bottom:20px}
+.page-hero h1{font-family:var(--ff-head);font-size:clamp(32px,5vw,58px);font-weight:700;color:#fff;line-height:1.12;letter-spacing:-.4px;margin-bottom:16px}
+.page-hero h1 em{font-style:normal;color:var(--gold-light)}
+.page-hero-desc{font-size:clamp(15px,1.5vw,17px);color:rgba(255,255,255,.65);line-height:1.7;max-width:560px;font-weight:300}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;border:none;cursor:pointer;transition:background .2s,transform .15s;box-shadow:0 4px 20px rgba(201,151,43,.3)}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px)}
+.btn-navy{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}
+.btn-navy:hover{background:var(--navy-light)}
+.btn-wa{display:inline-flex;align-items:center;gap:9px;background:#25D366;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}
+.btn-wa:hover{background:#20bb5a}
+.cta-band{background:var(--gold);padding:56px 5vw;text-align:center}
+.cta-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,36px);font-weight:700;color:var(--navy);margin-bottom:10px}
+.cta-band p{font-size:15px;color:rgba(11,31,58,.7);margin-bottom:28px}
+.cta-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;border-top:1px solid rgba(201,151,43,.15)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px;margin-bottom:40px}
+.footer-logo-img{height:48px;width:auto;object-fit:contain;background:#fff;border-radius:8px;padding:5px 8px}
+.footer-brand-desc{font-size:13px;line-height:1.7;margin-top:12px;max-width:260px}
+.footer-title{font-size:11.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s}
+.footer-links a:hover{color:var(--gold-light)}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.footer-badge{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--gold-pale)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,.3)}
+.floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45);transition:transform .2s}
+.floating-wa:hover{transform:scale(1.1)}
+@media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px 20px;gap:4px;border-bottom:1px solid rgba(201,151,43,.15)}.nav-links.open{display:flex}.hamburger{display:flex}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){section{padding:56px 5vw}.footer-grid{grid-template-columns:1fr}}
+.page-hero{background:linear-gradient(135deg,#0B1F3A,#1a3d6e)}
+.quick-contact{background:var(--navy);padding:44px 5vw}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.quick-card{background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:var(--r-lg);padding:22px;text-align:center;text-decoration:none;transition:background .2s,transform .2s;display:block}
+.quick-card:hover{background:rgba(201,151,43,.1);transform:translateY(-2px)}
+.quick-icon{font-size:30px;margin-bottom:10px}
+.quick-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:5px}
+.quick-value{font-size:14.5px;font-weight:600;color:#fff}
+.quick-card.wa{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.3)}
+.quick-card.wa:hover{background:rgba(37,211,102,.2)}
+.contact-main{background:var(--white)}
+.contact-layout{display:grid;grid-template-columns:1fr 1.5fr;gap:52px;align-items:start}
+.info-cards{display:flex;flex-direction:column;gap:13px}
+.info-card{background:var(--cream);border-radius:var(--r-lg);padding:18px 20px;border:1px solid var(--border);display:flex;gap:13px;align-items:flex-start}
+.info-icon{width:42px;height:42px;flex-shrink:0;border-radius:9px;background:rgba(201,151,43,.12);display:flex;align-items:center;justify-content:center;font-size:18px}
+.info-label{display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px}
+.info-value{font-size:15px;font-weight:600;color:var(--text-dark)}
+.info-value a{color:var(--text-dark);text-decoration:none}.info-value a:hover{color:var(--gold)}
+.wa-big{display:flex;align-items:center;justify-content:center;gap:11px;background:#25D366;color:#fff;font-size:15px;font-weight:700;padding:14px 20px;border-radius:11px;text-decoration:none;transition:background .2s;box-shadow:0 4px 14px rgba(37,211,102,.3);margin-top:14px}
+.wa-big:hover{background:#20bb5a}
+.map-ph{border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--navy-light));height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:rgba(255,255,255,.4);font-size:13px;margin-top:14px}
+.contact-form{background:var(--cream);border-radius:var(--r-lg);padding:32px 28px;border:1px solid var(--border)}
+.contact-form h3{font-family:var(--ff-head);font-size:21px;font-weight:700;color:var(--text-dark);margin-bottom:5px}
+.contact-form>p{font-size:13.5px;color:var(--text-muted);margin-bottom:22px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-group label{font-size:12px;font-weight:600;color:var(--text-mid)}
+.form-group input,.form-group select,.form-group textarea{padding:10px 13px;border-radius:8px;border:1.5px solid rgba(11,31,58,.12);background:var(--white);font-family:var(--ff-body);font-size:14px;color:var(--text-dark);outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group textarea{resize:vertical;min-height:100px}
+.kvkk-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:14px}
+.kvkk-row input{width:15px;height:15px;accent-color:var(--gold);flex-shrink:0;margin-top:2px}
+.kvkk-row label{font-size:12px;color:var(--text-muted);line-height:1.5}
+.form-submit{width:100%;padding:13px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:var(--ff-body);box-shadow:0 4px 14px rgba(201,151,43,.28)}
+.form-submit:hover{background:var(--gold-light)}
+.form-success{display:none;text-align:center;padding:28px;background:#e8f5e9;border-radius:var(--r);color:#2e7d32}
+.form-success-icon{font-size:46px;margin-bottom:10px}
+.sss-section{background:var(--cream)}
+.sss-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:36px}
+.sss-item{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.sss-q{padding:15px 18px;font-size:14px;font-weight:600;color:var(--text-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:background .2s}
+.sss-q:hover{background:rgba(201,151,43,.04)}.sss-q-icon{color:var(--gold);font-size:18px;transition:transform .25s;flex-shrink:0}
+.sss-a{display:none;padding:0 18px 14px;font-size:13.5px;color:var(--text-muted);line-height:1.7}
+.sss-item.open .sss-q-icon{transform:rotate(45deg)}.sss-item.open .sss-a{display:block}
+@media(max-width:900px){.contact-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.sss-grid{grid-template-columns:1fr}}
+</style>
+
+  <!-- SEO Meta Etiketleri -->
+  <meta name="description" content="Hac ve umre kayıt, fiyat bilgisi ve tur programları için bize ulaşın. 0533 198 07 81 | info@ismailcosarturizm.com | Ankara">
+  <meta name="keywords" content="İsmail Coşar Turizm iletişim, hac kayıt, umre kayıt, hac fiyat, umre fiyat, tur bilgi">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="İsmail Coşar Turizm">
+  <link rel="canonical" href="https://ismailcosarturizm.com/iletisim.html">
+
+  <!-- Open Graph (WhatsApp, Facebook paylaşım önizlemesi) -->
+  <meta property="og:title" content="İletişim – Bize Ulaşın | İsmail Coşar Turizm">
+  <meta property="og:description" content="Hac ve umre kayıt, fiyat bilgisi ve tur programları için bize ulaşın. 0533 198 07 81 | info@ismailcosarturizm.com | Ankara">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ismailcosarturizm.com/iletisim.html">
+  <meta property="og:image" content="logo.png">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="İsmail Coşar Turizm">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="İletişim – Bize Ulaşın | İsmail Coşar Turizm">
+  <meta name="twitter:description" content="Hac ve umre kayıt, fiyat bilgisi ve tur programları için bize ulaşın. 0533 198 07 81 | info@ismailcosarturizm.com | Ankara">
+
+  <!-- Schema.org Yapısal Veri -->
+  <script type="application/ld+json">
+  {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "İletişim",
+      "mainEntity": {
+        "@type": "TravelAgency",
+        "name": "İsmail Coşar Turizm",
+        "telephone": "+905331980781",
+        "email": "info@ismailcosarturizm.com.tr",
+        "address": {"@type": "PostalAddress", "streetAddress": "Dr. Mediha Eldem Sk. 81/17", "addressLocality": "Çankaya, Ankara", "addressCountry": "TR"}
+      }
+    }
+  </script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo"><img src="logo.png" alt="İsmail Coşar Turizm" class="navbar-logo-img" style="height:44px;width:auto;"></a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Ana Sayfa</a><a href="hac.html">Hac</a><a href="umre.html">Umre</a><a href="turlar.html">Turlar</a><a href="galeri.html">Galeri</a><a href="hakkimizda.html">Hakkımızda</a><a href="sss.html">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a><a href="iletisim.html" class="active nav-cta">📞 İletişim</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
+</nav>
+<div class="page-hero">
+  <div class="page-hero-pattern"></div><div class="hero-glow"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <span>İletişim</span></div>
+    <div class="page-badge">📞 7/24 Türkçe Destek</div>
+    <h1>Bize <em>Ulaşın</em></h1>
+    <p class="page-hero-desc">Tur programları, fiyatlar, kayıt ve her türlü sorunuz için bizimle iletişime geçin. Ekibimiz en kısa sürede size döner.</p>
+  </div>
+</div>
+<div class="quick-contact">
+  <div class="quick-grid">
+    <a href="tel:+905331980781" class="quick-card"><div class="quick-icon">📞</div><div class="quick-label">Telefon</div><div class="quick-value">0533 198 07 81</div></a>
+    <a href="https://wa.me/905331980781?text=Merhaba%2C%20bilgi%20almak%20istiyorum." class="quick-card wa" target="_blank"><div class="quick-icon">💬</div><div class="quick-label">WhatsApp</div><div class="quick-value">Hemen Yaz</div></a>
+    <a href="mailto:info@ismailcosarturizm.com.tr" class="quick-card"><div class="quick-icon">✉️</div><div class="quick-label">E-Posta</div><div class="quick-value">info@ismailcosarturizm.com.tr</div></a>
+    </div>
+  </div>
+</div>
+<section class="contact-main">
+  <div style="margin-bottom:44px"><div class="section-eyebrow">İletişim Formu</div><h2 class="section-title">Size Geri Dönelim</h2></div>
+  <div class="contact-layout">
+    <div>
+      <div class="info-cards">
+        <div class="info-card"><div class="info-icon">📞</div><div><span class="info-label">Telefon</span><div class="info-value"><a href="tel:+905331980781">0533 198 07 81</a></div></div></div>
+        <div class="info-card"><div class="info-icon">✉️</div><div><span class="info-label">E-Posta</span><div class="info-value"><a href="mailto:info@ismailcosarturizm.com.tr">info@ismailcosarturizm.com.tr</a></div></div></div>
+        <div class="info-card"><div class="info-icon">🌐</div><div><span class="info-label">Web Sitesi</span><div class="info-value"><a href="https://ismailcosarturizm.com">ismailcosarturizm.com.tr</a></div></div></div>
+        <div class="info-card"><div class="info-icon">📍</div><div><span class="info-label">Merkez – Ankara</span><div class="info-value">Dr. Mediha Eldem Sk. 81/17<br>Kültür Mah., Çankaya / Ankara</div></div></div>
+      <div class="info-card"><div class="info-icon">📍</div><div><span class="info-label">Şube – Bursa</span><div class="info-value">Reyhan, 8. Park Sk. Melek Sultan İş Merkezi<br>Kat 2, No:12, 16020 Osmangazi / Bursa</div></div></div>
+      </div>
+      <a href="https://wa.me/905331980781?text=Merhaba%2C%20tur%20programlar%C4%B1%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." class="wa-big" target="_blank">💬 WhatsApp'tan Yazın</a>
+      <div class="map-wrapper" style="border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);margin-top:14px;box-shadow:var(--shadow-sm)">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.8!2d32.8597!3d39.9034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x408215c9d097b419%3A0x1a6eae88f9f83626!2sIsmail+Cosar+Turizm!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
+        width="100%"
+        height="240"
+        style="border:0;display:block"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="İsmail Coşar Turizm Konum">
+      </iframe>
+      <a href="https://maps.app.goo.gl/kcsyZAUVKr1JB5UH9" target="_blank"
+         style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--navy);color:#fff;text-decoration:none;font-size:13px;font-weight:600;transition:background .2s"
+         onmouseover="this.style.background='#1a3d6e'" onmouseout="this.style.background='#0B1F3A'">
+        📍 Ankara – Google Maps'te Aç →
+      </a>
+    </div>
+    <div class="map-wrapper" style="border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);margin-top:20px;box-shadow:var(--shadow-sm)">
+      <div style="background:var(--navy);color:var(--gold-light);font-size:13px;font-weight:600;padding:10px 14px">📍 Şube – Bursa</div>
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3054!2d29.0608!3d40.1887!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ca15b6f0000001%3A0x0!2zT3NtYW5nYXppLCBCdXJzYQ!5e0!3m2!1str!2str!4v1700000000001"
+        width="100%" height="220" style="border:0;display:block" allowfullscreen="" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade" title="İsmail Coşar Turizm Bursa Şube">
+      </iframe>
+      <a href="https://maps.google.com/?q=Reyhan,+8.+Park+Sk.+Melek+Sultan+Is+Merkezi,+Osmangazi,+Bursa" target="_blank"
+         style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--navy);color:#fff;text-decoration:none;font-size:13px;font-weight:600"
+         onmouseover="this.style.background='#1a3d6e'" onmouseout="this.style.background='#0B1F3A'">
+        📍 Bursa – Google Maps'te Aç →
+      </a>
+    </div>
+    </div>
+    <div class="contact-form">
+      <h3>Bilgi Talep Formu</h3><p>Formu doldurun, en kısa sürede sizi arayalım.</p>
+      <div id="formArea">
+        <form id="contactForm" name="iletisim-formu" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" style="display:contents">
+        <input type="hidden" name="form-name" value="iletisim-formu">
+        <input type="hidden" name="bot-field" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>Ad *</label><input type="text" id="fname" name="ad" placeholder="Adınız"></div>
+          <div class="form-group"><label>Soyad *</label><input type="text" id="lname" name="soyad" placeholder="Soyadınız"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Telefon *</label><input type="tel" id="phone" name="telefon" placeholder="05XX XXX XX XX"></div>
+          <div class="form-group"><label>E-Posta</label><input type="email" id="email" name="eposta" placeholder="ornek@email.com"></div>
+        </div>
+        <div class="form-group"><label>İlgilendiğiniz Hizmet *</label>
+          <select id="service" name="hizmet">
+            <option value="">Seçiniz...</option>
+            <option>Hac Organizasyonu</option>
+            <option>Ramazan Umresi</option>
+            <option>Kış Umresi</option>
+            <option>Yaz Umresi</option>
+            
+            <option>Balkanlar Turu</option>
+            <option>Endülüs Turu</option>
+            <option>Özel Grup Turu</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Kişi Sayısı</label><select id="persons" name="kisi-sayisi"><option>1 Kişi</option><option>2 Kişi</option><option>3-5 Kişi</option><option>6-10 Kişi</option><option>10+ Kişi</option></select></div>
+          <div class="form-group"><label>Tercih Edilen Tarih</label><input type="text" id="tarih" name="tercih-tarih" placeholder="Örn: Mart 2025"></div>
+        </div>
+        <div class="form-group"><label>Mesajınız</label><textarea id="message" name="mesaj" placeholder="Sormak istediğiniz sorular, özel istekleriniz..."></textarea></div>
+        <div class="kvkk-row"><input type="checkbox" id="kvkk"><label for="kvkk">KVKK kapsamında kişisel verilerimin işlenmesine onay veriyorum.</label></div>
+        <button type="button" class="form-submit" onclick="submitForm()">✉ Formu Gönder – Sizi Arayalım</button>
+        </form>
+      </div>
+      <div class="form-success" id="formSuccess">
+        <div class="form-success-icon">✅</div>
+        <strong>Formunuz Alındı!</strong><br>
+        <span style="font-size:13.5px;color:#388e3c;margin-top:6px;display:block">En geç 1 iş günü içinde sizi arayacağız. Acil konular için WhatsApp'ı kullanabilirsiniz.</span>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sss-section">
+  <div class="section-eyebrow">SSS</div><h2 class="section-title">Sıkça Sorulan Sorular</h2>
+  <div class="sss-grid">
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Ne zaman yanıt alırım? <span class="sss-q-icon">+</span></div><div class="sss-a">Hafta içi gönderilen formlar genellikle 2–3 saat içinde yanıtlanır. Hafta sonu en geç ertesi iş günü dönüş yapılır.</div></div>
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Kayıt için peşinat ne kadar? <span class="sss-q-icon">+</span></div><div class="sss-a">Genellikle toplam ücretin %20–30'u kadar ön ödeme alınmaktadır. Kalan tutar taksitli ödenebilir.</div></div>
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">İptal ve iade politikası nedir? <span class="sss-q-icon">+</span></div><div class="sss-a">60 gün öncesi iptallerde tam iade. 30–60 gün arasında %50. 30 günden az kalan iptallerde iade yapılmamaktadır.</div></div>
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Özel grup turu organize edebilir misiniz? <span class="sss-q-icon">+</span></div><div class="sss-a">Evet! Minimum 15 kişi ile özel tur düzenleyebiliyoruz. Tarih ve destinasyonu siz belirleyin, teklif hazırlayalım.</div></div>
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Çocuklar için indirim var mı? <span class="sss-q-icon">+</span></div><div class="sss-a">2–12 yaş arası çocuklar için özel indirim uygulanmaktadır. Detaylar için bizi arayın.</div></div>
+    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Seyahat sigortası dahil mi? <span class="sss-q-icon">+</span></div><div class="sss-a">Evet, tüm programlarımıza hastalık, kaza ve bagaj kayıplarını kapsayan seyahat sigortası dahildir.</div></div>
+  </div>
+</section>
+<footer>
+  <div class="footer-grid">
+    <div><img src="logo.png" alt="İsmail Coşar Turizm" class="footer-logo-img"><p class="footer-brand-desc">20 yılı aşkın tecrübemizle hac, umre ve yurt dışı turlarında güvenilir çözüm ortağınız.</p><div class="footer-badges"><span class="footer-badge">TURSAB</span><span class="footer-badge">Diyanet Onaylı</span></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <a href="https://www.instagram.com/ismailcosarturizm" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </a>
+        <a href="https://www.facebook.com/share/16EmdzsymFJ/?mibextid=wwXIfr" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,43,.2);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;font-weight:600" onmouseover="this.style.background='rgba(201,151,43,.15)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+      </div></div>
+    <div><div class="footer-title">Hizmetler</div><ul class="footer-links"><li><a href="hac.html">Hac</a></li><li><a href="umre.html">Umre</a></li><li><a href="turlar.html">Turlar</a></li><li><a href="galeri.html">Galeri</a></li></ul></div>
+    <div><div class="footer-title">Kurumsal</div><ul class="footer-links"><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="belgelerimiz.html">Belgelerimiz</a></li><li><a href="sss.html">SSS</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+    <div><div class="footer-title">İletişim</div><ul class="footer-links"><li><a href="tel:+905331980781">📞 0533 198 07 81</a></li><li><a href="mailto:info@ismailcosarturizm.com.tr">✉ info@ismailcosarturizm.com.tr</a></li></ul></div>
+  </div>
+                    <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">Anlaşmalı Havayolları</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img src="logo-thy.png" alt="Turkish Airlines" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-ajet.png" alt="AJet" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+          <img src="logo-pegasus.png" alt="Pegasus" style="height:28px;width:auto;background:#fff;border-radius:4px;padding:3px 6px;object-fit:contain">
+        </div>
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px">🔒 Güvenli Ödeme İmkânı</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="background:#fff;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:15px;color:#1A1F71;letter-spacing:-1px">VISA</div>
+          <div style="background:#fff;border-radius:6px;padding:4px 8px;height:30px;display:flex;align-items:center;gap:3px">
+            <div style="width:18px;height:18px;border-radius:50%;background:#EB001B"></div>
+            <div style="width:18px;height:18px;border-radius:50%;background:#F79E1B;margin-left:-8px"></div>
+          </div>
+          <div style="background:#003087;border-radius:6px;padding:4px 10px;height:30px;display:flex;align-items:center;font-family:Arial;font-weight:900;font-size:13px;color:#fff;letter-spacing:1px">TROY</div>
+          <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
+        </div>
+      </div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span></div>
+</footer>
+<a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
+<script>
+function submitForm(){
+  var f=document.getElementById('fname').value.trim(),p=document.getElementById('phone').value.trim(),s=document.getElementById('service').value,k=document.getElementById('kvkk').checked;
+  if(!f||!p||!s){alert('Lütfen Ad, Telefon ve Hizmet alanlarını doldurunuz.');return}
+  if(!k){alert('Lütfen KVKK onayını veriniz.');return}
+  var form=document.getElementById('contactForm');
+  var data=new FormData(form);
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams(data).toString()})
+  .then(function(){
+    document.getElementById('formArea').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  })
+  .catch(function(){alert('Bir hata oluştu. Lütfen doğrudan bizi arayın: 0533 198 07 81');});
+}
+function toggleSSS(el){var item=el.closest('.sss-item'),was=item.classList.contains('open');document.querySelectorAll('.sss-item').forEach(i=>i.classList.remove('open'));if(!was)item.classList.add('open')}
+</script>
+</body>
+</html>
