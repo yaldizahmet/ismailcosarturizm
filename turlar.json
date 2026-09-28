@@ -185,6 +185,20 @@
       "aktif": true,
       "aciklama": "Mekke 5★ + Medine 4★",
       "one_cikan": false
+    },
+    {
+      "id": "tur-1790626895494",
+      "kategori": "umre",
+      "baslik": "Deneme",
+      "icon": "🌙",
+      "tarih": "2026-12-13",
+      "sure": "10 gece",
+      "konum": "Mekke",
+      "kapasite": "30",
+      "fiyat": "1000",
+      "para_birimi": "$",
+      "kontenjan": "var",
+      "aktif": true
     }
   ],
   "fiyat_tablolari": {
