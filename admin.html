@@ -336,22 +336,59 @@ function renderFiyat() {
     const gruplar = (data.fiyat_tablolari && data.fiyat_tablolari[tip]) || [];
     html += `<div class="card"><h3>${tip === 'hac' ? '🕋 Hac' : '🌙 Umre'} Fiyat Tablosu</h3>
       <table class="fiyat-tablo">
-        <thead><tr><th>Grup</th><th>Süre</th><th>2 Kişilik ($)</th><th>3 Kişilik ($)</th><th>4 Kişilik ($)</th></tr></thead>
+        <thead><tr><th>Grup Adı</th><th>Süre</th><th>2 Kişilik ($)</th><th>3 Kişilik ($)</th><th>4 Kişilik ($)</th><th></th></tr></thead>
         <tbody id="fiyat-${tip}">
           ${gruplar.map((g,gi) => g.satirlar.map((s,si) => `
             <tr>
-              <td>${si===0 ? g.grup : ''}</td>
-              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="sure" value="${s.sure}"></td>
-              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_2" value="${s.fiyat_2||''}"></td>
-              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_3" value="${s.fiyat_3||''}"></td>
-              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_4" value="${s.fiyat_4||''}"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="grup" value="${si===0 ? g.grup : ''}" placeholder="${si===0 ? 'Grup adı' : ''}"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="sure" value="${s.sure}" placeholder="6/7 gece"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_2" value="${s.fiyat_2||''}" placeholder="1750"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_3" value="${s.fiyat_3||''}" placeholder="1700"></td>
+              <td><input data-tip="${tip}" data-gi="${gi}" data-si="${si}" data-f="fiyat_4" value="${s.fiyat_4||''}" placeholder="1650"></td>
+              <td><button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="satirSil('${tip}',${gi},${si})">Sil</button></td>
             </tr>`).join('')).join('')}
         </tbody>
       </table>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-navy" onclick="satirEkle('${tip}')">+ Satır Ekle</button>
+        <button class="btn btn-navy" onclick="grupEkle('${tip}')">+ Grup Ekle</button>
+      </div>
     </div>`;
   });
   
   el.innerHTML = html;
+}
+
+function satirEkle(tip) {
+  const data = veriYukle();
+  if (!data.fiyat_tablolari) data.fiyat_tablolari = {};
+  if (!data.fiyat_tablolari[tip]) data.fiyat_tablolari[tip] = [];
+  const gruplar = data.fiyat_tablolari[tip];
+  if (gruplar.length === 0) {
+    gruplar.push({grup: 'Yeni Grup', satirlar: []});
+  }
+  gruplar[gruplar.length-1].satirlar.push({sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:''});
+  veriKaydet(data);
+  renderFiyat();
+}
+
+function grupEkle(tip) {
+  const data = veriYukle();
+  if (!data.fiyat_tablolari) data.fiyat_tablolari = {};
+  if (!data.fiyat_tablolari[tip]) data.fiyat_tablolari[tip] = [];
+  data.fiyat_tablolari[tip].push({grup: 'Yeni Grup', satirlar: [{sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:''}]});
+  veriKaydet(data);
+  renderFiyat();
+}
+
+function satirSil(tip, gi, si) {
+  const data = veriYukle();
+  data.fiyat_tablolari[tip][gi].satirlar.splice(si, 1);
+  if (data.fiyat_tablolari[tip][gi].satirlar.length === 0) {
+    data.fiyat_tablolari[tip].splice(gi, 1);
+  }
+  veriKaydet(data);
+  renderFiyat();
 }
 
 function fiyatKaydet() {
