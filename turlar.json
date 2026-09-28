@@ -19,54 +19,6 @@
       "one_cikan": false
     },
     {
-      "id": "hac-standart",
-      "kategori": "hac",
-      "tip": "paket",
-      "baslik": "Hac Organizasyonu 2025 – Standart Paket",
-      "icon": "🌟",
-      "tarih": "Haziran 2025",
-      "konum": "Mekke & Medine",
-      "sure": "25 gece",
-      "kapasite": "40 kişi",
-      "fiyat": "72.000",
-      "para_birimi": "₺",
-      "kontenjan": "az",
-      "aktif": true,
-      "aciklama": "Huzurlu ve konforlu hac yolculuğu",
-      "one_cikan": true
-    },
-    {
-      "id": "hac-vip",
-      "kategori": "hac",
-      "tip": "paket",
-      "baslik": "Hac Organizasyonu 2025 – VIP Paket",
-      "icon": "👑",
-      "tarih": "Haziran 2025",
-      "konum": "Mekke & Medine",
-      "sure": "30 gece",
-      "kapasite": "20 kişi",
-      "fiyat": "115.000",
-      "para_birimi": "₺",
-      "kontenjan": "var",
-      "aktif": true,
-      "aciklama": "Maksimum konfor, özel hizmet",
-      "one_cikan": false
-    },
-    {
-      "id": "kudus-2025",
-      "kategori": "diger",
-      "baslik": "Kudüs & Filistin Ziyaret Turu – 7 Gün",
-      "icon": "🕌",
-      "tarih": "Şubat 2025",
-      "konum": "Kudüs & Ramallah",
-      "sure": "7 gece",
-      "kapasite": "35 kişi",
-      "fiyat": "22.000",
-      "para_birimi": "₺",
-      "kontenjan": "var",
-      "aktif": true
-    },
-    {
       "id": "balkanlar-2025",
       "kategori": "diger",
       "baslik": "Balkanlar İslam Mirası Turu",
@@ -178,7 +130,7 @@
             "fiyat_2": "1555",
             "fiyat_3": "1777",
             "fiyat_4": "1888",
-            "grup": "Deneme"
+            "grup": "test"
           }
         ]
       }
