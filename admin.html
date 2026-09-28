@@ -107,7 +107,16 @@ const VARSAYILAN = {"guncelleme": "2025-01-01", "turlar": [{"id": "hac-ekonomi",
 
 function veriYukle() {
   const k = localStorage.getItem('ict_v2');
-  return k ? JSON.parse(k) : JSON.parse(JSON.stringify(VARSAYILAN));
+  if (k) {
+    const local = JSON.parse(k);
+    // Eğer localStorage'daki tur sayısı JSON'dakinden azsa sıfırla
+    if (local.turlar && local.turlar.length < VARSAYILAN.turlar.length) {
+      localStorage.removeItem('ict_v2');
+      return JSON.parse(JSON.stringify(VARSAYILAN));
+    }
+    return local;
+  }
+  return JSON.parse(JSON.stringify(VARSAYILAN));
 }
 
 function veriKaydet(d) {
@@ -129,10 +138,10 @@ function girisYap() {
 }
 
 function veriSifirla() {
-  if (!confirm('localStorage sıfırlanacak. Sunucudaki güncel veri yüklenecek. Devam?')) return;
+  if (!confirm('Tüm değişiklikler silinecek, orijinal veri yüklenecek. Devam?')) return;
   localStorage.removeItem('ict_v2');
-  toast('✅ Veri sıfırlandı, güncel veri yüklendi', 'success');
-  renderTurlar();
+  toast('✅ Veri sıfırlandı', 'success');
+  setTimeout(() => renderTurlar(), 300);
 }
 
 function cikisYap() {
