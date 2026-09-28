@@ -7,12 +7,12 @@
       "tip": "paket",
       "baslik": "Hac Organizasyonu 2025 – Ekonomi Paket",
       "icon": "🕋",
-      "tarih": "Haziran 2025",
+      "tarih": "",
       "konum": "Mekke & Medine",
       "sure": "21 gece",
       "kapasite": "40 kişi",
-      "fiyat": "58.000",
-      "para_birimi": "₺",
+      "fiyat": "2000",
+      "para_birimi": "$",
       "kontenjan": "var",
       "aktif": true,
       "aciklama": "Uygun fiyatlı, eksiksiz hac deneyimi",
@@ -23,12 +23,12 @@
       "kategori": "diger",
       "baslik": "Balkanlar İslam Mirası Turu",
       "icon": "🌍",
-      "tarih": "Mayıs 2025",
+      "tarih": "",
       "konum": "Bosna & Makedonya",
       "sure": "8 gece",
       "kapasite": "40 kişi",
-      "fiyat": "26.000",
-      "para_birimi": "₺",
+      "fiyat": "950",
+      "para_birimi": "$",
       "kontenjan": "var",
       "aktif": true
     },
@@ -37,19 +37,19 @@
       "kategori": "diger",
       "baslik": "Endülüs Kültür & Tarih Turu",
       "icon": "🏰",
-      "tarih": "Eylül 2025",
+      "tarih": "",
       "konum": "İspanya",
       "sure": "10 gece",
       "kapasite": "35 kişi",
-      "fiyat": "42.000",
-      "para_birimi": "₺",
+      "fiyat": "1100",
+      "para_birimi": "$",
       "kontenjan": "var",
       "aktif": true
     },
     {
       "id": "tur-1790626895494",
       "kategori": "umre",
-      "baslik": "Deneme",
+      "baslik": "Umre",
       "icon": "🌙",
       "tarih": "2026-12-13",
       "sure": "10 gece",
@@ -77,7 +77,7 @@
             "sure": "13 Gece / 14 Gün",
             "fiyat_2": "1900",
             "fiyat_3": "1850",
-            "fiyat_4": "1800",
+            "fiyat_4": "1900",
             "grup": ""
           }
         ]
@@ -130,7 +130,7 @@
             "fiyat_2": "1555",
             "fiyat_3": "1777",
             "fiyat_4": "1888",
-            "grup": "test"
+            "grup": "Yeni Grup"
           }
         ]
       }
