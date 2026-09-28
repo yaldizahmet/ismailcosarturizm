@@ -107,15 +107,7 @@ const VARSAYILAN = {"guncelleme": "2025-01-01", "turlar": [{"id": "hac-ekonomi",
 
 function veriYukle() {
   const k = localStorage.getItem('ict_v2');
-  if (k) {
-    const local = JSON.parse(k);
-    // Eğer localStorage'daki tur sayısı JSON'dakinden azsa sıfırla
-    if (local.turlar && local.turlar.length < VARSAYILAN.turlar.length) {
-      localStorage.removeItem('ict_v2');
-      return JSON.parse(JSON.stringify(VARSAYILAN));
-    }
-    return local;
-  }
+  if (k) return JSON.parse(k);
   return JSON.parse(JSON.stringify(VARSAYILAN));
 }
 
