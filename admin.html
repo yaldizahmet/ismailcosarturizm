@@ -81,7 +81,8 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item" onclick="sayfaGoster('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" onclick="sayfaGoster('fiyat')">💲 Fiyat Tabloları</button>
     <button class="nav-item" onclick="sayfaGoster('guncelle')">🚀 Siteyi Güncelle</button>
-    <button class="nav-item" style="margin-top:auto;color:rgba(255,100,100,.7)" onclick="cikisYap()">🚪 Çıkış</button>
+    <button class="nav-item" onclick="veriSifirla()" style="color:rgba(255,200,100,.7)">🔄 Veriyi Sıfırla</button>
+    <button class="nav-item" style="color:rgba(255,100,100,.7)" onclick="cikisYap()">🚪 Çıkış</button>
   </div>
   <div class="main">
     <div id="sayfa-turlar"></div>
@@ -125,6 +126,13 @@ function girisYap() {
     document.getElementById('loginErr').style.display = 'block';
     setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
   }
+}
+
+function veriSifirla() {
+  if (!confirm('localStorage sıfırlanacak. Sunucudaki güncel veri yüklenecek. Devam?')) return;
+  localStorage.removeItem('ict_v2');
+  toast('✅ Veri sıfırlandı, güncel veri yüklendi', 'success');
+  renderTurlar();
 }
 
 function cikisYap() {
