@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin – İsmail Coşar Turizm</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#f0f2f5}
@@ -14,11 +15,11 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 .login-box input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px;outline:none}
 .login-box button{width:100%;padding:12px;background:#C9972B;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}
 .err{color:red;font-size:13px;margin-top:10px;display:none}
-.app{display:none}
+.app{display:none;min-height:100vh}
 .sidebar{width:220px;background:#0B1F3A;min-height:100vh;padding:20px 0;position:fixed;top:0;left:0}
 .sidebar-logo{text-align:center;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:10px}
 .sidebar-logo img{height:40px;width:auto}
-.nav-item{display:block;padding:12px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+.nav-item{display:block;padding:12px 20px;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
 .nav-item:hover,.nav-item.active{background:rgba(201,151,43,.15);color:#E4B84A}
 .main{margin-left:220px;padding:24px;min-height:100vh}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
@@ -27,13 +28,12 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 .btn-gold{background:#C9972B;color:#fff}
 .btn-red{background:#dc3545;color:#fff}
 .btn-navy{background:#0B1F3A;color:#fff}
-.btn-green{background:#2e7d32;color:#fff}
 .card{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .card h3{color:#0B1F3A;margin-bottom:16px;font-size:16px;border-bottom:1px solid #eee;padding-bottom:10px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none}
 .tur-list{display:flex;flex-direction:column;gap:10px}
 .tur-item{background:#f8f9fa;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .tur-item-info h4{font-size:14px;color:#0B1F3A;margin-bottom:4px}
@@ -66,23 +66,18 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
   </div>
 </div>
 
-<div class="app" id="appDiv" style="display:flex">
+<div class="app" id="appDiv">
   <div class="sidebar">
-    <div class="sidebar-logo">
-      <img src="logo.png" alt="Logo">
-    </div>
+    <div class="sidebar-logo"><img src="logo.png" alt="Logo"></div>
     <button class="nav-item active" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-fiyat" onclick="sekmeAc('fiyat')">💲 Fiyat Tabloları</button>
-    <button class="nav-item" id="btn-guncelle" onclick="sekmeAc('guncelle')">🚀 Siteyi Güncelle</button>
-    <button class="nav-item" onclick="veriYenile()" style="color:#E4B84A">🔄 Veriyi Yenile</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
     <div id="sayfa-turlar"></div>
     <div id="sayfa-ekle" style="display:none"></div>
     <div id="sayfa-fiyat" style="display:none"></div>
-    <div id="sayfa-guncelle" style="display:none"></div>
   </div>
 </div>
 
@@ -91,29 +86,24 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 <script>
 const KULLANICI = 'ismail';
 const SIFRE = 'ismail123';
-const GITHUB_REPO = 'yaldizahmet/ismailcosarturizm';
-const RAW_URL = 'https://raw.githubusercontent.com/' + GITHUB_REPO + '/main/turlar.json';
-const API_URL = 'https://api.github.com/repos/' + GITHUB_REPO + '/contents/';
-const SITE_URL = 'https://yaldizahmet.github.io/ismailcosarturizm';
+const sb = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
 
-let aktifVeri = null;
-let ghToken = localStorage.getItem('gh_token') || '';
+window.onload = () => {
+  document.getElementById('appDiv').style.display = 'none';
+  document.getElementById('loginDiv').style.display = 'flex';
+};
 
-function ghToken_al() {
-  const parts = ['ghp_T2f3kG0JAIG', '8I7gbBOXo6n3s', 'BI8Jb40wIAkm'];
-  return parts.join('');
-}
+document.querySelectorAll('#loginDiv input').forEach(i => {
+  i.addEventListener('keydown', e => { if(e.key==='Enter') girisYap(); });
+});
 
-// ── GİRİŞ ──
 function girisYap() {
   const u = document.getElementById('uname').value.trim();
   const p = document.getElementById('upass').value.trim();
   if (u === KULLANICI && p === SIFRE) {
-    ghToken = ghToken_al();
-    localStorage.setItem('gh_token', ghToken);
     document.getElementById('loginDiv').style.display = 'none';
     document.getElementById('appDiv').style.display = 'flex';
-    veriYukle().then(() => sekmeAc('turlar'));
+    sekmeAc('turlar');
   } else {
     document.getElementById('loginErr').style.display = 'block';
     setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
@@ -123,67 +113,10 @@ function girisYap() {
 function cikisYap() {
   document.getElementById('loginDiv').style.display = 'flex';
   document.getElementById('appDiv').style.display = 'none';
-  aktifVeri = null;
 }
 
-document.querySelectorAll('#loginDiv input').forEach(i => {
-  i.addEventListener('keydown', e => { if(e.key==='Enter') girisYap(); });
-});
-
-// Sayfa açılınca login göster
-window.onload = function() {
-  document.getElementById('appDiv').style.display = 'none';
-  document.getElementById('loginDiv').style.display = 'flex';
-};
-
-// ── VERİ ──
-async function veriYukle() {
-  try {
-    const r = await fetch(RAW_URL + '?t=' + Date.now());
-    aktifVeri = await r.json();
-  } catch(e) {
-    toast('❌ Veri yüklenemedi: ' + e.message, 'error');
-    aktifVeri = {turlar:[], fiyat_tablolari:{hac:[], umre:[]}};
-  }
-  return aktifVeri;
-}
-
-function veriYenile() {
-  aktifVeri = null;
-  veriYukle().then(() => {
-    sekmeAc('turlar');
-    toast('✅ Veri yenilendi', 'success');
-  });
-}
-
-async function githubYukle(dosya, icerik) {
-  const url = API_URL + dosya;
-  let sha = null;
-  try {
-    const r = await fetch(url, {headers: {'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json'}});
-    if (r.ok) { const d = await r.json(); sha = d.sha; }
-  } catch(e) {}
-  
-  const body = {message: 'Admin güncelleme: ' + dosya, content: btoa(unescape(encodeURIComponent(icerik)))};
-  if (sha) body.sha = sha;
-  
-  const r2 = await fetch(url, {
-    method: 'PUT',
-    headers: {'Authorization': 'token ' + ghToken, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'},
-    body: JSON.stringify(body)
-  });
-  return r2.ok;
-}
-
-async function jsonKaydet() {
-  if (!aktifVeri) return;
-  const ok = await githubYukle('turlar.json', JSON.stringify(aktifVeri, null, 2));
-  return ok;
-}
-
-// ── SEKME ──
 function sekmeAc(ad) {
-  ['turlar','ekle','fiyat','guncelle'].forEach(s => {
+  ['turlar','ekle','fiyat'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -191,18 +124,18 @@ function sekmeAc(ad) {
   if (ad === 'turlar') renderTurlar();
   if (ad === 'ekle') renderEkle();
   if (ad === 'fiyat') renderFiyat();
-  if (ad === 'guncelle') renderGuncelle();
 }
 
 // ── TUR LİSTESİ ──
-function renderTurlar() {
+async function renderTurlar() {
   const el = document.getElementById('sayfa-turlar');
-  if (!aktifVeri) { el.innerHTML = '<div class="loading">Yükleniyor...</div>'; return; }
-  
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data, error } = await sb.from('turlar').select('*').order('kategori').order('tarih');
+  if (error) { el.innerHTML = '<div class="loading">❌ ' + error.message + '</div>'; return; }
   const katMap = {hac:'🕋 Hac', umre:'🌙 Umre', diger:'✈️ Diğer'};
-  el.innerHTML = '<div class="header"><h2>📋 Tur Listesi (' + aktifVeri.turlar.length + ' tur)</h2></div>' +
+  el.innerHTML = '<div class="header"><h2>📋 Tur Listesi (' + data.length + ' tur)</h2></div>' +
     '<div class="card"><div class="tur-list">' +
-    aktifVeri.turlar.map((t,i) => `
+    data.map(t => `
       <div class="tur-item">
         <div class="tur-item-info">
           <h4>${t.icon} ${t.baslik}</h4>
@@ -210,91 +143,94 @@ function renderTurlar() {
         </div>
         <div class="tur-item-actions">
           <span class="badge ${t.aktif?'badge-green':'badge-red'}">${t.aktif?'Aktif':'Pasif'}</span>
-          <button class="btn btn-navy" onclick="turDuzenle(${i})">Düzenle</button>
-          <button class="btn btn-red" onclick="turSil(${i})">Sil</button>
+          <button class="btn btn-navy" onclick="turDuzenle('${t.id}')">Düzenle</button>
+          <button class="btn btn-red" onclick="turSil('${t.id}')">Sil</button>
         </div>
       </div>`).join('') +
     '</div></div>';
 }
 
-async function turSil(i) {
+async function turSil(id) {
   if (!confirm('Bu turu silmek istediğinizden emin misiniz?')) return;
-  aktifVeri.turlar.splice(i, 1);
-  const ok = await jsonKaydet();
+  const { error } = await sb.from('turlar').delete().eq('id', id);
+  if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
+  toast('✅ Tur silindi', 'success');
   renderTurlar();
-  toast(ok ? '✅ Tur silindi ve kaydedildi' : '❌ Silindi ama kaydetme hatası', ok ? 'success' : 'error');
 }
 
-function turDuzenle(i) {
-  const t = aktifVeri.turlar[i];
+async function turDuzenle(id) {
+  const { data } = await sb.from('turlar').select('*').eq('id', id).single();
+  if (!data) return;
   const el = document.getElementById('sayfa-turlar');
   el.innerHTML = `
     <div class="header"><h2>✏️ Tur Düzenle</h2></div>
     <div class="card">
       <div class="form-row">
-        <div class="form-group"><label>Başlık</label><input id="e_baslik" value="${t.baslik}"></div>
+        <div class="form-group"><label>Başlık</label><input id="e_baslik" value="${data.baslik}"></div>
         <div class="form-group"><label>Kategori</label>
           <select id="e_kategori">
-            <option value="hac" ${t.kategori==='hac'?'selected':''}>Hac</option>
-            <option value="umre" ${t.kategori==='umre'?'selected':''}>Umre</option>
-            <option value="diger" ${t.kategori==='diger'?'selected':''}>Diğer</option>
-          </select>
-        </div>
+            <option value="hac" ${data.kategori==='hac'?'selected':''}>Hac</option>
+            <option value="umre" ${data.kategori==='umre'?'selected':''}>Umre</option>
+            <option value="diger" ${data.kategori==='diger'?'selected':''}>Diğer</option>
+          </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Fiyat</label><input id="e_fiyat" value="${t.fiyat}"></div>
+        <div class="form-group"><label>Fiyat</label><input id="e_fiyat" value="${data.fiyat}"></div>
         <div class="form-group"><label>Para Birimi</label>
           <select id="e_pb">
-            <option value="₺" ${t.para_birimi==='₺'?'selected':''}>₺ TL</option>
-            <option value="$" ${t.para_birimi==='$'?'selected':''}>$ USD</option>
-            <option value="€" ${t.para_birimi==='€'?'selected':''}>€ EUR</option>
-          </select>
-        </div>
+            <option value="₺" ${data.para_birimi==='₺'?'selected':''}>₺ TL</option>
+            <option value="$" ${data.para_birimi==='$'?'selected':''}>$ USD</option>
+            <option value="€" ${data.para_birimi==='€'?'selected':''}>€ EUR</option>
+          </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Tarih</label><input id="e_tarih" type="date" value="${t.tarih}"></div>
-        <div class="form-group"><label>Süre</label><input id="e_sure" value="${t.sure}"></div>
+        <div class="form-group"><label>Tarih</label><input id="e_tarih" type="date" value="${data.tarih}"></div>
+        <div class="form-group"><label>Süre</label><input id="e_sure" value="${data.sure}"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Konum</label><input id="e_konum" value="${t.konum}"></div>
-        <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${t.kapasite}"></div>
+        <div class="form-group"><label>Konum</label><input id="e_konum" value="${data.konum}"></div>
+        <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${data.kapasite||''}"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Kontenjan</label>
           <select id="e_kontenjan">
-            <option value="var" ${t.kontenjan==='var'?'selected':''}>Yer Var</option>
-            <option value="az" ${t.kontenjan==='az'?'selected':''}>Az Kaldı</option>
-            <option value="dolu" ${t.kontenjan==='dolu'?'selected':''}>Dolu</option>
-          </select>
-        </div>
+            <option value="var" ${data.kontenjan==='var'?'selected':''}>Yer Var</option>
+            <option value="az" ${data.kontenjan==='az'?'selected':''}>Az Kaldı</option>
+            <option value="dolu" ${data.kontenjan==='dolu'?'selected':''}>Dolu</option>
+          </select></div>
         <div class="form-group"><label>Durum</label>
           <select id="e_aktif">
-            <option value="true" ${t.aktif?'selected':''}>Aktif</option>
-            <option value="false" ${!t.aktif?'selected':''}>Pasif</option>
-          </select>
-        </div>
+            <option value="true" ${data.aktif?'selected':''}>Aktif</option>
+            <option value="false" ${!data.aktif?'selected':''}>Pasif</option>
+          </select></div>
       </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-gold" onclick="turKaydet(${i})">💾 Kaydet</button>
+      <div class="form-group"><label>Açıklama</label><input id="e_aciklama" value="${data.aciklama||''}"></div>
+      <div class="form-group"><label>Sezon (Umre için)</label><input id="e_sezon" value="${data.sezon||''}"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-gold" onclick="turKaydet('${id}')">💾 Kaydet</button>
         <button class="btn btn-navy" onclick="renderTurlar()">İptal</button>
       </div>
     </div>`;
 }
 
-async function turKaydet(i) {
-  aktifVeri.turlar[i].baslik = document.getElementById('e_baslik').value;
-  aktifVeri.turlar[i].kategori = document.getElementById('e_kategori').value;
-  aktifVeri.turlar[i].fiyat = document.getElementById('e_fiyat').value;
-  aktifVeri.turlar[i].para_birimi = document.getElementById('e_pb').value;
-  aktifVeri.turlar[i].tarih = document.getElementById('e_tarih').value;
-  aktifVeri.turlar[i].sure = document.getElementById('e_sure').value;
-  aktifVeri.turlar[i].konum = document.getElementById('e_konum').value;
-  aktifVeri.turlar[i].kapasite = document.getElementById('e_kapasite').value;
-  aktifVeri.turlar[i].kontenjan = document.getElementById('e_kontenjan').value;
-  aktifVeri.turlar[i].aktif = document.getElementById('e_aktif').value === 'true';
-  const ok = await jsonKaydet();
+async function turKaydet(id) {
+  const { error } = await sb.from('turlar').update({
+    baslik: document.getElementById('e_baslik').value,
+    kategori: document.getElementById('e_kategori').value,
+    fiyat: document.getElementById('e_fiyat').value,
+    para_birimi: document.getElementById('e_pb').value,
+    tarih: document.getElementById('e_tarih').value,
+    sure: document.getElementById('e_sure').value,
+    konum: document.getElementById('e_konum').value,
+    kapasite: document.getElementById('e_kapasite').value,
+    kontenjan: document.getElementById('e_kontenjan').value,
+    aktif: document.getElementById('e_aktif').value === 'true',
+    aciklama: document.getElementById('e_aciklama').value,
+    sezon: document.getElementById('e_sezon').value
+  }).eq('id', id);
+  if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
+  toast('✅ Tur kaydedildi', 'success');
   renderTurlar();
-  toast(ok ? '✅ Tur kaydedildi' : '❌ Kaydetme hatası', ok ? 'success' : 'error');
 }
 
 // ── TUR EKLE ──
@@ -309,14 +245,12 @@ function renderEkle() {
             <option value="hac">Hac</option>
             <option value="umre">Umre</option>
             <option value="diger">Diğer</option>
-          </select>
-        </div>
+          </select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Fiyat</label><input id="n_fiyat" placeholder="58.000"></div>
         <div class="form-group"><label>Para Birimi</label>
-          <select id="n_pb"><option value="₺">₺ TL</option><option value="$">$ USD</option><option value="€">€ EUR</option></select>
-        </div>
+          <select id="n_pb"><option value="₺">₺ TL</option><option value="$">$ USD</option><option value="€">€ EUR</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Tarih</label><input id="n_tarih" type="date"></div>
@@ -326,7 +260,9 @@ function renderEkle() {
         <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
         <div class="form-group"><label>Kapasite</label><input id="n_kapasite" placeholder="40 kişi"></div>
       </div>
-      <button class="btn btn-gold" onclick="turEkle()">➕ Tur Ekle</button>
+      <div class="form-group"><label>Açıklama</label><input id="n_aciklama" placeholder="Kısa açıklama"></div>
+      <div class="form-group"><label>Sezon (Umre için)</label><input id="n_sezon" placeholder="Ramazan, Kış, Yaz"></div>
+      <button class="btn btn-gold" onclick="turEkle()" style="margin-top:8px">➕ Tur Ekle</button>
     </div>`;
 }
 
@@ -335,8 +271,10 @@ async function turEkle() {
   if (!baslik) { toast('Başlık zorunlu!', 'error'); return; }
   const kat = document.getElementById('n_kategori').value;
   const icons = {hac:'🕋', umre:'🌙', diger:'✈️'};
-  aktifVeri.turlar.push({
-    id: 'tur-' + Date.now(), kategori: kat, baslik: baslik,
+  const { error } = await sb.from('turlar').insert({
+    id: 'tur-' + Date.now(),
+    kategori: kat,
+    baslik: baslik,
     icon: icons[kat]||'✈️',
     tarih: document.getElementById('n_tarih').value,
     sure: document.getElementById('n_sure').value,
@@ -344,155 +282,68 @@ async function turEkle() {
     kapasite: document.getElementById('n_kapasite').value,
     fiyat: document.getElementById('n_fiyat').value,
     para_birimi: document.getElementById('n_pb').value,
-    kontenjan: 'var', aktif: true
+    kontenjan: 'var',
+    aktif: true,
+    aciklama: document.getElementById('n_aciklama').value,
+    sezon: document.getElementById('n_sezon').value
   });
-  const ok = await jsonKaydet();
-  toast(ok ? '✅ Tur eklendi!' : '❌ Kaydetme hatası', ok ? 'success' : 'error');
+  if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
+  toast('✅ Tur eklendi!', 'success');
   renderEkle();
 }
 
 // ── FİYAT TABLOLARI ──
-function renderFiyat() {
-  if (!aktifVeri) return;
+async function renderFiyat() {
   const el = document.getElementById('sayfa-fiyat');
-  let html = '<div class="header"><h2>💲 Fiyat Tabloları</h2><button class="btn btn-gold" onclick="fiyatKaydet()">💾 Kaydet</button></div>';
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  let html = '<div class="header"><h2>💲 Fiyat Tabloları</h2></div>';
   
-  ['hac','umre'].forEach(tip => {
-    const gruplar = (aktifVeri.fiyat_tablolari && aktifVeri.fiyat_tablolari[tip]) || [];
+  for (const tip of ['hac','umre']) {
+    const { data } = await sb.from('fiyat_tablolari').select('*').eq('tip',tip).order('sira');
     html += `<div class="card"><h3>${tip==='hac'?'🕋 Hac':'🌙 Umre'} Fiyat Tablosu</h3>
       <table class="fiyat-tablo">
         <thead><tr><th>Grup Adı</th><th>Süre</th><th>2 Kişilik ($)</th><th>3 Kişilik ($)</th><th>4 Kişilik ($)</th><th></th></tr></thead>
         <tbody>
-        ${gruplar.map((g,gi) => g.satirlar.map((s,si) => `
+        ${(data||[]).map(f => `
           <tr>
-            <td><input id="f_${tip}_${gi}_${si}_grup" value="${si===0?g.grup:''}" placeholder="${si===0?'Grup adı':''}"></td>
-            <td><input id="f_${tip}_${gi}_${si}_sure" value="${s.sure||''}" placeholder="6/7 gece"></td>
-            <td><input id="f_${tip}_${gi}_${si}_f2" value="${s.fiyat_2||''}" placeholder="1750"></td>
-            <td><input id="f_${tip}_${gi}_${si}_f3" value="${s.fiyat_3||''}" placeholder="1700"></td>
-            <td><input id="f_${tip}_${gi}_${si}_f4" value="${s.fiyat_4||''}" placeholder="1650"></td>
-            <td><button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="satirSil('${tip}',${gi},${si})">Sil</button></td>
-          </tr>`).join('')).join('')}
+            <td><input id="fg_${f.id}" value="${f.grup||''}"></td>
+            <td><input id="fs_${f.id}" value="${f.sure||''}"></td>
+            <td><input id="f2_${f.id}" value="${f.fiyat_2||''}"></td>
+            <td><input id="f3_${f.id}" value="${f.fiyat_3||''}"></td>
+            <td><input id="f4_${f.id}" value="${f.fiyat_4||''}"></td>
+            <td><button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="fiyatSatirSil(${f.id})">Sil</button>
+                <button class="btn btn-navy" style="padding:4px 8px;font-size:11px" onclick="fiyatSatirKaydet(${f.id})">💾</button></td>
+          </tr>`).join('')}
         </tbody>
       </table>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn btn-navy" onclick="satirEkle('${tip}')">+ Satır Ekle</button>
-        <button class="btn btn-navy" onclick="grupEkle('${tip}')">+ Grup Ekle</button>
-      </div>
+      <button class="btn btn-navy" style="margin-top:8px" onclick="fiyatSatirEkle('${tip}')">+ Satır Ekle</button>
     </div>`;
-  });
+  }
   el.innerHTML = html;
 }
 
-async function fiyatKaydet() {
-  if (!aktifVeri.fiyat_tablolari) aktifVeri.fiyat_tablolari = {hac:[], umre:[]};
-  ['hac','umre'].forEach(tip => {
-    const gruplar = aktifVeri.fiyat_tablolari[tip] || [];
-    gruplar.forEach((g,gi) => {
-      const grupEl = document.getElementById(`f_${tip}_${gi}_0_grup`);
-      if (grupEl) g.grup = grupEl.value;
-      g.satirlar.forEach((s,si) => {
-        s.sure = (document.getElementById(`f_${tip}_${gi}_${si}_sure`)||{}).value || s.sure;
-        s.fiyat_2 = (document.getElementById(`f_${tip}_${gi}_${si}_f2`)||{}).value || s.fiyat_2;
-        s.fiyat_3 = (document.getElementById(`f_${tip}_${gi}_${si}_f3`)||{}).value || s.fiyat_3;
-        s.fiyat_4 = (document.getElementById(`f_${tip}_${gi}_${si}_f4`)||{}).value || s.fiyat_4;
-      });
-    });
-  });
-  const ok = await jsonKaydet();
-  toast(ok ? '✅ Fiyatlar kaydedildi' : '❌ Kaydetme hatası', ok ? 'success' : 'error');
+async function fiyatSatirKaydet(id) {
+  const { error } = await sb.from('fiyat_tablolari').update({
+    grup: document.getElementById('fg_'+id).value,
+    sure: document.getElementById('fs_'+id).value,
+    fiyat_2: document.getElementById('f2_'+id).value,
+    fiyat_3: document.getElementById('f3_'+id).value,
+    fiyat_4: document.getElementById('f4_'+id).value
+  }).eq('id', id);
+  toast(error ? '❌ Hata' : '✅ Kaydedildi', error ? 'error' : 'success');
 }
 
-function satirEkle(tip) {
-  if (!aktifVeri.fiyat_tablolari[tip]) aktifVeri.fiyat_tablolari[tip] = [];
-  const g = aktifVeri.fiyat_tablolari[tip];
-  if (!g.length) g.push({grup:'Yeni Grup', satirlar:[]});
-  g[g.length-1].satirlar.push({sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:''});
+async function fiyatSatirSil(id) {
+  await sb.from('fiyat_tablolari').delete().eq('id', id);
+  toast('✅ Silindi', 'success');
   renderFiyat();
 }
 
-function grupEkle(tip) {
-  if (!aktifVeri.fiyat_tablolari[tip]) aktifVeri.fiyat_tablolari[tip] = [];
-  aktifVeri.fiyat_tablolari[tip].push({grup:'Yeni Grup', satirlar:[{sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:''}]});
+async function fiyatSatirEkle(tip) {
+  const { data: mevcut } = await sb.from('fiyat_tablolari').select('sira').eq('tip',tip).order('sira',{ascending:false}).limit(1);
+  const sira = mevcut && mevcut.length ? mevcut[0].sira + 1 : 0;
+  await sb.from('fiyat_tablolari').insert({tip, grup:'', sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:'', sira});
   renderFiyat();
-}
-
-function satirSil(tip, gi, si) {
-  aktifVeri.fiyat_tablolari[tip][gi].satirlar.splice(si, 1);
-  if (!aktifVeri.fiyat_tablolari[tip][gi].satirlar.length) aktifVeri.fiyat_tablolari[tip].splice(gi, 1);
-  renderFiyat();
-}
-
-// ── SİTEYİ GÜNCELLE ──
-function renderGuncelle() {
-  document.getElementById('sayfa-guncelle').innerHTML = `
-    <div class="header"><h2>🚀 Siteyi Güncelle</h2></div>
-    <div class="card">
-      <p style="margin-bottom:16px;color:#666">Hac ve Umre sayfalarını güncel verilerle yeniden oluşturur.</p>
-      <button class="btn btn-gold" id="guncBtn" onclick="siteGuncelle()" style="font-size:15px;padding:14px 28px">🚀 Siteyi Güncelle</button>
-      <div id="guncLog" style="margin-top:16px;font-size:13px;color:#666;line-height:2"></div>
-    </div>`;
-}
-
-async function siteGuncelle() {
-  const btn = document.getElementById('guncBtn');
-  const log = document.getElementById('guncLog');
-  btn.disabled = true; btn.textContent = '⏳ Güncelleniyor...'; log.innerHTML = '';
-  const logEkle = m => log.innerHTML += m + '<br>';
-
-  try {
-    if (!aktifVeri) { await veriYukle(); }
-    
-    logEkle('📤 turlar.json yükleniyor...');
-    const ok1 = await githubYukle('turlar.json', JSON.stringify(aktifVeri, null, 2));
-    logEkle(ok1 ? '✅ turlar.json güncellendi' : '❌ turlar.json hatası');
-
-    logEkle('📤 hac.html yükleniyor...');
-    const hacRes = await fetch(SITE_URL + '/hac.html');
-    if (hacRes.ok) {
-      let html = await hacRes.text();
-      html = html.replace(/<div class="paket-grid" id="paketGrid">[\s\S]*?<\/div>/, '<div class="paket-grid" id="paketGrid">' + buildHac() + '</div>');
-      const ok2 = await githubYukle('hac.html', html);
-      logEkle(ok2 ? '✅ hac.html güncellendi' : '❌ hac.html hatası');
-    }
-
-    logEkle('📤 umre.html yükleniyor...');
-    const umreRes = await fetch(SITE_URL + '/umre.html');
-    if (umreRes.ok) {
-      let html = await umreRes.text();
-      html = html.replace(/<div class="prog-list" id="progList">[\s\S]*?<\/div>/, '<div class="prog-list" id="progList">' + buildUmre() + '</div>');
-      const ok3 = await githubYukle('umre.html', html);
-      logEkle(ok3 ? '✅ umre.html güncellendi' : '❌ umre.html hatası');
-    }
-
-    logEkle('<strong style="color:green">🎉 Tamamlandı! Site 1-2 dk içinde yansır.</strong>');
-    btn.textContent = '✅ Güncellendi!';
-    setTimeout(() => { btn.textContent = '🚀 Siteyi Güncelle'; btn.disabled = false; }, 3000);
-  } catch(e) {
-    logEkle('❌ Hata: ' + e.message);
-    btn.textContent = '🚀 Siteyi Güncelle'; btn.disabled = false;
-  }
-}
-
-function buildHac() {
-  const kL = {az:'Az Kaldı', var:'Yer Var', dolu:'Dolu'};
-  return aktifVeri.turlar.filter(t => t.kategori==='hac' && t.aktif).map(p => {
-    const f = p.one_cikan;
-    const bg = f ? 'linear-gradient(135deg,#132d52,#1a3d6e)' : '#0B1F3A';
-    const bc = f ? 'btn-paket-gold' : 'btn-paket-outline';
-    const badge = f ? '<span class="paket-feat-badge">⭐ En Çok Tercih</span>' : '';
-    const title = p.baslik.includes('–') ? p.baslik.split('–').pop().trim() : p.baslik;
-    const safe = p.baslik.replace(/'/g, "\\'");
-    return `<div class="paket-card${f?' featured':''}">${badge}<div class="paket-header" style="background:${bg}"><div class="paket-header-icon">${p.icon}</div><h3>${title}</h3><p>${p.aciklama||''}</p></div><div class="paket-body"><div class="paket-price"><span style="font-size:12px;color:var(--text-muted)">Kişi başı</span><span class="paket-price-num">${p.fiyat} ${p.para_birimi}</span></div><ul class="paket-includes"><li>Direkt uçuş (Türkiye–Cidde)</li><li>Mekke ve Medine'de otel (${p.sure})</li><li>Türkçe din görevlisi rehber</li><li>Vize, kurban ve sigorta desteği</li></ul><button class="${bc}" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer;width:100%">Hemen Kayıt Ol →</button></div></div>`;
-  }).join('');
-}
-
-function buildUmre() {
-  const kL = {az:'Az Kaldı', var:'Yer Var', dolu:'Dolu'};
-  const kS = {az:'background:rgba(198,40,40,.1);color:#c62828', var:'background:#e8f5e9;color:#2e7d32', dolu:'background:#ffebee;color:#c62828'};
-  return aktifVeri.turlar.filter(t => t.kategori==='umre' && t.aktif).map(p => {
-    const safe = p.baslik.replace(/'/g, "\\'");
-    return `<div class="prog-item"><div class="prog-body"><div class="prog-badges"><span class="pb pb-gold">🌙 ${p.sezon||'Umre'}</span><span class="pb" style="${kS[p.kontenjan]||kS.var}">${kL[p.kontenjan]||'Yer Var'}</span></div><h3>${p.baslik}</h3><div class="prog-meta"><span class="prog-detail">📅 <strong>${p.tarih}</strong></span><span class="prog-detail">⏱ <strong>${p.sure}</strong></span><span class="prog-detail">📍 ${p.konum}</span></div></div><div class="prog-action"><div><div class="prog-price-lbl">Kişi başı</div><div class="prog-price">${p.fiyat} ${p.para_birimi}</div></div><button class="btn-prog" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol →</button></div></div>`;
-  }).join('');
 }
 
 // ── TOAST ──
