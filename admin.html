@@ -73,6 +73,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-fiyat" onclick="sekmeAc('fiyat')">💲 Fiyat Tabloları</button>
     <button class="nav-item" id="btn-sezon" onclick="sekmeAc('sezon')">🌙 Sezon Programları</button>
+    <button class="nav-item" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
@@ -80,6 +81,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <div id="sayfa-ekle" style="display:none"></div>
     <div id="sayfa-fiyat" style="display:none"></div>
   <div id="sayfa-sezon" style="display:none"></div>
+  <div id="sayfa-duyuru" style="display:none"></div>
   </div>
 </div>
 
@@ -118,7 +120,7 @@ function cikisYap() {
 }
 
 function sekmeAc(ad) {
-  ['turlar','ekle','fiyat','sezon'].forEach(s => {
+  ['turlar','ekle','fiyat','sezon','duyuru'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -127,6 +129,7 @@ function sekmeAc(ad) {
   if (ad === 'ekle') renderEkle();
   if (ad === 'fiyat') renderFiyat();
   if (ad === 'sezon') renderSezon();
+  if (ad === 'duyuru') renderDuyuru();
 }
 
 // ── TUR LİSTESİ ──
@@ -484,6 +487,98 @@ async function sezonYeniKaydet() {
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Eklendi!', 'success');
   renderSezon();
+}
+
+
+// ── DUYURULAR ──
+async function renderDuyuru() {
+  const el = document.getElementById('sayfa-duyuru');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data } = await sb.from('duyurular').select('*').order('sira');
+  
+  let html = '<div class="header"><h2>📢 Duyurular</h2><button class="btn btn-gold" onclick="duyuruEkle()">➕ Yeni Ekle</button></div>';
+  html += '<div class="card"><div class="tur-list">';
+  html += (data||[]).map(d => `
+    <div class="tur-item">
+      <div class="tur-item-info">
+        <h4>${d.metin}</h4>
+        <p>Sıra: ${d.sira}</p>
+      </div>
+      <div class="tur-item-actions">
+        <span class="badge ${d.aktif?'badge-green':'badge-red'}">${d.aktif?'Aktif':'Pasif'}</span>
+        <button class="btn btn-navy" onclick="duyuruDuzenle(${d.id})">Düzenle</button>
+        <button class="btn btn-red" onclick="duyuruSil(${d.id})">Sil</button>
+      </div>
+    </div>`).join('');
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+async function duyuruSil(id) {
+  if (!confirm('Silinsin mi?')) return;
+  await sb.from('duyurular').delete().eq('id', id);
+  toast('✅ Silindi', 'success');
+  renderDuyuru();
+}
+
+function duyuruEkle() {
+  const el = document.getElementById('sayfa-duyuru');
+  el.innerHTML = `
+    <div class="header"><h2>➕ Yeni Duyuru</h2></div>
+    <div class="card">
+      <div class="form-group"><label>Duyuru Metni</label><input id="d_metin" placeholder="🕋 2026 Hac kontenjanları açıldı!"></div>
+      <div class="form-group"><label>Sıra</label><input id="d_sira" type="number" value="0"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-gold" onclick="duyuruKaydet()">➕ Ekle</button>
+        <button class="btn btn-navy" onclick="renderDuyuru()">İptal</button>
+      </div>
+    </div>`;
+}
+
+async function duyuruKaydet() {
+  const { error } = await sb.from('duyurular').insert({
+    metin: document.getElementById('d_metin').value,
+    sira: parseInt(document.getElementById('d_sira').value)||0,
+    aktif: true
+  });
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Eklendi!', 'success');
+  renderDuyuru();
+}
+
+async function duyuruDuzenle(id) {
+  const { data } = await sb.from('duyurular').select('*').eq('id', id).single();
+  if (!data) return;
+  const el = document.getElementById('sayfa-duyuru');
+  el.innerHTML = `
+    <div class="header"><h2>✏️ Duyuru Düzenle</h2></div>
+    <div class="card">
+      <div class="form-group"><label>Duyuru Metni</label><input id="d_metin" value="${data.metin}"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Sıra</label><input id="d_sira" type="number" value="${data.sira}"></div>
+        <div class="form-group"><label>Durum</label>
+          <select id="d_aktif">
+            <option value="true" ${data.aktif?'selected':''}>Aktif</option>
+            <option value="false" ${!data.aktif?'selected':''}>Pasif</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-gold" onclick="duyuruGuncelle(${id})">💾 Kaydet</button>
+        <button class="btn btn-navy" onclick="renderDuyuru()">İptal</button>
+      </div>
+    </div>`;
+}
+
+async function duyuruGuncelle(id) {
+  const { error } = await sb.from('duyurular').update({
+    metin: document.getElementById('d_metin').value,
+    sira: parseInt(document.getElementById('d_sira').value)||0,
+    aktif: document.getElementById('d_aktif').value === 'true'
+  }).eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Kaydedildi', 'success');
+  renderDuyuru();
 }
 
 // ── TOAST ──
