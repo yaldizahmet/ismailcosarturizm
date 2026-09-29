@@ -503,8 +503,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   const grid = document.getElementById('toursGrid');
   if (!grid || !turlar || !turlar.length) return;
   
-  grid.innerHTML = turlar.map(t => `
-    <div class="tour-card">
+  grid.innerHTML = turlar.map(t => {
+    const safe = t.baslik.replace(/'/g, "\'");
+    const kayitBtn = t.kontenjan !== 'dolu' ? `<button class="btn-tur" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol</button>` : '';
+    return `<div class="tour-card">
       <div class="tc-top"><div class="tc-icon">${t.icon}</div></div>
       <h3>${t.baslik}</h3>
       <div class="tc-meta">
@@ -515,9 +517,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       <div class="tc-bottom">
         <div><div class="tc-price-from">Kişi başı</div><div class="tc-price">${t.fiyat} ${t.para_birimi}</div></div>
         <span class="kontenjan" style="${kMap[t.kontenjan]||kMap.var}">${kLabel[t.kontenjan]||'Yer Var'}</span>
-        <a href="iletisim.html" class="btn-tur">Detay &amp; Kayıt</a>
+        ${kayitBtn}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 });
 </script>
 </body>
