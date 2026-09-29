@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tur Detayı – İsmail Coşar Turizm</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0B1F3A;--navy-light:#1a3d6e;--gold:#C9972B;--gold-light:#E4B84A;--cream:#FAF7F0;--white:#fff;--text-dark:#0B1F3A;--text-mid:#3a4a62;--text-muted:#6b7a94;--border:rgba(201,151,43,0.18);--r:12px;--r-lg:20px;--ff-head:'Playfair Display',Georgia,serif;--ff-body:'DM Sans',sans-serif}
+body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark)}
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(11,31,58,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,151,43,0.2);padding:0 5vw;height:72px;display:flex;align-items:center;justify-content:space-between}
+.navbar-logo img{height:48px;width:auto}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{color:rgba(255,255,255,.78);text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 9px;border-radius:6px}
+.nav-links a:hover{color:var(--gold-light);background:rgba(201,151,43,.1)}
+.nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px}
+
+.hero{padding:120px 5vw 60px;background:linear-gradient(135deg,#0B1F3A,#132d52);position:relative;overflow:hidden}
+.hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
+.hero-content{position:relative;z-index:2;max-width:800px;margin:0 auto}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none}.breadcrumb a:hover{color:var(--gold-light)}.breadcrumb span{color:var(--gold-light)}
+.tur-baslik{font-family:var(--ff-head);font-size:clamp(28px,4vw,48px);font-weight:700;color:#fff;margin-bottom:16px}
+.tur-meta{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.tur-meta-item{display:flex;align-items:center;gap:6px;font-size:14px;color:rgba(255,255,255,.7)}
+.tur-fiyat-hero{background:rgba(201,151,43,.15);border:1px solid rgba(201,151,43,.3);border-radius:12px;padding:16px 24px;display:inline-flex;align-items:center;gap:16px}
+.tur-fiyat-lbl{font-size:12px;color:rgba(255,255,255,.5)}
+.tur-fiyat-num{font-family:var(--ff-head);font-size:28px;font-weight:700;color:var(--gold-light)}
+
+.detay-wrap{max-width:1000px;margin:0 auto;padding:60px 5vw}
+.detay-grid{display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
+.detay-main{}
+.section-card{background:var(--white);border-radius:var(--r-lg);padding:28px;margin-bottom:24px;border:1px solid var(--border)}
+.section-card h3{font-family:var(--ff-head);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:8px}
+.program-list{list-style:none}
+.program-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.program-item:last-child{border-bottom:none}
+.program-gun{width:60px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;padding-top:2px}
+.program-icerik{font-size:14px;color:var(--text-mid);line-height:1.6}
+.dahil-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.dahil-item{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-mid);line-height:1.5}
+.dahil-item::before{content:'✓';color:#2e7d32;font-weight:700;flex-shrink:0;margin-top:1px}
+.dahil-degil-item::before{content:'✗';color:#c62828;}
+.notlar-text{font-size:14px;color:var(--text-mid);line-height:1.7;white-space:pre-line}
+
+.sidebar-card{background:var(--white);border-radius:var(--r-lg);padding:24px;border:1px solid var(--border);position:sticky;top:90px}
+.sidebar-card h3{font-family:var(--ff-head);font-size:18px;color:var(--navy);margin-bottom:20px}
+.sidebar-fiyat{text-align:center;padding:16px;background:var(--cream);border-radius:var(--r);margin-bottom:16px}
+.sidebar-fiyat-lbl{font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.sidebar-fiyat-num{font-family:var(--ff-head);font-size:32px;font-weight:700;color:var(--gold)}
+.sidebar-info{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.sidebar-info-item{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid #f0f0f0}
+.sidebar-info-item:last-child{border:none}
+.sidebar-info-label{color:var(--text-muted)}
+.sidebar-info-value{font-weight:600;color:var(--navy)}
+.btn-kayit{display:block;width:100%;padding:14px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:var(--ff-body);text-align:center;margin-bottom:10px}
+.btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#25D366;color:#fff;font-size:14px;font-weight:600;border-radius:10px;text-decoration:none}
+.kontenjan{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:50px;margin-bottom:16px}
+.k-var{background:#e8f5e9;color:#2e7d32}
+.k-az{background:#fff3e0;color:#c65f00}
+.k-dolu{background:#ffebee;color:#c62828}
+.loading{text-align:center;padding:80px;color:var(--text-muted);font-size:16px}
+
+/* Kayıt Modal */
+.kayit-modal-bg{position:fixed;inset:0;background:rgba(11,31,58,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.kayit-modal-bg.open{opacity:1;pointer-events:all}
+.kayit-modal{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:480px}
+.kayit-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.kayit-modal-title{font-family:var(--ff-head);font-size:20px;font-weight:700;color:var(--navy)}
+.kayit-modal-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:6px;cursor:pointer;font-size:18px}
+.kayit-form-group{margin-bottom:14px}
+.kayit-form-group label{display:block;font-size:12px;font-weight:600;color:#6b7a94;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kayit-form-group input,.kayit-form-group select{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none}
+.kayit-submit{width:100%;padding:13px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:var(--ff-body)}
+.kayit-success{text-align:center;padding:20px 0;display:none}
+
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:40px 5vw 24px;border-top:1px solid rgba(201,151,43,.15)}
+.footer-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,.3)}
+.floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45)}
+
+@media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px;gap:4px}.nav-links.open{display:flex}.hamburger{display:flex}.detay-grid{grid-template-columns:1fr}.sidebar-card{position:static}}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="navbar-logo"><img src="logo.png" alt="İsmail Coşar Turizm"></a>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Ana Sayfa</a><a href="hac.html">Hac</a><a href="umre.html">Umre</a>
+    <a href="turlar.html">Turlar</a><a href="galeri.html">Galeri</a>
+    <a href="hakkimizda.html">Hakkımızda</a><a href="sss.html">SSS</a>
+    <a href="belgelerimiz.html">Belgelerimiz</a>
+    <a href="iletisim.html" class="nav-cta">📞 İletişim</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
+</nav>
+
+<div id="tur-hero" class="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-content">
+    <div class="loading">⏳ Yükleniyor...</div>
+  </div>
+</div>
+
+<div class="detay-wrap" id="tur-detay" style="display:none">
+  <div class="detay-grid">
+    <div class="detay-main" id="detay-main"></div>
+    <div>
+      <div class="sidebar-card" id="detay-sidebar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- KAYIT MODAL -->
+<div class="kayit-modal-bg" id="kayitModalBg" onclick="if(event.target===this)kayitModalKapat()">
+  <div class="kayit-modal">
+    <div class="kayit-modal-header">
+      <div class="kayit-modal-title">📋 Kayıt Talebi</div>
+      <button class="kayit-modal-close" onclick="kayitModalKapat()">✕</button>
+    </div>
+    <div id="kayitForm">
+      <div id="kayitProgramAdi" style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;font-weight:600;color:var(--navy);border-left:3px solid var(--gold)"></div>
+      <form name="tur-kayit" method="POST" data-netlify="true" onsubmit="kayitGonder(event)">
+        <input type="hidden" name="form-name" value="tur-kayit">
+        <input type="hidden" name="tur" id="kayitTurGizli">
+        <div class="kayit-form-group"><label>Ad Soyad *</label><input type="text" name="adsoyad" placeholder="Adınız Soyadınız" required></div>
+        <div class="kayit-form-group"><label>Telefon *</label><input type="tel" name="telefon" placeholder="05XX XXX XX XX" required></div>
+        <div class="kayit-form-group"><label>E-posta</label><input type="email" name="eposta" placeholder="ornek@mail.com"></div>
+        <div class="kayit-form-group"><label>Kişi Sayısı</label><select name="kisi"><option>1 Kişi</option><option>2 Kişi</option><option>3 Kişi</option><option>4+ Kişi</option></select></div>
+        <button type="submit" class="kayit-submit">📩 Kayıt Talebimi Gönder</button>
+      </form>
+    </div>
+    <div class="kayit-success" id="kayitSuccess">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <h3 style="font-family:var(--ff-head);font-size:20px;color:var(--navy);margin-bottom:8px">Talebiniz Alındı!</h3>
+      <p style="font-size:14px;color:#6b7a94">En kısa sürede sizi arayacağız.<br><strong>0533 198 07 81</strong></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom">
+    <span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span>
+    <span>TURSAB · Diyanet Onaylı</span>
+  </div>
+</footer>
+<a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
+
+<script>
+const _SB = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
+
+// URL'den tur ID'sini al
+const params = new URLSearchParams(window.location.search);
+const turId = params.get('id');
+
+const kMap = {var:'k-var', az:'k-az', dolu:'k-dolu'};
+const kLabel = {var:'Yer Var', az:'Az Kaldı', dolu:'Dolu'};
+
+document.addEventListener('DOMContentLoaded', async function() {
+  if (!turId) {
+    document.getElementById('tur-hero').innerHTML = '<div class="hero-pattern"></div><div class="hero-content"><p style="color:rgba(255,255,255,.6);padding:40px 0">Tur bulunamadı. <a href="turlar.html" style="color:var(--gold-light)">Tüm turları gör →</a></p></div>';
+    return;
+  }
+
+  const { data: tur, error } = await _SB.from('turlar').select('*').eq('id', turId).single();
+  
+  if (error || !tur) {
+    document.getElementById('tur-hero').innerHTML = '<div class="hero-pattern"></div><div class="hero-content"><p style="color:rgba(255,255,255,.6);padding:40px 0">Tur bulunamadı. <a href="turlar.html" style="color:var(--gold-light)">Tüm turları gör →</a></p></div>';
+    return;
+  }
+
+  document.title = tur.baslik + ' – İsmail Coşar Turizm';
+
+  // Hero
+  document.getElementById('tur-hero').innerHTML = `
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <div class="breadcrumb">
+        <a href="index.html">Ana Sayfa</a> › 
+        <a href="turlar.html">Turlar</a> › 
+        <span>${tur.baslik}</span>
+      </div>
+      <h1 class="tur-baslik">${tur.icon} ${tur.baslik}</h1>
+      <div class="tur-meta">
+        <span class="tur-meta-item">📅 ${tur.tarih}</span>
+        <span class="tur-meta-item">⏱ ${tur.sure}</span>
+        <span class="tur-meta-item">📍 ${tur.konum}</span>
+        <span class="tur-meta-item">👥 ${tur.kapasite||''}</span>
+      </div>
+      <div class="tur-fiyat-hero">
+        <div>
+          <div class="tur-fiyat-lbl">Kişi başı fiyat</div>
+          <div class="tur-fiyat-num">${tur.fiyat} ${tur.para_birimi}</div>
+        </div>
+        <span class="kontenjan ${kMap[tur.kontenjan]||'k-var'}" style="margin:0">${kLabel[tur.kontenjan]||'Yer Var'}</span>
+      </div>
+    </div>`;
+
+  // Detay içerik
+  let mainHtml = '';
+
+  // Program
+  if (tur.program) {
+    const gunler = tur.program.split('\n').filter(g => g.trim());
+    mainHtml += `<div class="section-card">
+      <h3>🗓 Tur Programı</h3>
+      <ul class="program-list">
+        ${gunler.map((g, i) => {
+          const parts = g.split(':');
+          const gunLabel = parts.length > 1 ? parts[0].trim() : `${i+1}. Gün`;
+          const icerik = parts.length > 1 ? parts.slice(1).join(':').trim() : g.trim();
+          return `<li class="program-item">
+            <span class="program-gun">${gunLabel}</span>
+            <span class="program-icerik">${icerik}</span>
+          </li>`;
+        }).join('')}
+      </ul>
+    </div>`;
+  }
+
+  // Dahil olanlar
+  if (tur.dahil) {
+    const maddeler = tur.dahil.split('\n').filter(m => m.trim());
+    mainHtml += `<div class="section-card">
+      <h3>✅ Dahil Olanlar</h3>
+      <ul class="dahil-list">
+        ${maddeler.map(m => `<li class="dahil-item">${m.trim()}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  // Dahil olmayanlar
+  if (tur.dahil_degil) {
+    const maddeler = tur.dahil_degil.split('\n').filter(m => m.trim());
+    mainHtml += `<div class="section-card">
+      <h3>❌ Dahil Olmayanlar</h3>
+      <ul class="dahil-list">
+        ${maddeler.map(m => `<li class="dahil-item dahil-degil-item">${m.trim()}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  // Notlar
+  if (tur.notlar) {
+    mainHtml += `<div class="section-card">
+      <h3>📌 Notlar</h3>
+      <p class="notlar-text">${tur.notlar}</p>
+    </div>`;
+  }
+
+  if (!mainHtml) {
+    mainHtml = `<div class="section-card"><p style="color:var(--text-muted);text-align:center;padding:20px">Detay bilgisi yakında eklenecektir.</p></div>`;
+  }
+
+  document.getElementById('detay-main').innerHTML = mainHtml;
+
+  // Sidebar
+  document.getElementById('detay-sidebar').innerHTML = `
+    <h3>Hızlı Kayıt</h3>
+    <div class="sidebar-fiyat">
+      <div class="sidebar-fiyat-lbl">Kişi başı</div>
+      <div class="sidebar-fiyat-num">${tur.fiyat} ${tur.para_birimi}</div>
+    </div>
+    <div class="sidebar-info">
+      <div class="sidebar-info-item"><span class="sidebar-info-label">Tarih</span><span class="sidebar-info-value">${tur.tarih}</span></div>
+      <div class="sidebar-info-item"><span class="sidebar-info-label">Süre</span><span class="sidebar-info-value">${tur.sure}</span></div>
+      <div class="sidebar-info-item"><span class="sidebar-info-label">Konum</span><span class="sidebar-info-value">${tur.konum}</span></div>
+      <div class="sidebar-info-item"><span class="sidebar-info-label">Kapasite</span><span class="sidebar-info-value">${tur.kapasite||'-'}</span></div>
+    </div>
+    <span class="kontenjan ${kMap[tur.kontenjan]||'k-var'}" style="margin-bottom:16px;display:inline-flex">${kLabel[tur.kontenjan]||'Yer Var'}</span>
+    <button class="btn-kayit" onclick="kayitModalAc('${tur.baslik.replace(/'/g,"\\'")}')">📋 Hemen Kayıt Ol</button>
+    <a href="https://wa.me/905331980781?text=Merhaba, ${encodeURIComponent(tur.baslik)} hakkında bilgi almak istiyorum." class="btn-whatsapp" target="_blank">💬 WhatsApp'tan Yaz</a>`;
+
+  document.getElementById('tur-detay').style.display = 'block';
+});
+
+function kayitModalAc(turAdi) {
+  document.getElementById('kayitProgramAdi').textContent = '📋 ' + turAdi;
+  document.getElementById('kayitTurGizli').value = turAdi;
+  document.getElementById('kayitModalBg').classList.add('open');
+  document.getElementById('kayitForm').style.display = 'block';
+  document.getElementById('kayitSuccess').style.display = 'none';
+}
+
+function kayitModalKapat() {
+  document.getElementById('kayitModalBg').classList.remove('open');
+}
+
+function kayitGonder(e) {
+  e.preventDefault();
+  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(new FormData(e.target)).toString()})
+  .then(() => {
+    document.getElementById('kayitForm').style.display = 'none';
+    document.getElementById('kayitSuccess').style.display = 'block';
+    setTimeout(() => kayitModalKapat(), 4000);
+  }).catch(() => alert('Hata! Lütfen arayın: 0533 198 07 81'));
+}
+</script>
+</body>
+</html>
