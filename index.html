@@ -292,18 +292,19 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
   <div class="duyuru-bant-ic" id="duyuruIc"></div>
 </div>
 <script>
-window.addEventListener('load', async function() {
+document.addEventListener('DOMContentLoaded', async function() {
   try {
-    const sb2 = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
-    const { data } = await sb2.from('duyurular').select('*').eq('aktif', true).order('sira');
-    if (!data || !data.length) return;
+    const _sbD = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
+    const { data, error } = await _sbD.from('duyurular').select('metin').eq('aktif', true).order('sira');
+    if (error) { console.log('Duyuru hata:', error); return; }
+    if (!data || !data.length) { console.log('Duyuru yok'); return; }
     const bant = document.getElementById('duyuruBant');
     const ic = document.getElementById('duyuruIc');
     if (!bant || !ic) return;
     const metin = data.map(d => '<span>' + d.metin + '</span>').join('');
     ic.innerHTML = metin + metin;
     bant.style.display = 'block';
-  } catch(e) { console.log('Duyuru hatası:', e); }
+  } catch(e) { console.log('Duyuru hatası:', e.message); }
 });
 </script>
 
