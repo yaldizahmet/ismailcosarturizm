@@ -19,7 +19,7 @@ html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cre
 .nav-cta{background:var(--gold)!important;color:var(--navy)!important;font-weight:600!important;padding:6px 14px!important;border-radius:8px!important;margin-left:4px}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px}
 .hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px}
-.page-hero{padding:148px 5vw 80px;background:linear-gradient(135deg,#0B1F3A,#132d52);position:relative;overflow:hidden}
+.page-hero{padding:100px 5vw 80px;background:linear-gradient(135deg,#0B1F3A,#132d52);position:relative;overflow:hidden}
 .page-hero-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,#C9972B 0,#C9972B 1px,transparent 0,transparent 50%);background-size:30px 30px}
 .hero-glow{position:absolute;right:0;top:0;width:55%;height:100%;background:radial-gradient(ellipse 70% 80% at 80% 40%,rgba(201,151,43,.12),transparent 65%)}
 .page-hero-content{position:relative;z-index:2;max-width:720px}
@@ -71,6 +71,15 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .floating-wa{position:fixed;bottom:28px;right:28px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 18px rgba(37,211,102,.45)}
 @media(max-width:900px){.nav-links{display:none;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(11,31,58,.98);padding:16px 20px 20px;gap:4px}.nav-links.open{display:flex}.hamburger{display:flex}.hikaye-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.footer-grid{grid-template-columns:1fr}}
+
+<style>
+.duyuru-bant{background:var(--gold);overflow:hidden;white-space:nowrap;padding:8px 0;margin-top:72px}
+.duyuru-bant-ic{display:inline-block;animation:bant-kaydir 30s linear infinite}
+.duyuru-bant-ic:hover{animation-play-state:paused}
+.duyuru-bant span{font-size:13px;font-weight:600;color:var(--navy);padding:0 40px}
+.duyuru-bant span::before{content:"◆";margin-right:10px;opacity:.5}
+@keyframes bant-kaydir{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+</style>
 </style>
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-M69P1Q6LZR"></script>
@@ -93,6 +102,22 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
   </div>
   <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
 </nav>
+<div class="duyuru-bant" id="duyuruBant" style="display:none">
+  <div class="duyuru-bant-ic" id="duyuruIc"></div>
+</div>
+<script>
+(async function() {
+  const _SB2 = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
+  const { data } = await _SB2.from('duyurular').select('*').eq('aktif', true).order('sira');
+  if (!data || !data.length) return;
+  const bant = document.getElementById('duyuruBant');
+  const ic = document.getElementById('duyuruIc');
+  if (!bant || !ic) return;
+  const metin = data.map(d => `<span>${d.metin}</span>`).join('');
+  ic.innerHTML = metin + metin; // Sonsuz döngü için iki kez
+  bant.style.display = 'block';
+})();
+</script>
 
 <div class="page-hero">
   <div class="page-hero-pattern"></div><div class="hero-glow"></div>
