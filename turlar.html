@@ -294,8 +294,7 @@ fetch('./turlar.json')
       html += '<div class="tc-footer">';
       html += '<div class="tc-price"><small>Kişi başı</small>'+t.fiyat+' '+t.para_birimi+'</div>';
       html += '<span class="kontenjan '+(kMap[t.kontenjan]||'k-var')+'">'+(kLabel[t.kontenjan]||'Yer Var')+'</span>';
-      var detayLink = t.id && t.id.includes('balkan') ? 'balkan-programi.html' : 'iletisim.html';
-      html += '<a href="'+detayLink+'" class="btn-sm-navy">Detay →</a>';
+      html += '<a href="tur-detay.html?id='+t.id+'" class="btn-sm-navy">Detay →</a>';
       html += '</div></div></div>';
     });
     document.getElementById('toursGrid').innerHTML = html || '<p style="color:var(--text-muted);padding:20px">Henüz aktif tur bulunmuyor.</p>';
