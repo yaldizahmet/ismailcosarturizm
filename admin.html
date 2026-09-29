@@ -72,12 +72,14 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item active" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-fiyat" onclick="sekmeAc('fiyat')">💲 Fiyat Tabloları</button>
+    <button class="nav-item" id="btn-sezon" onclick="sekmeAc('sezon')">🌙 Sezon Programları</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
     <div id="sayfa-turlar"></div>
     <div id="sayfa-ekle" style="display:none"></div>
     <div id="sayfa-fiyat" style="display:none"></div>
+  <div id="sayfa-sezon" style="display:none"></div>
   </div>
 </div>
 
@@ -116,7 +118,7 @@ function cikisYap() {
 }
 
 function sekmeAc(ad) {
-  ['turlar','ekle','fiyat'].forEach(s => {
+  ['turlar','ekle','fiyat','sezon'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -124,6 +126,7 @@ function sekmeAc(ad) {
   if (ad === 'turlar') renderTurlar();
   if (ad === 'ekle') renderEkle();
   if (ad === 'fiyat') renderFiyat();
+  if (ad === 'sezon') renderSezon();
 }
 
 // ── TUR LİSTESİ ──
@@ -344,6 +347,133 @@ async function fiyatSatirEkle(tip) {
   const sira = mevcut && mevcut.length ? mevcut[0].sira + 1 : 0;
   await sb.from('fiyat_tablolari').insert({tip, grup:'', sure:'', fiyat_2:'', fiyat_3:'', fiyat_4:'', sira});
   renderFiyat();
+}
+
+
+// ── SEZON PROGRAMLARI ──
+async function renderSezon() {
+  const el = document.getElementById('sayfa-sezon');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data, error } = await sb.from('sezon_programlari').select('*').order('sira');
+  if (error) { el.innerHTML = '<div class="loading">❌ ' + error.message + '</div>'; return; }
+  
+  let html = '<div class="header"><h2>🌙 Sezon Programları</h2><button class="btn btn-gold" onclick="sezonEkle()">➕ Yeni Ekle</button></div>';
+  html += '<div class="card"><div class="tur-list">';
+  html += (data||[]).map(s => `
+    <div class="tur-item">
+      <div class="tur-item-info">
+        <h4>${s.icon} ${s.ad}</h4>
+        <p>${s.label} · ${s.sure}</p>
+      </div>
+      <div class="tur-item-actions">
+        <span class="badge ${s.aktif?'badge-green':'badge-red'}">${s.aktif?'Aktif':'Pasif'}</span>
+        <button class="btn btn-navy" onclick="sezonDuzenle(${s.id})">Düzenle</button>
+        <button class="btn btn-red" onclick="sezonSil(${s.id})">Sil</button>
+      </div>
+    </div>`).join('');
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+async function sezonSil(id) {
+  if (!confirm('Silinsin mi?')) return;
+  await sb.from('sezon_programlari').delete().eq('id', id);
+  toast('✅ Silindi', 'success');
+  renderSezon();
+}
+
+async function sezonDuzenle(id) {
+  const { data } = await sb.from('sezon_programlari').select('*').eq('id', id).single();
+  if (!data) return;
+  const el = document.getElementById('sayfa-sezon');
+  el.innerHTML = `
+    <div class="header"><h2>✏️ Sezon Düzenle</h2></div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>Sezon Adı</label><input id="sz_ad" value="${data.ad}"></div>
+        <div class="form-group"><label>Etiket (EN KUTSAL SEZON gibi)</label><input id="sz_label" value="${data.label||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>İkon (emoji)</label><input id="sz_icon" value="${data.icon||'🌙'}"></div>
+        <div class="form-group"><label>Süre</label><input id="sz_sure" value="${data.sure||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Özellik 1</label><input id="sz_o1" value="${data.ozellik1||''}"></div>
+        <div class="form-group"><label>Özellik 2</label><input id="sz_o2" value="${data.ozellik2||''}"></div>
+      </div>
+      <div class="form-group"><label>Açıklama</label><input id="sz_aciklama" value="${data.aciklama||''}"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Sıra</label><input id="sz_sira" type="number" value="${data.sira||0}"></div>
+        <div class="form-group"><label>Durum</label>
+          <select id="sz_aktif">
+            <option value="true" ${data.aktif?'selected':''}>Aktif</option>
+            <option value="false" ${!data.aktif?'selected':''}>Pasif</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-gold" onclick="sezonKaydet(${id})">💾 Kaydet</button>
+        <button class="btn btn-navy" onclick="renderSezon()">İptal</button>
+      </div>
+    </div>`;
+}
+
+async function sezonKaydet(id) {
+  const { error } = await sb.from('sezon_programlari').update({
+    ad: document.getElementById('sz_ad').value,
+    label: document.getElementById('sz_label').value,
+    icon: document.getElementById('sz_icon').value,
+    sure: document.getElementById('sz_sure').value,
+    ozellik1: document.getElementById('sz_o1').value,
+    ozellik2: document.getElementById('sz_o2').value,
+    aciklama: document.getElementById('sz_aciklama').value,
+    sira: parseInt(document.getElementById('sz_sira').value),
+    aktif: document.getElementById('sz_aktif').value === 'true'
+  }).eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Kaydedildi', 'success');
+  renderSezon();
+}
+
+function sezonEkle() {
+  const el = document.getElementById('sayfa-sezon');
+  el.innerHTML = `
+    <div class="header"><h2>➕ Yeni Sezon Ekle</h2></div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>Sezon Adı</label><input id="sz_ad" placeholder="Ramazan Umresi"></div>
+        <div class="form-group"><label>Etiket</label><input id="sz_label" placeholder="EN KUTSAL SEZON"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>İkon</label><input id="sz_icon" placeholder="🌙"></div>
+        <div class="form-group"><label>Süre</label><input id="sz_sure" placeholder="10–14 gece"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Özellik 1</label><input id="sz_o1" placeholder="Direkt uçuş"></div>
+        <div class="form-group"><label>Özellik 2</label><input id="sz_o2" placeholder=""></div>
+      </div>
+      <div class="form-group"><label>Açıklama</label><input id="sz_aciklama" placeholder="Kısa açıklama"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-gold" onclick="sezonYeniKaydet()">➕ Ekle</button>
+        <button class="btn btn-navy" onclick="renderSezon()">İptal</button>
+      </div>
+    </div>`;
+}
+
+async function sezonYeniKaydet() {
+  const { error } = await sb.from('sezon_programlari').insert({
+    ad: document.getElementById('sz_ad').value,
+    label: document.getElementById('sz_label').value,
+    icon: document.getElementById('sz_icon').value||'🌙',
+    sure: document.getElementById('sz_sure').value,
+    ozellik1: document.getElementById('sz_o1').value,
+    ozellik2: document.getElementById('sz_o2').value,
+    aciklama: document.getElementById('sz_aciklama').value,
+    aktif: true, sira: 99
+  });
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Eklendi!', 'success');
+  renderSezon();
 }
 
 // ── TOAST ──
