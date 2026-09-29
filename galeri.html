@@ -364,14 +364,50 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 <div class="lightbox" id="lightbox" onclick="closeLB()">
   <div class="lb-inner" onclick="event.stopPropagation()">
     <button class="lb-close" onclick="closeLB()">✕</button>
+    <button onclick="lbOnceki()" style="position:absolute;left:-50px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-size:28px;width:40px;height:40px;border-radius:50%;cursor:pointer">‹</button>
+    <button onclick="lbSonraki()" style="position:absolute;right:-50px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-size:28px;width:40px;height:40px;border-radius:50%;cursor:pointer">›</button>
     <div class="lb-content"><img id="lbImg" src="" alt=""><div id="lbTitle" style="font-size:15px;font-weight:600"></div><div style="font-size:12px">Gerçek fotoğraf buraya eklenecek</div></div>
   </div>
 </div>
 <script>
 function filterGallery(cat,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.gallery-item').forEach(i=>{i.style.display=(cat==='all'||i.dataset.cat===cat)?'':'none'})}
-function openLB(t,src){document.getElementById('lbImg').src=src||'';document.getElementById('lbTitle').textContent=t;document.getElementById('lightbox').classList.add('open');}
+let lbIndex = 0;
+let lbItems = [];
+
+function openLB(t, src) {
+  // Tüm görünür galeri resimlerini topla
+  lbItems = Array.from(document.querySelectorAll('.gallery-item:not([style*="none"]) img'));
+  lbIndex = lbItems.findIndex(img => img.src === src);
+  if (lbIndex === -1) lbIndex = 0;
+  lbGoster();
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function lbGoster() {
+  const img = lbItems[lbIndex];
+  if (!img) return;
+  document.getElementById('lbImg').src = img.src;
+  document.getElementById('lbTitle').textContent = img.alt || '';
+}
+
+function lbOnceki() {
+  lbIndex = (lbIndex - 1 + lbItems.length) % lbItems.length;
+  lbGoster();
+}
+
+function lbSonraki() {
+  lbIndex = (lbIndex + 1) % lbItems.length;
+  lbGoster();
+}
 function closeLB(){document.getElementById('lightbox').classList.remove('open')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB()})
+
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') lbSonraki();
+  if (e.key === 'ArrowLeft') lbOnceki();
+  if (e.key === 'Escape') closeLB();
+});
 </script>
 </body>
 </html>
