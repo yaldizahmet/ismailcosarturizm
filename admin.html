@@ -209,6 +209,10 @@ async function turDuzenle(id) {
       </div>
       <div class="form-group"><label>Açıklama</label><input id="e_aciklama" value="${data.aciklama||''}"></div>
       <div class="form-group"><label>Sezon (Umre için)</label><input id="e_sezon" value="${data.sezon||''}"></div>
+      <div class="form-group"><label>Program (Gün Gün)</label><textarea id="e_program" rows="8" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.program||''}</textarea></div>
+      <div class="form-group"><label>Dahil Olanlar (her satıra bir madde)</label><textarea id="e_dahil" rows="5" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.dahil||''}</textarea></div>
+      <div class="form-group"><label>Dahil Olmayanlar</label><textarea id="e_dahil_degil" rows="5" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.dahil_degil||''}</textarea></div>
+      <div class="form-group"><label>Notlar</label><textarea id="e_notlar" rows="3" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.notlar||''}</textarea></div>
       <div style="display:flex;gap:10px;margin-top:16px">
         <button class="btn btn-gold" onclick="turKaydet('${id}')">💾 Kaydet</button>
         <button class="btn btn-navy" onclick="renderTurlar()">İptal</button>
@@ -229,7 +233,11 @@ async function turKaydet(id) {
     kontenjan: document.getElementById('e_kontenjan').value,
     aktif: document.getElementById('e_aktif').value === 'true',
     aciklama: document.getElementById('e_aciklama').value,
-    sezon: document.getElementById('e_sezon').value
+    sezon: document.getElementById('e_sezon').value,
+    program: document.getElementById('e_program').value,
+    dahil: document.getElementById('e_dahil').value,
+    dahil_degil: document.getElementById('e_dahil_degil').value,
+    notlar: document.getElementById('e_notlar').value
   }).eq('id', id);
   if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
   toast('✅ Tur kaydedildi', 'success');
