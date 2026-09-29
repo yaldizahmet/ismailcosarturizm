@@ -143,9 +143,11 @@ async function renderTurlar() {
         <div class="tur-item-info">
           <h4>${t.icon} ${t.baslik}</h4>
           <p>${katMap[t.kategori]||t.kategori} · ${t.tarih} · ${t.fiyat} ${t.para_birimi}</p>
+          <p style="font-size:11px;color:#999;margin-top:2px">ID: ${t.id}</p>
         </div>
         <div class="tur-item-actions">
           <span class="badge ${t.aktif?'badge-green':'badge-red'}">${t.aktif?'Aktif':'Pasif'}</span>
+          <a class="btn btn-navy" href="tur-detay.html?id=${t.id}" target="_blank" style="text-decoration:none">Detay</a>
           <button class="btn btn-navy" onclick="turDuzenle('${t.id}')">Düzenle</button>
           <button class="btn btn-red" onclick="turSil('${t.id}')">Sil</button>
         </div>
