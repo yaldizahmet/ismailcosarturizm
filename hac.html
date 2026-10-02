@@ -144,14 +144,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .kayit-success h3{font-family:var(--ff-head);font-size:20px;color:var(--navy);margin-bottom:8px}
 .kayit-success p{font-size:14px;color:#6b7a94;line-height:1.6}
 
-<style>
-.duyuru-bant{background:#C9972B;overflow:hidden;white-space:nowrap;padding:8px 0;line-height:1}
-.duyuru-bant-ic{display:inline-block;animation:bant-kaydir 40s linear infinite;white-space:nowrap}
-.duyuru-bant-ic:hover{animation-play-state:paused}
-.duyuru-bant span{font-size:13px;font-weight:700;color:#0B1F3A;padding:0 40px}
-.duyuru-bant span::before{content:"◆";margin-right:10px;opacity:.5}
-@keyframes bant-kaydir{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-</style>
+
 </style>
 
   <!-- SEO Meta Etiketleri -->
@@ -225,29 +218,34 @@ async function sbFiyatlariYukle(tip) {
   </div>
   <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
 </nav>
-<div class="duyuru-bant" id="duyuruBant" style="display:none">
-  <div class="duyuru-bant-ic" id="duyuruIc"></div>
+<div id="duyuruBant" style="display:none;background:#C9972B;overflow:hidden;padding:9px 0;width:100%">
+  <div id="duyuruIc" style="display:inline-block;white-space:nowrap;animation:bantKaydir 40s linear infinite"></div>
 </div>
+<style>
+@keyframes bantKaydir {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+</style>
 <script>
 setTimeout(async function() {
   try {
     const r = await fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&order=sira', {
-      headers: {
-        'apikey': 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK',
-        'Authorization': 'Bearer sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK'
-      }
+      headers: {'apikey': 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK', 'Authorization': 'Bearer sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK'}
     });
     const data = await r.json();
-    if (!data || !data.length) return;
-    const bant = document.getElementById('duyuruBant');
+    if (!Array.isArray(data) || !data.length) return;
     const ic = document.getElementById('duyuruIc');
-    if (!bant || !ic) return;
-    const metin = data.map(d => '<span>' + d.metin + '</span><span style="padding:0 20px;opacity:.4">◆</span>').join('');
-    ic.innerHTML = metin + metin + metin;
+    const bant = document.getElementById('duyuruBant');
+    if (!ic || !bant) return;
+    let html = data.map(d => '<span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">' + d.metin + '</span>').join('<span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>');
+    ic.innerHTML = html + html;
     bant.style.display = 'block';
-  } catch(e) { console.log('Duyuru:', e); }
-}, 1000);
+  } catch(e) { console.log('Duyuru hata:', e); }
+}, 500);
 </script>
+</div>
+
 <div class="page-hero">
   <div class="page-hero-pattern"></div><div class="hero-glow"></div>
   <div class="page-hero-content">
