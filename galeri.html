@@ -162,32 +162,26 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
   </div>
   <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></div>
 </nav>
-<div id="duyuruBant" style="display:none;background:#C9972B;overflow:hidden;padding:9px 0;width:100%">
-  <div id="duyuruIc" style="display:inline-block;white-space:nowrap;animation:bantKaydir 40s linear infinite"></div>
+<div style="background:#C9972B;overflow:hidden;padding:9px 0;width:100%">
+  <div style="display:inline-block;white-space:nowrap;animation:bantKaydir 40s linear infinite">
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🕋 2026 Hac kontenjanları için kayıtlar başladı! Erken kayıt avantajından yararlanın.</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🌙 Ramazan Umresi programlarımız yayında! Sınırlı kontenjan için hemen arayın.</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">📞 Bilgi ve kayıt: 0533 198 07 81</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🕋 2026 Hac kontenjanları için kayıtlar başladı! Erken kayıt avantajından yararlanın.</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🌙 Ramazan Umresi programlarımız yayında! Sınırlı kontenjan için hemen arayın.</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">📞 Bilgi ve kayıt: 0533 198 07 81</span>
+    <span style="color:#0B1F3A;opacity:.4">◆</span>
+  </div>
 </div>
-<style>
-@keyframes bantKaydir {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-</style>
-<script>
-setTimeout(async function() {
-  try {
-    const r = await fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&order=sira', {
-      headers: {'apikey': 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK', 'Authorization': 'Bearer sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK'}
-    });
-    const data = await r.json();
-    if (!Array.isArray(data) || !data.length) return;
-    const ic = document.getElementById('duyuruIc');
-    const bant = document.getElementById('duyuruBant');
-    if (!ic || !bant) return;
-    let html = data.map(d => '<span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">' + d.metin + '</span>').join('<span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>');
-    ic.innerHTML = html + html;
-    bant.style.display = 'block';
-  } catch(e) { console.log('Duyuru hata:', e); }
-}, 500);
-</script>
+<style>@keyframes bantKaydir{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}</style>
+</div>
+
+
 </div>
 
 <div class="page-hero">
