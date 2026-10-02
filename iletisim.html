@@ -190,8 +190,8 @@ setTimeout(async function() {
     const bant = document.getElementById('duyuruBant');
     const ic = document.getElementById('duyuruIc');
     if (!bant || !ic) return;
-    const metin = data.map(d => '<span>' + d.metin + '</span>').join('');
-    ic.innerHTML = metin + metin;
+    const metin = data.map(d => '<span>' + d.metin + '</span><span style="padding:0 20px;opacity:.4">◆</span>').join('');
+    ic.innerHTML = metin + metin + metin;
     bant.style.display = 'block';
   } catch(e) { console.log('Duyuru:', e); }
 }, 1000);
