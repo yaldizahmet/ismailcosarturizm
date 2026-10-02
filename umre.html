@@ -207,23 +207,25 @@ async function sbFiyatlariYukle(tip) {
 </script>
 </head>
 <body>
-<div style="position:fixed;top:72px;left:0;right:0;z-index:999;background:#C9972B;overflow:hidden;padding:9px 0">
-  <div style="display:inline-block;white-space:nowrap;animation:bantKaydir 40s linear infinite">
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🕋 2026 Hac kontenjanları için kayıtlar başladı! Erken kayıt avantajından yararlanın.</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🌙 Ramazan Umresi programlarımız yayında! Sınırlı kontenjan için hemen arayın.</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">📞 Bilgi ve kayıt: 0533 198 07 81</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🕋 2026 Hac kontenjanları için kayıtlar başladı! Erken kayıt avantajından yararlanın.</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">🌙 Ramazan Umresi programlarımız yayında! Sınırlı kontenjan için hemen arayın.</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-    <span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">📞 Bilgi ve kayıt: 0533 198 07 81</span>
-    <span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>
-  </div>
+<div id="duyuruBant" style="position:fixed;top:72px;left:0;right:0;z-index:999;background:#C9972B;overflow:hidden;padding:9px 0;display:none">
+  <div id="duyuruIc" style="display:inline-block;white-space:nowrap;animation:bantKaydir 40s linear infinite"></div>
 </div>
 <style>@keyframes bantKaydir{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}</style>
+<script>
+fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&order=sira', {
+  headers: {'apikey': 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK', 'Authorization': 'Bearer sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK'}
+}).then(r => r.json()).then(data => {
+  if (!data || !data.length) return;
+  const ic = document.getElementById('duyuruIc');
+  const bant = document.getElementById('duyuruBant');
+  if (!ic || !bant) return;
+  const sep = '<span style="color:#0B1F3A;opacity:.4;padding:0 10px">◆</span>';
+  const metin = data.map(d => '<span style="font-size:13px;font-weight:700;color:#0B1F3A;padding:0 50px">' + d.metin + '</span>').join(sep);
+  ic.innerHTML = metin + sep + metin + sep;
+  bant.style.display = 'block';
+}).catch(e => console.log('Duyuru:', e));
+</script>
+
 <nav class="navbar">
   <a href="index.html" class="navbar-logo"><img src="logo.png" alt="İsmail Coşar Turizm" class="navbar-logo-img" style="height:44px;width:auto;"></a>
   <div class="nav-links" id="navLinks">
