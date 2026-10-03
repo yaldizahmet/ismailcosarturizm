@@ -205,6 +205,14 @@ async function sbFiyatlariYukle(tip) {
   gtag('js', new Date());
   gtag('config', 'G-M69P1Q6LZR');
 </script>
+<script>
+/* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
+function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
+function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
+function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
+function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return x[0]+': <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong>';}).join(' · ')+'</div>';}
+function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
+</script>
 </head>
 <body>
 <div id="duyuruBant" style="position:fixed;top:72px;left:0;right:0;z-index:999;background:#C9972B;overflow:hidden;padding:9px 0;display:none">
@@ -407,14 +415,15 @@ document.addEventListener('DOMContentLoaded', async function() {
               <span class="pb" style="${kS[p.kontenjan]||kS.var}">${kL[p.kontenjan]||'Yer Var'}</span>
             </div>
             <h3>${p.baslik}</h3>
+            ${p.aciklama?`<p style="font-size:13.5px;color:var(--text-muted);line-height:1.6;margin:4px 0 8px">${satirSonu(p.aciklama)}</p>`:''}
             <div class="prog-meta">
-              <span class="prog-detail">📅 <strong>${p.tarih}</strong></span>
+              <span class="prog-detail">📅 <strong>${turTarihAraligi(p)}</strong></span>
               <span class="prog-detail">⏱ <strong>${p.sure}</strong></span>
               <span class="prog-detail">📍 ${p.konum}</span>
             </div>
           </div>
           <div class="prog-action">
-            <div><div class="prog-price-lbl">Kişi başı</div><div class="prog-price">${p.fiyat} ${p.para_birimi}</div></div>
+            <div><div class="prog-price-lbl">Kişi başı</div><div class="prog-price">${p.fiyat} ${p.para_birimi}</div>${odaKisaHtml(p)}</div>
             <button class="btn-prog" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol →</button>
           </div>
         </div>`;

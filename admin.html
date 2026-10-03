@@ -145,7 +145,7 @@ async function renderTurlar() {
       <div class="tur-item">
         <div class="tur-item-info">
           <h4>${t.icon} ${t.baslik}</h4>
-          <p>${katMap[t.kategori]||t.kategori} · ${t.tarih} · ${t.fiyat} ${t.para_birimi}</p>
+          <p>${katMap[t.kategori]||t.kategori} · ${t.tarih}${t.donus_tarihi?' → '+t.donus_tarihi:''} · ${t.fiyat} ${t.para_birimi}</p>
           <p style="font-size:11px;color:#999;margin-top:2px">ID: ${t.id}</p>
         </div>
         <div class="tur-item-actions">
@@ -183,7 +183,7 @@ async function turDuzenle(id) {
           </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Fiyat</label><input id="e_fiyat" value="${data.fiyat}"></div>
+        <div class="form-group"><label>Kişi Başı Fiyat (kartlarda görünen)</label><input id="e_fiyat" value="${data.fiyat}"></div>
         <div class="form-group"><label>Para Birimi</label>
           <select id="e_pb">
             <option value="₺" ${data.para_birimi==='₺'?'selected':''}>₺ TL</option>
@@ -191,14 +191,20 @@ async function turDuzenle(id) {
             <option value="€" ${data.para_birimi==='€'?'selected':''}>€ EUR</option>
           </select></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Tarih</label><input id="e_tarih" type="date" value="${data.tarih}"></div>
-        <div class="form-group"><label>Süre</label><input id="e_sure" value="${data.sure}"></div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="form-group"><label>2 Kişilik Oda (kişi başı)</label><input id="e_fiyat_2" value="${data.fiyat_2||''}" placeholder="Boş bırakılabilir"></div>
+        <div class="form-group"><label>3 Kişilik Oda (kişi başı)</label><input id="e_fiyat_3" value="${data.fiyat_3||''}" placeholder="Boş bırakılabilir"></div>
+        <div class="form-group"><label>4 Kişilik Oda (kişi başı)</label><input id="e_fiyat_4" value="${data.fiyat_4||''}" placeholder="Boş bırakılabilir"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Konum</label><input id="e_konum" value="${data.konum}"></div>
+        <div class="form-group"><label>Gidiş Tarihi</label><input id="e_tarih" type="date" value="${data.tarih}"></div>
+        <div class="form-group"><label>Dönüş Tarihi</label><input id="e_donus" type="date" value="${data.donus_tarihi||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Süre</label><input id="e_sure" value="${data.sure}"></div>
         <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${data.kapasite||''}"></div>
       </div>
+      <div class="form-group"><label>Konum</label><input id="e_konum" value="${data.konum}"></div>
       <div class="form-row">
         <div class="form-group"><label>Kontenjan</label>
           <select id="e_kontenjan">
@@ -212,7 +218,7 @@ async function turDuzenle(id) {
             <option value="false" ${!data.aktif?'selected':''}>Pasif</option>
           </select></div>
       </div>
-      <div class="form-group"><label>Açıklama</label><input id="e_aciklama" value="${data.aciklama||''}"></div>
+      <div class="form-group"><label>Açıklama</label><textarea id="e_aciklama" rows="3" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.aciklama||''}</textarea></div>
       <div class="form-group"><label>Sezon (Umre için)</label><input id="e_sezon" value="${data.sezon||''}"></div>
       <div class="form-group"><label>Program (Gün Gün)</label><textarea id="e_program" rows="8" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.program||''}</textarea></div>
       <div class="form-group"><label>Dahil Olanlar (her satıra bir madde)</label><textarea id="e_dahil" rows="5" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical">${data.dahil||''}</textarea></div>
@@ -232,6 +238,10 @@ async function turKaydet(id) {
     fiyat: document.getElementById('e_fiyat').value,
     para_birimi: document.getElementById('e_pb').value,
     tarih: document.getElementById('e_tarih').value,
+    donus_tarihi: document.getElementById('e_donus').value || null,
+    fiyat_2: document.getElementById('e_fiyat_2').value.trim(),
+    fiyat_3: document.getElementById('e_fiyat_3').value.trim(),
+    fiyat_4: document.getElementById('e_fiyat_4').value.trim(),
     sure: document.getElementById('e_sure').value,
     konum: document.getElementById('e_konum').value,
     kapasite: document.getElementById('e_kapasite').value,
@@ -264,19 +274,25 @@ function renderEkle() {
           </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Fiyat</label><input id="n_fiyat" placeholder="58.000"></div>
+        <div class="form-group"><label>Kişi Başı Fiyat (kartlarda görünen)</label><input id="n_fiyat" placeholder="58.000"></div>
         <div class="form-group"><label>Para Birimi</label>
           <select id="n_pb"><option value="₺">₺ TL</option><option value="$">$ USD</option><option value="€">€ EUR</option></select></div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label>Tarih</label><input id="n_tarih" type="date"></div>
-        <div class="form-group"><label>Süre</label><input id="n_sure" placeholder="10 gece"></div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="form-group"><label>2 Kişilik Oda (kişi başı)</label><input id="n_fiyat_2" placeholder="Boş bırakılabilir"></div>
+        <div class="form-group"><label>3 Kişilik Oda (kişi başı)</label><input id="n_fiyat_3" placeholder="Boş bırakılabilir"></div>
+        <div class="form-group"><label>4 Kişilik Oda (kişi başı)</label><input id="n_fiyat_4" placeholder="Boş bırakılabilir"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
+        <div class="form-group"><label>Gidiş Tarihi</label><input id="n_tarih" type="date"></div>
+        <div class="form-group"><label>Dönüş Tarihi</label><input id="n_donus" type="date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Süre</label><input id="n_sure" placeholder="10 gece"></div>
         <div class="form-group"><label>Kapasite</label><input id="n_kapasite" placeholder="40 kişi"></div>
       </div>
-      <div class="form-group"><label>Açıklama</label><input id="n_aciklama" placeholder="Kısa açıklama"></div>
+      <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
+      <div class="form-group"><label>Açıklama</label><textarea id="n_aciklama" rows="3" placeholder="Kısa açıklama" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical"></textarea></div>
       <div class="form-group"><label>Sezon (Umre için)</label><input id="n_sezon" placeholder="Ramazan, Kış, Yaz"></div>
       <button class="btn btn-gold" onclick="turEkle()" style="margin-top:8px">➕ Tur Ekle</button>
     </div>`;
@@ -293,6 +309,10 @@ async function turEkle() {
     baslik: baslik,
     icon: icons[kat]||'✈️',
     tarih: document.getElementById('n_tarih').value,
+    donus_tarihi: document.getElementById('n_donus').value || null,
+    fiyat_2: document.getElementById('n_fiyat_2').value.trim(),
+    fiyat_3: document.getElementById('n_fiyat_3').value.trim(),
+    fiyat_4: document.getElementById('n_fiyat_4').value.trim(),
     sure: document.getElementById('n_sure').value,
     konum: document.getElementById('n_konum').value,
     kapasite: document.getElementById('n_kapasite').value,
