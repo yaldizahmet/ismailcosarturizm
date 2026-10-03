@@ -183,7 +183,7 @@ async function turDuzenle(id) {
           </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Kişi Başı Fiyat (kartlarda görünen)</label><input id="e_fiyat" value="${data.fiyat}"></div>
+        <div class="form-group"><label>Kişi Başı Fiyat (Umre'de gösterilmez)</label><input id="e_fiyat" value="${data.fiyat}"></div>
         <div class="form-group"><label>Para Birimi</label>
           <select id="e_pb">
             <option value="₺" ${data.para_birimi==='₺'?'selected':''}>₺ TL</option>
@@ -205,6 +205,7 @@ async function turDuzenle(id) {
         <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${data.kapasite||''}"></div>
       </div>
       <div class="form-group"><label>Konum</label><input id="e_konum" value="${data.konum}"></div>
+      <div class="form-group"><label>Otel</label><input id="e_otel" value="${(data.otel||'').replace(/"/g,'&quot;')}" placeholder="Örn: Mekke – Swissôtel / Medine – Pullman Zamzam"></div>
       <div class="form-row">
         <div class="form-group"><label>Kontenjan</label>
           <select id="e_kontenjan">
@@ -244,6 +245,7 @@ async function turKaydet(id) {
     fiyat_4: document.getElementById('e_fiyat_4').value.trim(),
     sure: document.getElementById('e_sure').value,
     konum: document.getElementById('e_konum').value,
+    otel: document.getElementById('e_otel').value.trim(),
     kapasite: document.getElementById('e_kapasite').value,
     kontenjan: document.getElementById('e_kontenjan').value,
     aktif: document.getElementById('e_aktif').value === 'true',
@@ -274,7 +276,7 @@ function renderEkle() {
           </select></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Kişi Başı Fiyat (kartlarda görünen)</label><input id="n_fiyat" placeholder="58.000"></div>
+        <div class="form-group"><label>Kişi Başı Fiyat (Umre'de gösterilmez)</label><input id="n_fiyat" placeholder="58.000"></div>
         <div class="form-group"><label>Para Birimi</label>
           <select id="n_pb"><option value="₺">₺ TL</option><option value="$">$ USD</option><option value="€">€ EUR</option></select></div>
       </div>
@@ -292,6 +294,7 @@ function renderEkle() {
         <div class="form-group"><label>Kapasite</label><input id="n_kapasite" placeholder="40 kişi"></div>
       </div>
       <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
+      <div class="form-group"><label>Otel</label><input id="n_otel" placeholder="Örn: Mekke – Swissôtel / Medine – Pullman Zamzam"></div>
       <div class="form-group"><label>Açıklama</label><textarea id="n_aciklama" rows="3" placeholder="Kısa açıklama" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical"></textarea></div>
       <div class="form-group"><label>Sezon (Umre için)</label><input id="n_sezon" placeholder="Ramazan, Kış, Yaz"></div>
       <button class="btn btn-gold" onclick="turEkle()" style="margin-top:8px">➕ Tur Ekle</button>
@@ -315,6 +318,7 @@ async function turEkle() {
     fiyat_4: document.getElementById('n_fiyat_4').value.trim(),
     sure: document.getElementById('n_sure').value,
     konum: document.getElementById('n_konum').value,
+    otel: document.getElementById('n_otel').value.trim(),
     kapasite: document.getElementById('n_kapasite').value,
     fiyat: document.getElementById('n_fiyat').value,
     para_birimi: document.getElementById('n_pb').value,

@@ -870,7 +870,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <span class="tc-meta-item">🗓 <strong>${t.sure}</strong></span>
       </div>
       <div class="tc-bottom">
-        <div><div class="tc-price-from">Kişi başı</div><div class="tc-price">${t.fiyat} ${t.para_birimi}</div></div>
+        ${t.kategori==='umre' ? `<div>${t.otel?`<div class="tc-price-from">Otel</div><div style="font-weight:700;font-size:14px;color:var(--navy)">🏨 ${t.otel}</div>`:''}${odaKisaHtml(t)}</div>` : `<div><div class="tc-price-from">Kişi başı</div><div class="tc-price">${t.fiyat} ${t.para_birimi}</div>${odaKisaHtml(t)}</div>`}
         <span class="kontenjan" style="${kMap[t.kontenjan]||kMap.var}">${kLabel[t.kontenjan]||'Yer Var'}</span>
         ${kayitBtn}
       </div>
