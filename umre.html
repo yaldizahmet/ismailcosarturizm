@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           </div>
           <div class="prog-action">
             <div>${p.otel?`<div class="prog-price-lbl">Otel</div><div style="font-weight:700;color:var(--navy);font-size:15px;line-height:1.35">🏨 ${p.otel}</div>`:''}${odaListeHtml(p)}</div>
-            <button class="btn-prog" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol →</button>
+            <div style="display:flex;flex-direction:column;gap:8px"><a href="tur-detay.html?id=${encodeURIComponent(p.id)}" class="btn-prog" style="text-decoration:none;text-align:center;background:transparent;color:var(--navy);border:1.5px solid var(--navy)">Programı İncele</a><button class="btn-prog" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol →</button></div>
           </div>
         </div>`;
       }).join('');
