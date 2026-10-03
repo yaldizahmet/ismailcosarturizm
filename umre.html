@@ -233,8 +233,23 @@ function basvuruKaydet(form){
   var ad=v.adsoyad||v['ad-soyad']||[v.ad,v.soyad].filter(Boolean).join(' ');
   var row={form:v['form-name']||form.getAttribute('name')||'',program:v.program||v.paket||v.tur||'',ad_soyad:ad,telefon:v.telefon||'',eposta:v.eposta||'',hizmet:v.hizmet||'',kisi_sayisi:v['kisi-sayisi']||v.kisi||'',mesaj:v.mesaj||'',sayfa:location.pathname,veri:v};
   var K='sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
-  return fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/basvurular',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)})
+  var db=fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/basvurular',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)})
     .then(function(r){ if(!r.ok) throw new Error('Başvuru kaydedilemedi: '+r.status); });
+  /* E-posta bildirimi (Web3Forms) */
+  var etiket={'umre-kayit':'Umre Kayıt','hac-kayit':'Hac Kayıt','tur-kayit':'Tur Kayıt','iletisim-formu':'İletişim Formu','ana-sayfa-iletisim':'Ana Sayfa Formu'}[row.form]||'Web Sitesi';
+  var mailVeri={access_key:'b14b0b74-ba3c-44a6-8d93-908f7a7eb7cd',subject:'Yeni Başvuru: '+(row.program||etiket)+' – '+(row.ad_soyad||'İsimsiz'),from_name:'İsmail Coşar Turizm Web Sitesi','Form':etiket,'Ad Soyad':row.ad_soyad,'Telefon':row.telefon};
+  if(row.program) mailVeri['Program']=row.program;
+  if(row.eposta){ mailVeri['E-posta']=row.eposta; mailVeri.email=row.eposta; }
+  if(row.hizmet) mailVeri['Hizmet']=row.hizmet;
+  if(row.kisi_sayisi) mailVeri['Kişi Sayısı']=row.kisi_sayisi;
+  if(v['tercih-tarih']) mailVeri['Tercih Edilen Tarih']=v['tercih-tarih'];
+  if(row.mesaj) mailVeri['Mesaj']=row.mesaj;
+  mailVeri['Not']='Tüm başvurular admin panelindeki Başvurular sekmesinde de listelenir.';
+  var mail=fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(mailVeri)})
+    .then(function(r){ return r.json(); }).then(function(j){ if(!j.success) throw new Error(j.message||'Mail gönderilemedi'); });
+  mail.catch(function(){});
+  /* Veritabanı kaydı başarısız olursa, mail ulaştıysa yine de başarılı say */
+  return db.catch(function(){ return mail; });
 }
 </script>
 </head>
