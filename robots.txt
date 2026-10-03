@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ismailcosarturizm.com/sitemap.xml
+Sitemap: https://ismailcosarturizm.com.tr/sitemap.xml
