@@ -110,6 +110,19 @@ function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div
 function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
 function odaListeHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:13px;line-height:1.7;margin-top:4px">'+o.map(function(x){return '<div><span style="color:var(--text-muted)">'+x[0].toLocaleLowerCase('tr')+' odada kişi başı:</span> <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 </script>
+<script>
+/* Form başvurularını Supabase "basvurular" tablosuna kaydeder */
+function basvuruKaydet(form){
+  var fd=new FormData(form), v={};
+  if(fd.get('bot-field')) return Promise.resolve();
+  fd.forEach(function(val,key){ if(key!=='bot-field') v[key]=String(val).trim(); });
+  var ad=v.adsoyad||v['ad-soyad']||[v.ad,v.soyad].filter(Boolean).join(' ');
+  var row={form:v['form-name']||form.getAttribute('name')||'',program:v.program||v.paket||v.tur||'',ad_soyad:ad,telefon:v.telefon||'',eposta:v.eposta||'',hizmet:v.hizmet||'',kisi_sayisi:v['kisi-sayisi']||v.kisi||'',mesaj:v.mesaj||'',sayfa:location.pathname,veri:v};
+  var K='sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
+  return fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/basvurular',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)})
+    .then(function(r){ if(!r.ok) throw new Error('Başvuru kaydedilemedi: '+r.status); });
+}
+</script>
 </head>
 <body>
 
@@ -168,7 +181,7 @@ window.addEventListener('load', async function() {
     </div>
     <div id="kayitForm">
       <div id="kayitProgramAdi" style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;font-weight:600;color:var(--navy);border-left:3px solid var(--gold)"></div>
-      <form name="tur-kayit" method="POST" data-netlify="true" onsubmit="kayitGonder(event)">
+      <form name="tur-kayit" method="POST" onsubmit="kayitGonder(event)">
         <input type="hidden" name="form-name" value="tur-kayit">
         <input type="hidden" name="tur" id="kayitTurGizli">
         <div class="kayit-form-group"><label>Ad Soyad *</label><input type="text" name="adsoyad" placeholder="Adınız Soyadınız" required></div>
@@ -359,7 +372,7 @@ function kayitModalKapat() {
 
 function kayitGonder(e) {
   e.preventDefault();
-  fetch('/', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: new URLSearchParams(new FormData(e.target)).toString()})
+  basvuruKaydet(e.target)
   .then(() => {
     document.getElementById('kayitForm').style.display = 'none';
     document.getElementById('kayitSuccess').style.display = 'block';

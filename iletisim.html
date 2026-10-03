@@ -156,6 +156,19 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
   gtag('js', new Date());
   gtag('config', 'G-M69P1Q6LZR');
 </script>
+<script>
+/* Form başvurularını Supabase "basvurular" tablosuna kaydeder */
+function basvuruKaydet(form){
+  var fd=new FormData(form), v={};
+  if(fd.get('bot-field')) return Promise.resolve();
+  fd.forEach(function(val,key){ if(key!=='bot-field') v[key]=String(val).trim(); });
+  var ad=v.adsoyad||v['ad-soyad']||[v.ad,v.soyad].filter(Boolean).join(' ');
+  var row={form:v['form-name']||form.getAttribute('name')||'',program:v.program||v.paket||v.tur||'',ad_soyad:ad,telefon:v.telefon||'',eposta:v.eposta||'',hizmet:v.hizmet||'',kisi_sayisi:v['kisi-sayisi']||v.kisi||'',mesaj:v.mesaj||'',sayfa:location.pathname,veri:v};
+  var K='sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
+  return fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/basvurular',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)})
+    .then(function(r){ if(!r.ok) throw new Error('Başvuru kaydedilemedi: '+r.status); });
+}
+</script>
 </head>
 <body>
 <div id="duyuruBant" style="position:fixed;top:72px;left:0;right:0;z-index:999;background:#C9972B;overflow:hidden;padding:9px 0;display:none">
@@ -254,7 +267,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
     <div class="contact-form">
       <h3>Bilgi Talep Formu</h3><p>Formu doldurun, en kısa sürede sizi arayalım.</p>
       <div id="formArea">
-        <form id="contactForm" name="iletisim-formu" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" style="display:contents">
+        <form id="contactForm" name="iletisim-formu" method="POST" onsubmit="return false" style="display:contents">
         <input type="hidden" name="form-name" value="iletisim-formu">
         <input type="hidden" name="bot-field" style="display:none">
         <div class="form-row">
@@ -354,8 +367,7 @@ function submitForm(){
   if(!k){alert('Lütfen KVKK onayını veriniz.');return}
   var form=document.getElementById('contactForm');
   var data=new FormData(form);
-  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams(data).toString()})
+  basvuruKaydet(form)
   .then(function(){
     document.getElementById('formArea').style.display='none';
     document.getElementById('formSuccess').style.display='block';

@@ -59,16 +59,17 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
   <div class="login-box">
     <h1>🔐 Admin Paneli</h1>
     <p>İsmail Coşar Turizm</p>
-    <input type="text" id="uname" placeholder="Kullanıcı Adı">
-    <input type="password" id="upass" placeholder="Şifre">
-    <button onclick="girisYap()">Giriş Yap</button>
-    <div class="err" id="loginErr">Kullanıcı adı veya şifre yanlış!</div>
+    <input type="email" id="uname" placeholder="E-posta" autocomplete="username">
+    <input type="password" id="upass" placeholder="Şifre" autocomplete="current-password">
+    <button onclick="girisYap()" id="girisBtn">Giriş Yap</button>
+    <div class="err" id="loginErr">E-posta veya şifre yanlış!</div>
   </div>
 </div>
 
 <div class="app" id="appDiv">
   <div class="sidebar">
     <div class="sidebar-logo"><img src="logo.png" alt="Logo"></div>
+    <button class="nav-item" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
     <button class="nav-item active" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-fiyat" onclick="sekmeAc('fiyat')">💲 Fiyat Tabloları</button>
@@ -77,6 +78,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
+    <div id="sayfa-basvuru" style="display:none"></div>
     <div id="sayfa-turlar"></div>
     <div id="sayfa-ekle" style="display:none"></div>
     <div id="sayfa-fiyat" style="display:none"></div>
@@ -88,43 +90,54 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 <div class="toast" id="toast"></div>
 
 <script>
-const KULLANICI = 'ismail';
-const SIFRE = 'ismail123';
 const sb = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
 
-window.onload = () => {
+function paneliAc() {
+  document.getElementById('loginDiv').style.display = 'none';
+  document.getElementById('appDiv').style.display = 'flex';
+  sekmeAc('basvuru');
+}
+
+window.onload = async () => {
   document.getElementById('appDiv').style.display = 'none';
   document.getElementById('loginDiv').style.display = 'flex';
+  const { data } = await sb.auth.getSession();
+  if (data && data.session) paneliAc();
 };
 
 document.querySelectorAll('#loginDiv input').forEach(i => {
   i.addEventListener('keydown', e => { if(e.key==='Enter') girisYap(); });
 });
 
-function girisYap() {
-  const u = document.getElementById('uname').value.trim();
-  const p = document.getElementById('upass').value.trim();
-  if (u === KULLANICI && p === SIFRE) {
-    document.getElementById('loginDiv').style.display = 'none';
-    document.getElementById('appDiv').style.display = 'flex';
-    sekmeAc('turlar');
+async function girisYap() {
+  const email = document.getElementById('uname').value.trim();
+  const password = document.getElementById('upass').value;
+  const btn = document.getElementById('girisBtn');
+  btn.disabled = true; btn.textContent = 'Giriş yapılıyor...';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Giriş Yap';
+  if (!error) {
+    document.getElementById('upass').value = '';
+    paneliAc();
   } else {
     document.getElementById('loginErr').style.display = 'block';
     setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
   }
 }
 
-function cikisYap() {
+async function cikisYap() {
+  await sb.auth.signOut();
   document.getElementById('loginDiv').style.display = 'flex';
   document.getElementById('appDiv').style.display = 'none';
 }
 
 function sekmeAc(ad) {
-  ['turlar','ekle','fiyat','sezon','duyuru'].forEach(s => {
+  ['basvuru','turlar','ekle','fiyat','sezon','duyuru'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
   });
+  if (ad === 'basvuru') renderBasvurular();
   if (ad === 'turlar') renderTurlar();
   if (ad === 'ekle') renderEkle();
   if (ad === 'fiyat') renderFiyat();
@@ -606,6 +619,78 @@ async function duyuruGuncelle(id) {
 }
 
 // ── TOAST ──
+// ── BAŞVURULAR ──
+const DURUMLAR = {yeni:'🆕 Yeni', arandi:'📞 Arandı', kayit:'✅ Kayıt Oldu', iptal:'✖️ İlgilenmiyor'};
+const DURUM_RENK = {yeni:'#dc3545', arandi:'#C9972B', kayit:'#2e7d32', iptal:'#999'};
+const FORM_AD = {'umre-kayit':'Umre Kayıt', 'hac-kayit':'Hac Kayıt', 'tur-kayit':'Tur Kayıt', 'iletisim-formu':'İletişim Formu', 'ana-sayfa-iletisim':'Ana Sayfa Formu'};
+let basvuruFiltre = 'hepsi';
+
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function yeniSayacGuncelle() {
+  const { count } = await sb.from('basvurular').select('id', { count: 'exact', head: true }).eq('durum', 'yeni');
+  const el = document.getElementById('yeniSayac');
+  if (count) { el.textContent = count; el.style.display = 'inline-block'; } else el.style.display = 'none';
+}
+
+async function renderBasvurular() {
+  const el = document.getElementById('sayfa-basvuru');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  let q = sb.from('basvurular').select('*').order('created_at', { ascending: false }).limit(200);
+  if (basvuruFiltre !== 'hepsi') q = q.eq('durum', basvuruFiltre);
+  const { data, error } = await q;
+  yeniSayacGuncelle();
+  if (error) { el.innerHTML = '<div class="loading">❌ ' + esc(error.message) + '</div>'; return; }
+  const filtreler = [['hepsi','Tümü'], ...Object.entries(DURUMLAR)];
+  el.innerHTML = `
+    <div class="header"><h2>📥 Başvurular</h2><button class="btn btn-navy" onclick="renderBasvurular()">↻ Yenile</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      ${filtreler.map(([k,v]) => `<button class="btn ${basvuruFiltre===k?'btn-navy':''}" style="${basvuruFiltre===k?'':'background:#fff;border:1px solid #ddd;color:#333'}" onclick="basvuruFiltre='${k}';renderBasvurular()">${v}</button>`).join('')}
+    </div>
+    ${!data.length ? '<div class="card" style="text-align:center;color:#888">Bu listede başvuru yok.</div>' : data.map(b => {
+      const tel = (b.telefon||'').replace(/[^0-9+]/g,'');
+      const wa = tel.replace(/^\+/,'').replace(/^0/,'90');
+      const tarih = new Date(b.created_at).toLocaleString('tr-TR', {day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'});
+      const ekstra = Object.entries(b.veri||{}).filter(([k]) => !['form-name','program','paket','tur','adsoyad','ad-soyad','ad','soyad','telefon','eposta','hizmet','kisi-sayisi','kisi','mesaj'].includes(k) && b.veri[k]);
+      return `<div class="card" style="border-left:4px solid ${DURUM_RENK[b.durum]||'#ccc'}">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+          <div>
+            <div style="font-size:12px;color:#888;margin-bottom:4px">${esc(tarih)} · ${esc(FORM_AD[b.form]||b.form||'Form')}</div>
+            <div style="font-size:17px;font-weight:700;color:#0B1F3A">${esc(b.ad_soyad||'(isim yok)')}</div>
+            ${b.program?`<div style="font-size:13.5px;color:#C9972B;font-weight:600;margin-top:2px">${esc(b.program)}</div>`:''}
+          </div>
+          <select onchange="basvuruDurum(${b.id}, this.value)" style="padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px">
+            ${Object.entries(DURUMLAR).map(([k,v]) => `<option value="${k}" ${b.durum===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:14px">
+          ${tel?`<a href="tel:${esc(tel)}" style="color:#0B1F3A;font-weight:600;text-decoration:none">📞 ${esc(b.telefon)}</a><a href="https://wa.me/${esc(wa)}" target="_blank" style="color:#25D366;font-weight:600;text-decoration:none">💬 WhatsApp</a>`:''}
+          ${b.eposta?`<a href="mailto:${esc(b.eposta)}" style="color:#0B1F3A;text-decoration:none">✉️ ${esc(b.eposta)}</a>`:''}
+          ${b.hizmet?`<span>🏷 ${esc(b.hizmet)}</span>`:''}
+          ${b.kisi_sayisi?`<span>👥 ${esc(b.kisi_sayisi)}${/^\d+$/.test(b.kisi_sayisi)?' kişi':''}</span>`:''}
+          ${ekstra.map(([k,v]) => `<span>• ${esc(({'tercih-tarih':'Tercih edilen tarih'})[k]||k)}: ${esc(v)}</span>`).join('')}
+        </div>
+        ${b.mesaj?`<div style="margin-top:12px;padding:10px 12px;background:#f7f7f7;border-radius:8px;font-size:13.5px;white-space:pre-wrap">${esc(b.mesaj)}</div>`:''}
+        <div style="margin-top:12px;text-align:right"><button class="btn btn-red" style="padding:6px 12px;font-size:12px" onclick="basvuruSil(${b.id})">Sil</button></div>
+      </div>`;
+    }).join('')}`;
+}
+
+async function basvuruDurum(id, durum) {
+  const { error } = await sb.from('basvurular').update({ durum }).eq('id', id);
+  if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
+  toast('✅ Durum güncellendi', 'success');
+  renderBasvurular();
+}
+
+async function basvuruSil(id) {
+  if (!confirm('Bu başvuruyu kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+  const { error } = await sb.from('basvurular').delete().eq('id', id);
+  if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
+  toast('✅ Başvuru silindi', 'success');
+  renderBasvurular();
+}
+
 function toast(msg, tip) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast toast-' + tip; t.style.display = 'block';
