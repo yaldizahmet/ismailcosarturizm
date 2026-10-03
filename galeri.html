@@ -345,14 +345,58 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
 </section>
 <section style="background:var(--cream)">
   <div class="section-eyebrow">Video Galerisi</div><h2 class="section-title">Tur Videolarımız</h2>
-  <p class="section-sub">YouTube kanalımızdaki en son videolar. Listedeki diğer videolara oynatıcının sağ üstündeki liste simgesinden geçebilirsiniz.</p>
-  <div style="position:relative;max-width:960px;margin:36px auto 0;aspect-ratio:16/9;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-md);background:var(--navy)">
-    <iframe src="https://www.youtube.com/embed/videoseries?list=UU8DtiN-Mb4_lasmzKzWH9-g&rel=0" title="İsmail Coşar Turizm YouTube videoları" style="position:absolute;inset:0;width:100%;height:100%;border:0" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
-  </div>
-  <div style="text-align:center;margin-top:28px">
+  <p class="section-sub">YouTube kanalımızdaki en son videolar.</p>
+  <div class="video-grid" id="ytGrid"><p style="color:var(--text-muted)">Videolar yükleniyor…</p></div>
+  <div style="text-align:center;margin-top:32px">
     <a href="https://www.youtube.com/@%C4%B0smailCO%C5%9EARTurizm" target="_blank" rel="noopener" style="display:inline-block;padding:11px 24px;border-radius:999px;background:#c4302b;color:#fff;font-weight:600;font-size:14px;text-decoration:none">▶ YouTube Kanalımız</a>
   </div>
 </section>
+<div id="ytModal" style="position:fixed;inset:0;background:rgba(5,12,25,.9);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px">
+  <button onclick="ytKapat()" aria-label="Kapat" style="position:absolute;top:12px;right:18px;background:none;border:0;color:#fff;font-size:38px;line-height:1;cursor:pointer">&times;</button>
+  <div style="position:relative;width:min(960px,100%);aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden" id="ytFrame"></div>
+</div>
+<script>
+(function(){
+  var API_KEY = 'AIzaSyCvJTO8yfmljMzQXFdN7IdYu6WZnA4nmr0';
+  var LISTE = 'UU8DtiN-Mb4_lasmzKzWH9-g'; // kanalın "yüklenen videolar" listesi
+  var grid = document.getElementById('ytGrid');
+  var esc = function(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+
+  function yedek(){ // API çalışmazsa eski oynatıcıyı göster
+    grid.style.display='block';
+    grid.innerHTML = '<div style="position:relative;max-width:960px;margin:0 auto;aspect-ratio:16/9;border-radius:var(--r-lg);overflow:hidden;background:var(--navy)"><iframe src="https://www.youtube.com/embed/videoseries?list='+LISTE+'&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="YouTube videoları"></iframe></div>';
+  }
+
+  fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=12&playlistId='+LISTE+'&key='+API_KEY)
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){
+      var v = (d.items||[]).filter(function(i){ var t=i.snippet.title; return t!=='Private video' && t!=='Deleted video'; });
+      if(!v.length){ yedek(); return; }
+      grid.innerHTML = v.map(function(i){
+        var s=i.snippet, id=i.contentDetails.videoId, th=s.thumbnails, img=(th.high||th.medium||th.default||{}).url||'';
+        var tarih = new Date(i.contentDetails.videoPublishedAt||s.publishedAt).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+        return '<div class="video-card"><div class="video-thumb" onclick="ytAc(\''+esc(id)+'\')" style="background:var(--navy)">'
+          + '<img src="'+esc(img)+'" alt="'+esc(s.title)+'" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
+          + '<div class="play-btn" style="position:relative">▶</div></div>'
+          + '<div class="video-body"><h4>'+esc(s.title)+'</h4><p>'+esc(tarih)+'</p></div></div>';
+      }).join('');
+    })
+    .catch(yedek);
+
+  window.ytAc = function(id){
+    document.getElementById('ytFrame').innerHTML = '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>';
+    document.getElementById('ytModal').style.display='flex';
+    document.body.style.overflow='hidden';
+  };
+  window.ytKapat = function(){
+    document.getElementById('ytFrame').innerHTML='';
+    document.getElementById('ytModal').style.display='none';
+    document.body.style.overflow='';
+  };
+  document.getElementById('ytModal').addEventListener('click',function(e){ if(e.target.id==='ytModal') ytKapat(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') ytKapat(); });
+})();
+</script>
 <div class="cta-band">
   <h2>Siz de Bu Anların Parçası Olun</h2><p>Programa katılın, bu güzel kareler sizin de olsun.</p>
   <div class="cta-actions"><a href="turlar.html" class="btn-navy">🗓 Tur Programları</a><a href="https://wa.me/905331980781" class="btn-wa" target="_blank">💬 WhatsApp</a></div>
