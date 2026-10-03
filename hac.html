@@ -213,7 +213,7 @@ async function sbFiyatlariYukle(tip) {
 function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
 function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
-function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return x[0]+': <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong>';}).join(' · ')+'</div>';}
+function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return '<div>'+x[0].toLocaleLowerCase('tr')+' odada kişi başı: <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
 </script>
 </head>

@@ -106,9 +106,9 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:40px 5vw 24px;b
 function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
 function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
-function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return x[0]+': <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong>';}).join(' · ')+'</div>';}
+function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return '<div>'+x[0].toLocaleLowerCase('tr')+' odada kişi başı: <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
-function odaListeHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:13px;line-height:1.7;margin-top:4px">'+o.map(function(x){return '<div><span style="color:var(--text-muted)">'+x[0]+':</span> <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
+function odaListeHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:13px;line-height:1.7;margin-top:4px">'+o.map(function(x){return '<div><span style="color:var(--text-muted)">'+x[0].toLocaleLowerCase('tr')+' odada kişi başı:</span> <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 </script>
 </head>
 <body>
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     mainHtml += `<div class="section-card">
       <h3>🛏 Oda Tipine Göre Fiyatlar</h3>
       <ul class="program-list">
-        ${odalar.map(o => `<li class="program-item"><span class="program-gun">${o[0]}</span><span class="program-icerik"><strong>${o[1]} ${tur.para_birimi}</strong> <span style="color:var(--text-muted)">(kişi başı)</span></span></li>`).join('')}
+        ${odalar.map(o => `<li class="program-item"><span class="program-gun">${o[0]} oda</span><span class="program-icerik">Kişi başı <strong>${o[1]} ${tur.para_birimi}</strong></span></li>`).join('')}
       </ul>
     </div>`;
   }
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     <div class="sidebar-info">
       <div class="sidebar-info-item"><span class="sidebar-info-label">Gidiş</span><span class="sidebar-info-value">${trTarih(tur.tarih)}</span></div>
       ${tur.donus_tarihi?`<div class="sidebar-info-item"><span class="sidebar-info-label">Dönüş</span><span class="sidebar-info-value">${trTarih(tur.donus_tarihi)}</span></div>`:''}
-      ${odalar.map(o => `<div class="sidebar-info-item"><span class="sidebar-info-label">${o[0]} oda</span><span class="sidebar-info-value">${o[1]} ${tur.para_birimi}</span></div>`).join('')}
+      ${odalar.map(o => `<div class="sidebar-info-item"><span class="sidebar-info-label">${o[0].toLocaleLowerCase('tr')} odada kişi başı</span><span class="sidebar-info-value">${o[1]} ${tur.para_birimi}</span></div>`).join('')}
       <div class="sidebar-info-item"><span class="sidebar-info-label">Süre</span><span class="sidebar-info-value">${tur.sure}</span></div>
       <div class="sidebar-info-item"><span class="sidebar-info-label">Konum</span><span class="sidebar-info-value">${tur.konum}</span></div>
       <div class="sidebar-info-item"><span class="sidebar-info-label">Kapasite</span><span class="sidebar-info-value">${tur.kapasite||'-'}</span></div>
