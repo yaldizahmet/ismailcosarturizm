@@ -272,95 +272,6 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </div>
 </section>
 
-<section class="fiyat-section" id="fiyatlar">
-  <div class="section-eyebrow">Fiyatlandırma</div>
-  <h2 class="section-title">2025 Fiyat Tablosu</h2>
-  <p class="section-sub" style="margin-bottom:36px">Tüm fiyatlar kişi başı USD ($) olarak belirtilmiştir.</p>
-  <div id="fiyatTabloContainer_hac"></div>
-      <table class="fiyat-tablo">
-        <thead><tr>
-          <th style="text-align:left">Konaklama Süresi</th>
-          <th>2 Kişilik</th><th>3 Kişilik</th><th>4 Kişilik</th>
-        </tr></thead>
-        <tbody>          <tr>
-            <td style="font-weight:600">9 Gece / 10 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1750</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1700</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1650</span></td>
-          </tr>          <tr>
-            <td style="font-weight:600">13 Gece / 14 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1900</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1850</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1800</span></td>
-          </tr>        </tbody>
-      </table>
-    </div>    <div class="fiyat-grup">
-      <div class="fiyat-grup-baslik">2. Grup – Ekonomik</div>
-      <table class="fiyat-tablo">
-        <thead><tr>
-          <th style="text-align:left">Konaklama Süresi</th>
-          <th>2 Kişilik</th><th>3 Kişilik</th><th>4 Kişilik</th>
-        </tr></thead>
-        <tbody>          <tr>
-            <td style="font-weight:600">13 Gece / 14 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1550</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1500</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1450</span></td>
-          </tr>          <tr>
-            <td style="font-weight:600">19 Gece / 20 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1650</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1600</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 1550</span></td>
-          </tr>        </tbody>
-      </table>
-    </div>    <div class="fiyat-grup">
-      <div class="fiyat-grup-baslik">3. Grup – 5 Yıldız</div>
-      <table class="fiyat-tablo">
-        <thead><tr>
-          <th style="text-align:left">Konaklama Süresi</th>
-          <th>2 Kişilik</th><th>3 Kişilik</th><th>4 Kişilik</th>
-        </tr></thead>
-        <tbody>          <tr>
-            <td style="font-weight:600">6 Gece / 7 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 2500</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 2400</span></td>
-            <td style="text-align:center">-</td>
-          </tr>          <tr>
-            <td style="font-weight:600">9 Gece / 10 Gün</td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 2800</span></td>
-            <td style="text-align:center"><span class="fiyat-dolar">$ 2700</span></td>
-            <td style="text-align:center">-</td>
-          </tr>        </tbody>
-      </table>
-    </div>
-  </div>
-  <p style="font-size:12px;color:var(--text-muted);margin-top:16px">* Fiyatlar kişi başı dolar ($) cinsindendir. Güncel kur için iletişime geçin.</p>
-</section>
-
-<script>
-fetch('turlar.json')
-  .then(r=>r.json())
-  .then(function(data){
-    var gruplar = data.fiyat_tablolari && data.fiyat_tablolari['hac'] || [];
-    var container = document.getElementById('fiyatTabloContainer_hac');
-    if(!gruplar.length){ container.innerHTML=''; return; }
-    var html = '';
-    gruplar.forEach(function(grup){
-      html += '<div class="fiyat-grup"><div class="fiyat-grup-baslik">'+grup.grup+'</div>';
-      html += '<table class="fiyat-tablo"><thead><tr><th>Konaklama Süresi</th><th>2 Kişilik</th><th>3 Kişilik</th><th>4 Kişilik</th></tr></thead><tbody>';
-      grup.satirlar.forEach(function(s){
-        html += '<tr><td>'+s.sure+'</td>';
-        html += '<td>'+(s.fiyat_2?'<span class=\"fiyat-dolar\">$ '+s.fiyat_2+'</span>':'-')+'</td>';
-        html += '<td>'+(s.fiyat_3?'<span class=\"fiyat-dolar\">$ '+s.fiyat_3+'</span>':'-')+'</td>';
-        html += '<td>'+(s.fiyat_4?'<span class=\"fiyat-dolar\">$ '+s.fiyat_4+'</span>':'-')+'</td>';
-        html += '</tr>';
-      });
-      html += '</tbody></table></div>';
-    });
-    container.innerHTML = html;
-  });
-</script>
-
 <div class="cta-band">
   <h2>Hac İçin Yerinizi Ayırtın</h2><p>Kontenjanlar sınırlıdır. Erken kayıt avantajından yararlanın.</p>
   <div class="cta-actions"><a href="https://wa.me/905331980781?text=Hac%202025%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." class="btn-wa" target="_blank">💬 WhatsApp</a><a href="tel:+905331980781" class="btn-navy">📞 Ara</a></div>
@@ -495,33 +406,6 @@ document.addEventListener('DOMContentLoaded', async function() {
           </div>
         </div>`;
       }).join('');
-    }
-  }
-
-  // Fiyat tablosu
-  const { data: fiyatlar } = await _SB.from('fiyat_tablolari').select('*').eq('tip','hac').order('sira');
-  if (fiyatlar && fiyatlar.length) {
-    const ft = document.getElementById('fiyatTabloContainer_hac');
-    if (ft) {
-      let html = '';
-      let mevcutGrup = '';
-      fiyatlar.forEach(f => {
-        if (f.grup && f.grup !== mevcutGrup) {
-          if (mevcutGrup) html += '</tbody></table></div>';
-          mevcutGrup = f.grup;
-          html += `<div class="fiyat-grup"><div class="fiyat-grup-baslik">${f.grup}</div>
-            <table class="fiyat-tablo"><thead><tr>
-              <th style="text-align:left">Konaklama Süresi</th><th>2 Kişilik</th><th>3 Kişilik</th><th>4 Kişilik</th>
-            </tr></thead><tbody>`;
-        }
-        html += `<tr><td style="font-weight:600">${f.sure}</td>
-          <td style="text-align:center">${f.fiyat_2?'<span class="fiyat-dolar">$ '+f.fiyat_2+'</span>':'-'}</td>
-          <td style="text-align:center">${f.fiyat_3?'<span class="fiyat-dolar">$ '+f.fiyat_3+'</span>':'-'}</td>
-          <td style="text-align:center">${f.fiyat_4?'<span class="fiyat-dolar">$ '+f.fiyat_4+'</span>':'-'}</td>
-        </tr>`;
-      });
-      if (mevcutGrup) html += '</tbody></table></div>';
-      ft.innerHTML = html;
     }
   }
 });
