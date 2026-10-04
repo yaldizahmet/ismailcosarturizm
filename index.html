@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const safe = t.baslik.replace(/'/g, "\'");
     const kayitBtn = t.kontenjan !== 'dolu' ? `<button class="btn-tur" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol</button>` : '';
     return `<div class="tour-card">
-      <div class="tc-top"><div class="tc-icon">${t.icon}</div></div>
+      <div class="tc-top">${t.gorsel ? `<img src="${t.gorsel}" alt="" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;display:block">` : `<div class="tc-icon">${t.icon}</div>`}</div>
       <h3><a href="tur-detay.html?id=${encodeURIComponent(t.id)}" style="color:inherit;text-decoration:none">${t.baslik}</a></h3>
       <div class="tc-meta">
         <span class="tc-meta-item">📅 <strong>${turTarihAraligi(t)}</strong></span>

@@ -279,9 +279,8 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (!turlar.length) { grid.innerHTML = '<p style="color:#999;padding:20px">Henüz tur bulunmuyor.</p>'; return; }
   grid.innerHTML = turlar.map(t => `
     <div class="tour-card" data-cat="${t.kategori}">
-      <div class="tc-hero" style="background:linear-gradient(135deg,#3a1a08,#6b3212)">
-        <div class="tc-pattern"></div>
-        <span class="tc-icon">${t.icon}</span>
+      <div class="tc-hero" style="${t.gorsel ? `background:linear-gradient(180deg,rgba(11,31,58,0) 40%,rgba(11,31,58,.55)),url('${t.gorsel}') center/cover no-repeat` : 'background:linear-gradient(135deg,#3a1a08,#6b3212)'}">
+        ${t.gorsel ? '' : `<div class="tc-pattern"></div><span class="tc-icon">${t.icon}</span>`}
         <div class="tc-tags"><span class="tc-tag tc-tag-light">${t.konum}</span></div>
       </div>
       <div class="tc-body">

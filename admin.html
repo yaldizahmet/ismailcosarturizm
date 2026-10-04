@@ -218,6 +218,15 @@ async function turDuzenle(id) {
         <div class="form-group"><label>Kapasite</label><input id="e_kapasite" value="${data.kapasite||''}"></div>
       </div>
       <div class="form-group"><label>Konum</label><input id="e_konum" value="${data.konum}"></div>
+      <div class="form-group"><label>Kapak Fotoğrafı</label>
+        <input type="hidden" id="e_gorsel" value="${data.gorsel||''}">
+        <div id="e_gorselOnizleme" style="margin-bottom:8px">${data.gorsel ? `<img src="${data.gorsel}" style="width:100%;max-width:360px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">` : '<div style="color:#999;font-size:13px">Henüz fotoğraf yok</div>'}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="btn btn-navy" style="cursor:pointer;margin:0">📷 Fotoğraf Seç<input type="file" accept="image/*" style="display:none" onchange="gorselYukle(this,'e')"></label>
+          <button type="button" class="btn btn-red" style="padding:8px 12px" onclick="gorselKaldir('e')">Kaldır</button>
+          <span id="e_gorselDurum" style="font-size:12px;color:#888"></span>
+        </div>
+      </div>
       <div class="form-group"><label>Otel</label><input id="e_otel" value="${(data.otel||'').replace(/"/g,'&quot;')}" placeholder="Örn: Mekke – Swissôtel / Medine – Pullman Zamzam"></div>
       <div class="form-row">
         <div class="form-group"><label>Kontenjan</label>
@@ -259,6 +268,7 @@ async function turKaydet(id) {
     sure: document.getElementById('e_sure').value,
     konum: document.getElementById('e_konum').value,
     otel: document.getElementById('e_otel').value.trim(),
+    gorsel: document.getElementById('e_gorsel').value || null,
     kapasite: document.getElementById('e_kapasite').value,
     kontenjan: document.getElementById('e_kontenjan').value,
     aktif: document.getElementById('e_aktif').value === 'true',
@@ -307,6 +317,15 @@ function renderEkle() {
         <div class="form-group"><label>Kapasite</label><input id="n_kapasite" placeholder="40 kişi"></div>
       </div>
       <div class="form-group"><label>Konum</label><input id="n_konum" placeholder="Mekke & Medine"></div>
+      <div class="form-group"><label>Kapak Fotoğrafı</label>
+        <input type="hidden" id="n_gorsel" value="">
+        <div id="n_gorselOnizleme" style="margin-bottom:8px"><div style="color:#999;font-size:13px">Henüz fotoğraf yok</div></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="btn btn-navy" style="cursor:pointer;margin:0">📷 Fotoğraf Seç<input type="file" accept="image/*" style="display:none" onchange="gorselYukle(this,'n')"></label>
+          <button type="button" class="btn btn-red" style="padding:8px 12px" onclick="gorselKaldir('n')">Kaldır</button>
+          <span id="n_gorselDurum" style="font-size:12px;color:#888"></span>
+        </div>
+      </div>
       <div class="form-group"><label>Otel</label><input id="n_otel" placeholder="Örn: Mekke – Swissôtel / Medine – Pullman Zamzam"></div>
       <div class="form-group"><label>Açıklama</label><textarea id="n_aciklama" rows="3" placeholder="Kısa açıklama" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;resize:vertical"></textarea></div>
       <div class="form-group"><label>Sezon (Umre için)</label><input id="n_sezon" placeholder="Ramazan, Kış, Yaz"></div>
@@ -332,6 +351,7 @@ async function turEkle() {
     sure: document.getElementById('n_sure').value,
     konum: document.getElementById('n_konum').value,
     otel: document.getElementById('n_otel').value.trim(),
+    gorsel: document.getElementById('n_gorsel').value || null,
     kapasite: document.getElementById('n_kapasite').value,
     fiyat: document.getElementById('n_fiyat').value,
     para_birimi: document.getElementById('n_pb').value,
@@ -689,6 +709,49 @@ async function basvuruSil(id) {
   if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
   toast('✅ Başvuru silindi', 'success');
   renderBasvurular();
+}
+
+// ── TUR FOTOĞRAFI ──
+function gorselKucult(dosya, maxW) {
+  return new Promise((ok, hata) => {
+    const img = new Image();
+    img.onload = () => {
+      const oran = Math.min(1, maxW / img.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * oran); c.height = Math.round(img.height * oran);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? ok(b) : hata(new Error('Görsel işlenemedi')), 'image/jpeg', 0.82);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => hata(new Error('Bu dosya açılamadı'));
+    img.src = URL.createObjectURL(dosya);
+  });
+}
+
+async function gorselYukle(input, p) {
+  const dosya = input.files && input.files[0];
+  if (!dosya) return;
+  const durum = document.getElementById(p + '_gorselDurum');
+  durum.textContent = '⏳ Yükleniyor...';
+  try {
+    const blob = await gorselKucult(dosya, 1600);
+    const yol = 'tur-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
+    const { error } = await sb.storage.from('tur-gorselleri').upload(yol, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+    if (error) throw error;
+    const url = sb.storage.from('tur-gorselleri').getPublicUrl(yol).data.publicUrl;
+    document.getElementById(p + '_gorsel').value = url;
+    document.getElementById(p + '_gorselOnizleme').innerHTML = `<img src="${url}" style="width:100%;max-width:360px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">`;
+    durum.textContent = '✅ Yüklendi – kaydetmeyi unutmayın';
+  } catch (e) {
+    durum.textContent = '❌ ' + (e.message || 'Yükleme başarısız');
+  }
+  input.value = '';
+}
+
+function gorselKaldir(p) {
+  document.getElementById(p + '_gorsel').value = '';
+  document.getElementById(p + '_gorselOnizleme').innerHTML = '<div style="color:#999;font-size:13px">Henüz fotoğraf yok</div>';
+  document.getElementById(p + '_gorselDurum').textContent = 'Kaydettiğinizde fotoğraf kaldırılır';
 }
 
 function toast(msg, tip) {

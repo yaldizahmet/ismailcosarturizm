@@ -245,6 +245,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     : `<div><div class="tur-fiyat-lbl">Kişi başı fiyat</div><div class="tur-fiyat-num">${tur.fiyat} ${tur.para_birimi}</div></div>`;
 
   // Hero
+  if (tur.gorsel) {
+    document.getElementById('tur-hero').style.background = `linear-gradient(135deg,rgba(11,31,58,.92) 0%,rgba(11,31,58,.75) 45%,rgba(11,31,58,.35) 100%),url('${tur.gorsel}') center/cover no-repeat`;
+  }
   document.getElementById('tur-hero').innerHTML = `
     <div class="hero-pattern"></div>
     <div class="hero-content">
@@ -253,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <a href="turlar.html">Turlar</a> › 
         <span>${tur.baslik}</span>
       </div>
-      <h1 class="tur-baslik">${tur.icon} ${tur.baslik}</h1>
+      <h1 class="tur-baslik">${tur.gorsel ? '' : (tur.icon || '') + ' '}${tur.baslik}</h1>
       <div class="tur-meta">
         <span class="tur-meta-item">📅 ${turTarihAraligi(tur)}</span>
         <span class="tur-meta-item">⏱ ${tur.sure}</span>
