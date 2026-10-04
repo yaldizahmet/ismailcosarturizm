@@ -137,14 +137,6 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>const _SB = supabase.createClient("https://wpkjxwbvewwgdclbsdya.supabase.co", "sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK");</script>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M69P1Q6LZR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-M69P1Q6LZR');
-</script>
 <script>
 /* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
 function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
@@ -271,7 +263,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
           <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
         </div>
       </div>
-<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm</span><span>TURSAB · Diyanet Onaylı</span></div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm</span><span>TURSAB · Diyanet Onaylı</span><span><a href="kvkk.html" style="color:inherit">KVKK Aydınlatma Metni</a> · <a href="kvkk.html#cerez" style="color:inherit">Çerez Politikası</a> · <a href="#" onclick="cerezAyarlari();return false" style="color:inherit">Çerez Tercihleri</a></span></div>
 </footer>
 <a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
 
@@ -317,5 +309,6 @@ function filterTours(cat, btn) {
   });
 }
 </script>
+<script src="cerez.js" defer></script>
 </body>
 </html>

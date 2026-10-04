@@ -93,14 +93,6 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:40px 5vw 24px;b
 @keyframes bant-kaydir{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 </style>
 </style>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M69P1Q6LZR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-M69P1Q6LZR');
-</script>
 <script>
 /* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
 function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
@@ -203,6 +195,7 @@ window.addEventListener('load', async function() {
         <div class="kayit-form-group"><label>Telefon *</label><input type="tel" name="telefon" placeholder="05XX XXX XX XX" required></div>
         <div class="kayit-form-group"><label>E-posta</label><input type="email" name="eposta" placeholder="ornek@mail.com"></div>
         <div class="kayit-form-group"><label>Kişi Sayısı</label><select name="kisi"><option>1 Kişi</option><option>2 Kişi</option><option>3 Kişi</option><option>4+ Kişi</option></select></div>
+        <label style="display:flex;gap:9px;align-items:flex-start;font-size:12px;color:#6b7280;line-height:1.5;margin:4px 0 14px;cursor:pointer"><input type="checkbox" name="kvkk_onay" value="evet" required style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:#C9972B"><span><a href="kvkk.html" target="_blank" style="color:#C9972B;text-decoration:underline">KVKK Aydınlatma Metni</a>'ni okudum. Başvurumun değerlendirilmesi için kişisel verilerimin işlenmesine ve metinde belirtilen yurt dışındaki hizmet sağlayıcılara aktarılmasına açık rıza veriyorum.</span></label>
         <button type="submit" class="kayit-submit">📩 Kayıt Talebimi Gönder</button>
       </form>
     </div>
@@ -218,7 +211,7 @@ window.addEventListener('load', async function() {
   <div class="footer-bottom">
     <span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span>
     <span>TURSAB · Diyanet Onaylı</span>
-  </div>
+  <span><a href="kvkk.html" style="color:inherit">KVKK Aydınlatma Metni</a> · <a href="kvkk.html#cerez" style="color:inherit">Çerez Politikası</a> · <a href="#" onclick="cerezAyarlari();return false" style="color:inherit">Çerez Tercihleri</a></span></div>
 </footer>
 <a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
 
@@ -395,5 +388,6 @@ function kayitGonder(e) {
   }).catch(() => alert('Hata! Lütfen arayın: 0533 198 07 81'));
 }
 </script>
+<script src="cerez.js" defer></script>
 </body>
 </html>

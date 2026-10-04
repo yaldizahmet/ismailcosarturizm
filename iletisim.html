@@ -148,14 +148,6 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
       }
     }
   </script>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M69P1Q6LZR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-M69P1Q6LZR');
-</script>
 <script>
 /* Form başvurularını Supabase "basvurular" tablosuna kaydeder */
 function basvuruKaydet(form){
@@ -312,7 +304,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
           <div class="form-group"><label>Tercih Edilen Tarih</label><input type="text" id="tarih" name="tercih-tarih" placeholder="Örn: Mart 2025"></div>
         </div>
         <div class="form-group"><label>Mesajınız</label><textarea id="message" name="mesaj" placeholder="Sormak istediğiniz sorular, özel istekleriniz..."></textarea></div>
-        <div class="kvkk-row"><input type="checkbox" id="kvkk"><label for="kvkk">KVKK kapsamında kişisel verilerimin işlenmesine onay veriyorum.</label></div>
+        <div class="kvkk-row"><input type="checkbox" id="kvkk" name="kvkk_onay" value="evet"><label for="kvkk"><a href="kvkk.html" target="_blank" style="color:#C9972B;text-decoration:underline">KVKK Aydınlatma Metni</a>'ni okudum. Başvurumun değerlendirilmesi için kişisel verilerimin işlenmesine ve metinde belirtilen yurt dışındaki hizmet sağlayıcılara aktarılmasına açık rıza veriyorum.</label></div>
         <button type="button" class="form-submit" onclick="submitForm()">✉ Formu Gönder – Sizi Arayalım</button>
         </form>
       </div>
@@ -372,7 +364,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
           <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
         </div>
       </div>
-<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span></div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span><span><a href="kvkk.html" style="color:inherit">KVKK Aydınlatma Metni</a> · <a href="kvkk.html#cerez" style="color:inherit">Çerez Politikası</a> · <a href="#" onclick="cerezAyarlari();return false" style="color:inherit">Çerez Tercihleri</a></span></div>
 </footer>
 <a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
 <script>
@@ -391,5 +383,6 @@ function submitForm(){
 }
 function toggleSSS(el){var item=el.closest('.sss-item'),was=item.classList.contains('open');document.querySelectorAll('.sss-item').forEach(i=>i.classList.remove('open'));if(!was)item.classList.add('open')}
 </script>
+<script src="cerez.js" defer></script>
 </body>
 </html>

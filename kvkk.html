@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sıkça Sorulan Sorular – İsmail Coşar Turizm</title>
-<meta name="description" content="Hac, Umre, Balkan turları ve rezervasyon hakkında sıkça sorulan sorular ve cevapları.">
+<title>KVKK Aydınlatma Metni ve Çerez Politikası – İsmail Coşar Turizm</title>
+<meta name="description" content="İsmail Coşar Turizm KVKK aydınlatma metni ve çerez politikası: kişisel verilerinizin nasıl işlendiği ve haklarınız.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -35,6 +35,27 @@ html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cre
 .page-hero-desc{font-size:clamp(15px,1.5vw,17px);color:rgba(255,255,255,.65);line-height:1.7;max-width:560px;font-weight:300}
 
 /* SSS */
+.yasal-wrap{padding:64px 5vw 80px;background:var(--white)}
+.yasal-icerik{max-width:860px;margin:0 auto;color:var(--text-dark);font-size:15px;line-height:1.75}
+.yasal-menu{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
+.yasal-menu a{padding:9px 16px;border-radius:50px;border:1.5px solid var(--border);color:var(--navy);font-weight:600;font-size:13.5px;text-decoration:none}
+.yasal-menu a:hover{border-color:var(--gold);color:var(--gold)}
+.yasal-icerik section{scroll-margin-top:90px;margin-bottom:56px}
+.yasal-icerik h2{font-family:var(--ff-head);font-size:clamp(24px,3vw,32px);color:var(--navy);margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--gold)}
+.yasal-icerik h3{font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 10px}
+.yasal-icerik p{margin-bottom:12px;color:var(--text-muted)}
+.yasal-icerik ul{margin:0 0 14px 20px;color:var(--text-muted)}
+.yasal-icerik li{margin-bottom:6px}
+.yasal-icerik strong{color:var(--text-dark)}
+.yasal-icerik a{color:var(--gold)}
+.yasal-icerik code{background:var(--cream);padding:1px 6px;border-radius:4px;font-size:13px}
+.yasal-kutu{background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;color:var(--text-muted)}
+.yasal-tablo-wrap{overflow-x:auto;margin:6px 0 14px}
+.yasal-tablo{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+.yasal-tablo th,.yasal-tablo td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.yasal-tablo th{background:var(--cream);color:var(--navy);font-weight:700}
+.yasal-tablo td{color:var(--text-muted)}
+.yasal-tarih{font-size:13px;color:var(--text-muted);font-style:italic}
 .sss-wrap{padding:72px 5vw;background:var(--white)}
 .sss-category{margin-bottom:52px}
 .sss-category-title{display:flex;align-items:center;gap:12px;font-family:var(--ff-head);font-size:22px;font-weight:700;color:var(--navy);margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--gold)}
@@ -119,7 +140,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
     <a href="turlar.html">Turlar</a>
     <a href="galeri.html">Galeri</a>
     <a href="hakkimizda.html">Hakkımızda</a>
-    <a href="sss.html" class="active">SSS</a>
+    <a href="sss.html">SSS</a>
     <a href="belgelerimiz.html">Belgelerimiz</a>
     <a href="iletisim.html" class="nav-cta">📞 İletişim</a>
   </div>
@@ -135,93 +156,121 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
 <div class="page-hero">
   <div class="page-hero-pattern"></div><div class="hero-glow"></div>
   <div class="page-hero-content">
-    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <span>SSS</span></div>
-    <div class="page-badge">❓ Merak Ettikleriniz</div>
-    <h1>Sıkça Sorulan <em>Sorular</em></h1>
-    <p class="page-hero-desc">Hac, Umre, Balkan turları ve rezervasyon hakkında en çok sorulan sorular ve cevapları.</p>
+    <div class="breadcrumb"><a href="index.html">Ana Sayfa</a> › <span>KVKK</span></div>
+    <div class="page-badge">🔒 Kişisel Verilerin Korunması</div>
+    <h1>KVKK Aydınlatma Metni <em>ve Çerez Politikası</em></h1>
+    <p class="page-hero-desc">Web sitemiz üzerinden paylaştığınız kişisel verilerin nasıl işlendiğini ve haklarınızı bu sayfada bulabilirsiniz.</p>
   </div>
 </div>
 
-<div class="sss-wrap">
+<div class="yasal-wrap">
+  <div class="yasal-icerik">
+    <nav class="yasal-menu">
+      <a href="#aydinlatma">KVKK Aydınlatma Metni</a>
+      <a href="#cerez">Çerez Politikası</a>
+    </nav>
 
-  <!-- GENEL -->
-  <div class="sss-category">
-    <div class="sss-category-title"><span>🌍</span> Genel Sorular</div>
-    <div class="sss-list">
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">1</span><span class="sss-q-text">Hangi tur ve seyahat hizmetlerini düzenliyorsunuz?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac ve Umre organizasyonlarının yanı sıra Balkanlar ve Avrupa başta olmak üzere yurt içi ve yurt dışı kültür, inanç ve grup turları düzenliyoruz. Farklı bütçe ve beklentilere uygun alternatifler sunuyoruz.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">2</span><span class="sss-q-text">Turlarınıza nereden katılım sağlanabilir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Organizasyonlarımızın kalkış noktaları tur programına göre değişmektedir. Ankara başta olmak üzere farklı şehirlerden katılım seçenekleri sunulabilmektedir. Güncel kalkış noktaları her turun programında belirtilmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">3</span><span class="sss-q-text">Tur fiyatlarına neler dahildir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Tur programına göre değişmekle birlikte konaklama, ulaşım, transferler, rehberlik hizmetleri ve programda belirtilen öğünler fiyata dahil olabilir. Her turun dahil olan ve olmayan hizmetleri program detaylarında açıkça belirtilmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">4</span><span class="sss-q-text">Tur ücretlerine dahil olmayan hizmetler nelerdir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Kişisel harcamalar, ekstra geziler, programda belirtilmeyen yemekler, yurt dışı çıkış harcı ve benzeri kişisel giderler tur paketine göre ayrıca ücretlendirilebilir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">5</span><span class="sss-q-text">Ödeme seçenekleriniz nelerdir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Turun niteliğine ve rezervasyon tarihine göre peşin veya taksitli ödeme seçenekleri sunulabilir. Güncel ödeme koşulları için bizimle iletişime geçebilirsiniz.</div></div>
-    </div>
+    <section id="aydinlatma">
+      <h2>Kişisel Verilerin İşlenmesine İlişkin Aydınlatma Metni</h2>
+      <p>6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, web sitemiz üzerinden elde edilen kişisel verileriniz, veri sorumlusu sıfatıyla aşağıda bilgileri yer alan şirketimiz tarafından, bu metinde açıklanan kapsamda işlenmektedir.</p>
+
+      <h3>1. Veri Sorumlusu</h3>
+      <div class="yasal-kutu">
+        <strong>İsmail Coşar Turizm Seyahat Havacılık İnş. Tarım Emlak San. ve Tic. Ltd. Şti.</strong><br>
+        Adres: Yavuzselim Mah. Hükümet Cad. No:24/1 Çubuk / Ankara<br>
+        Telefon: <a href="tel:+905331980781">0533 198 07 81</a><br>
+        E-posta: <a href="mailto:ismailcosarturizm@gmail.com">ismailcosarturizm@gmail.com</a>
+      </div>
+
+      <h3>2. İşlenen Kişisel Verileriniz</h3>
+      <ul>
+        <li><strong>Kimlik bilgileri:</strong> Ad ve soyad.</li>
+        <li><strong>İletişim bilgileri:</strong> Telefon numarası, e-posta adresi.</li>
+        <li><strong>Talep bilgileri:</strong> İlgilendiğiniz tur veya program, hizmet türü, kişi sayısı, tercih ettiğiniz tarih ve mesajınızda paylaştığınız bilgiler.</li>
+        <li><strong>İşlem güvenliği bilgileri:</strong> Formun gönderildiği tarih, saat ve sayfa.</li>
+        <li><strong>Site kullanım bilgileri (yalnızca onay vermeniz halinde):</strong> Google Analytics çerezleri aracılığıyla toplanan ziyaret edilen sayfalar, ziyaret süresi, cihaz ve tarayıcı türü gibi istatistiksel bilgiler.</li>
+      </ul>
+      <p>Bu metin, web sitemizdeki formlar ve çerezler aracılığıyla toplanan verileri kapsar. Tur kaydınızın kesinleşmesi aşamasında, hizmetin gerektirdiği ek bilgiler (örneğin pasaport bilgileri) ayrıca talep edilir ve bu konuda ayrıca bilgilendirilirsiniz.</p>
+
+      <h3>3. Kişisel Verilerinizin İşlenme Amaçları</h3>
+      <ul>
+        <li>Kayıt, bilgi ve iletişim taleplerinizin alınması, değerlendirilmesi ve size geri dönüş yapılması,</li>
+        <li>Hac, umre ve diğer tur organizasyonlarımız hakkında talep ettiğiniz bilgilerin sunulması,</li>
+        <li>Talebiniz doğrultusunda sözleşme öncesi ve sözleşme süreçlerinin yürütülmesi,</li>
+        <li>Mevzuattan kaynaklanan yükümlülüklerin yerine getirilmesi ve yetkili kurumlara bilgi verilmesi,</li>
+        <li>Web sitemizin güvenliğinin sağlanması ve onay vermeniz halinde, site kullanımının istatistiksel olarak ölçülerek iyileştirilmesi.</li>
+      </ul>
+
+      <h3>4. Hukuki Sebepler ve Toplama Yöntemi</h3>
+      <p>Kişisel verileriniz, web sitemizdeki kayıt ve iletişim formları ile çerezler aracılığıyla elektronik ortamda toplanmaktadır. Bu veriler KVKK'nın 5. maddesinde yer alan;</p>
+      <ul>
+        <li>bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması (m.5/2-c),</li>
+        <li>veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi için zorunlu olması (m.5/2-ç),</li>
+        <li>ilgili kişinin temel hak ve özgürlüklerine zarar vermemek kaydıyla, veri sorumlusunun meşru menfaatleri için zorunlu olması (m.5/2-f)</li>
+      </ul>
+      <p>hukuki sebeplerine dayanılarak işlenir. Analitik çerezlerin kullanılması ve kişisel verilerinizin aşağıda belirtilen yurt dışındaki hizmet sağlayıcılara aktarılması ise <strong>açık rızanıza</strong> dayanır (m.5/1 ve m.9).</p>
+
+      <h3>5. Kişisel Verilerin Aktarılması</h3>
+      <p><strong>Yurt içi aktarım:</strong> Kişisel verileriniz, talep edilmesi halinde yetkili kamu kurum ve kuruluşlarına; tur kaydınızın kesinleşmesi halinde ise hizmetin yerine getirilmesi için gerekli olduğu ölçüde ulaşım, konaklama ve organizasyon hizmeti aldığımız iş ortaklarımıza aktarılabilir.</p>
+      <p><strong>Yurt dışı aktarım:</strong> Web sitemizin teknik altyapısında yurt dışında bulunan hizmet sağlayıcılardan yararlanılmaktadır. Bu kapsamda verileriniz, açık rızanıza dayanarak aşağıdaki hizmet sağlayıcıların sunucularında saklanabilir veya bu sağlayıcılar üzerinden iletilebilir:</p>
+      <ul>
+        <li><strong>Supabase</strong> – form başvurularının saklandığı bulut veritabanı hizmeti,</li>
+        <li><strong>Web3Forms</strong> – form başvurularının şirketimize e-posta ile iletilmesini sağlayan hizmet,</li>
+        <li><strong>GitHub (GitHub Pages)</strong> – web sitesinin barındırma hizmeti,</li>
+        <li><strong>Google (Google Analytics)</strong> – yalnızca çerez onayı vermeniz halinde, site kullanım istatistikleri.</li>
+      </ul>
+
+      <h3>6. Saklama Süresi</h3>
+      <p>Kişisel verileriniz, işleme amacının gerektirdiği süre ve ilgili mevzuatta öngörülen süreler boyunca saklanır. Bu sürelerin sona ermesiyle birlikte silinir, yok edilir veya anonim hale getirilir.</p>
+
+      <h3>7. KVKK Kapsamındaki Haklarınız</h3>
+      <p>KVKK'nın 11. maddesi uyarınca şirketimize başvurarak;</p>
+      <ul>
+        <li>kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme,</li>
+        <li>işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+        <li>yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,</li>
+        <li>eksik veya yanlış işlenmiş olması halinde düzeltilmesini isteme,</li>
+        <li>KVKK'nın 7. maddesindeki şartlar çerçevesinde silinmesini veya yok edilmesini isteme,</li>
+        <li>düzeltme, silme veya yok etme işlemlerinin, verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,</li>
+        <li>işlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme,</li>
+        <li>kanuna aykırı işleme sebebiyle zarara uğramanız halinde zararın giderilmesini talep etme</li>
+      </ul>
+      <p>haklarına sahipsiniz. Verdiğiniz açık rızayı dilediğiniz zaman geri alabilirsiniz.</p>
+
+      <h3>8. Başvuru Yöntemi</h3>
+      <p>Haklarınıza ilişkin taleplerinizi, Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğ'e uygun olarak, yukarıdaki adrese yazılı olarak veya <a href="mailto:ismailcosarturizm@gmail.com">ismailcosarturizm@gmail.com</a> adresine e-posta ile iletebilirsiniz. Başvurunuz, niteliğine göre en geç otuz gün içinde ücretsiz olarak sonuçlandırılır.</p>
+    </section>
+
+    <section id="cerez">
+      <h2>Çerez Politikası</h2>
+      <p>Çerezler, ziyaret ettiğiniz web sitesi tarafından tarayıcınıza kaydedilen küçük metin dosyalarıdır. Web sitemizde kullanılan çerezler ve benzeri teknolojiler aşağıda açıklanmıştır.</p>
+
+      <h3>Zorunlu Kayıt</h3>
+      <p>Çerez tercihinizi (kabul veya ret) hatırlamak için tarayıcınızın yerel depolama alanına <code>cerez-tercihi</code> adlı bir kayıt yazılır. Bu kayıt, bildirimin her ziyarette yeniden gösterilmemesi için gereklidir ve kişisel veri içermez.</p>
+
+      <h3>Analitik Çerezler (onaya bağlı)</h3>
+      <div class="yasal-tablo-wrap">
+        <table class="yasal-tablo">
+          <thead><tr><th>Çerez</th><th>Sağlayıcı</th><th>Amaç</th><th>Süre</th></tr></thead>
+          <tbody>
+            <tr><td><code>_ga</code></td><td>Google Analytics</td><td>Ziyaretçileri ayırt ederek site kullanım istatistiği oluşturmak</td><td>2 yıl</td></tr>
+            <tr><td><code>_ga_*</code></td><td>Google Analytics</td><td>Ziyaret oturumunun durumunu korumak</td><td>2 yıl</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Analitik çerezler <strong>yalnızca çerez bildiriminde "Kabul Et" seçeneğini işaretlemeniz halinde</strong> çalışır. "Reddet" seçeneğini işaretlerseniz Google Analytics hiç yüklenmez.</p>
+
+      <h3>Tercihinizi Değiştirme</h3>
+      <p>Çerez tercihinizi istediğiniz zaman değiştirebilirsiniz: <a href="#" onclick="cerezAyarlari();return false">Çerez Tercihlerini Aç</a>. Ayrıca tarayıcınızın ayarlarından çerezleri silebilir veya engelleyebilirsiniz.</p>
+    </section>
+
+    <p class="yasal-tarih">Son güncelleme: 4 Ekim 2026</p>
   </div>
-
-  <!-- UMRE -->
-  <div class="sss-category">
-    <div class="sss-category-title"><span>🌙</span> Umre Hakkında</div>
-    <div class="sss-list">
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">6</span><span class="sss-q-text">Umre turlarınız hangi dönemlerde düzenleniyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Yıl içerisinde her ay olmak üzere Umre organizasyonları düzenliyoruz. Özellikle sömestr ve tatil dönemlerinde farklı süre ve konaklama seçenekleri sunulmaktadır.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">7</span><span class="sss-q-text">Umre paketlerinde oteller nerede bulunuyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Umre programına göre Mekke ve Medine'de farklı konum ve standartlarda oteller kullanılmaktadır. Otelin Kâbe-i Şerif'e veya Mescid-i Nebevî'ye olan mesafesi programda belirtilmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">8</span><span class="sss-q-text">Umre sırasında rehberlik hizmeti veriliyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Umre programlarımızda grup boyunca deneyimli kafile başkanı ve rehberlik hizmeti sunulmaktadır. İbadetlerin daha bilinçli ve düzenli şekilde yerine getirilmesine yardımcı oluyoruz.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">9</span><span class="sss-q-text">Umre programlarında Mekke ve Medine'de kaç gün kalınıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Konaklama süresi seçilen pakete göre değişmektedir. 10, 14 gün ve farklı sürelerde alternatif Umre programları hazırlanabilmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">10</span><span class="sss-q-text">Umreye ilk defa gidecekler için bilgilendirme yapılıyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Umre öncesinde yolculuk, ihram, umre ibadeti, dikkat edilmesi gereken hususlar ve programın işleyişi hakkında bilgilendirme yapılmaktadır.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">11</span><span class="sss-q-text">Yaşlı veya özel desteğe ihtiyaç duyan kişiler Umreye katılabilir mi?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Elbette. Yaşlı misafirlerimizin ve özel ihtiyaçları bulunan yolcularımızın durumlarını rezervasyon öncesinde bildirerek gerekli planlamayı birlikte yapıyoruz.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">12</span><span class="sss-q-text">Aile olarak Umreye katılabilir miyiz?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Aileler için uygun oda ve konaklama seçenekleri sunulmaktadır. Aynı aileden katılacak kişilerin mümkün olduğunca birlikte konaklaması için rezervasyon aşamasında gerekli planlama yapılır.</div></div>
-    </div>
-  </div>
-
-  <!-- HAC -->
-  <div class="sss-category">
-    <div class="sss-category-title"><span>🕋</span> Hac Hakkında</div>
-    <div class="sss-list">
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">13</span><span class="sss-q-text">Hac organizasyonunuz nasıl gerçekleştiriliyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac organizasyonları ilgili resmi mevzuat ve yetkili kurumların belirlediği şartlar doğrultusunda gerçekleştirilir. Kontenjan, başvuru ve kayıt süreçleri dönemsel olarak değişebildiğinden güncel bilgiler tarafımızdan paylaşılır.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">14</span><span class="sss-q-text">Hac için hangi belgeler gereklidir?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Gerekli belgeler dönemsel uygulamalara göre değişebilir. Pasaport, başvuru belgeleri, sağlık belgeleri ve ilgili resmi evraklar konusunda kayıt sürecinde misafirlerimize gerekli bilgilendirme yapılmaktadır.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">15</span><span class="sss-q-text">Hac ve Umre arasında ne gibi farklar vardır?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Hac, belirli zaman diliminde ve belirli şartları bulunan farz bir ibadettir. Umre ise yılın farklı dönemlerinde gerçekleştirilebilen bir ibadettir. Her iki ibadet için de program ve hazırlık süreçleri farklıdır.</div></div>
-    </div>
-  </div>
-
-  <!-- BALKAN -->
-  <div class="sss-category">
-    <div class="sss-category-title"><span>🗺️</span> Balkan Turları</div>
-    <div class="sss-list">
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">16</span><span class="sss-q-text">Balkan turlarınız hangi ülkeleri kapsıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Programlara göre değişmekle birlikte Makedonya, Kosova, Arnavutluk, Karadağ, Bosna-Hersek, Sırbistan ve çevre ülkeleri kapsayan farklı Balkan rotaları düzenlenmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">17</span><span class="sss-q-text">Balkan turuna katılmak için Schengen vizesi gerekiyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Tur programında ziyaret edilecek ülkelere göre vize şartları değişmektedir. Balkan ülkelerinin her biri için farklı giriş kuralları bulunabileceğinden, rezervasyon öncesinde pasaport ve vize durumunuz kontrol edilmelidir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">18</span><span class="sss-q-text">Balkan turlarında hangi otellerde konaklanıyor?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Programın kategorisine göre seçilen 4 ve 5 yıldızlı otellerde konaklama yapılmaktadır. Otel bilgileri tur programı kesinleştiğinde misafirlerimize bildirilir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">19</span><span class="sss-q-text">Balkan turlarında rehber bulunuyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Programın özelliğine göre profesyonel rehberlik hizmeti sunulmaktadır. Gezilecek şehirler, tarihi yapılar ve kültürel noktalar hakkında kapsamlı bilgi verilmektedir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">20</span><span class="sss-q-text">Balkan turlarında yemekler fiyata dahil mi?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Turdan tura değişmektedir. Dahil olan öğünler tur programında açıkça belirtilir. Bazı programlarda kahvaltı ve akşam yemeği dahil olabilir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">21</span><span class="sss-q-text">Balkan turuna tek başıma katılabilir miyim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Tek başına seyahat eden misafirlerimiz de grup turlarımıza katılabilir. Tek kişilik oda isteyen misafirlerimiz için tur paketine göre single oda farkı uygulanabilir.</div></div>
-    </div>
-  </div>
-
-  <!-- REZERVASYON -->
-  <div class="sss-category">
-    <div class="sss-category-title"><span>📋</span> Rezervasyon ve Seyahat</div>
-    <div class="sss-list">
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">22</span><span class="sss-q-text">Tur rezervasyonunu nasıl yapabilirim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Web sitemiz, telefon, WhatsApp veya ofisimiz üzerinden rezervasyon talebinizi oluşturabilirsiniz. Kontenjan ve uygunluk kontrolünden sonra kayıt işleminiz tamamlanır.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">23</span><span class="sss-q-text">Rezervasyon yaptıktan sonra turumu iptal edebilir miyim?</span><span class="sss-q-icon">+</span></div><div class="sss-a">İptal ve iade koşulları seçilen tur, rezervasyon tarihi ve ilgili hizmet sağlayıcılarının kurallarına göre değişebilir. Kayıt sırasında geçerli olan iptal ve iade şartları misafirimize bildirilir.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">24</span><span class="sss-q-text">Pasaportumun geçerlilik süresi ne kadar olmalı?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Pasaport geçerlilik şartları gidilecek ülkeye ve seyahatin türüne göre değişebilir. Seyahat öncesinde pasaportunuzun geçerlilik süresini kontrol etmenizi ve rezervasyon sırasında pasaport durumunuzu bildirmenizi öneriyoruz.</div></div>
-      <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)"><span class="sss-num">25</span><span class="sss-q-text">Seyahat öncesinde bilgilendirme yapılıyor mu?</span><span class="sss-q-icon">+</span></div><div class="sss-a">Evet. Tur tarihinden önce uçuş, buluşma noktası, otel, transfer, bagaj, gerekli belgeler ve tur programıyla ilgili tüm önemli bilgiler misafirlerimizle paylaşılır. Amacımız, seyahatinizin başlangıcından dönüşünüze kadar süreci güvenli, düzenli ve konforlu şekilde yönetmektir.</div></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- NEDEN BİZ -->
-<div class="neden-band">
-  <h2>Neden İsmail Coşar Turizm?</h2>
-  <div class="neden-grid">
-    <span class="neden-tag">✅ Güvenilir Organizasyon</span>
-    <span class="neden-tag">👨‍💼 Deneyimli Ekip</span>
-    <span class="neden-tag">🎓 Profesyonel Rehberlik</span>
-    <span class="neden-tag">📋 Şeffaf Program</span>
-    <span class="neden-tag">🏨 Konforlu Konaklama</span>
-  </div>
-  <p class="neden-desc">Her seyahatin sizin için özel olduğunun bilinciyle, ibadet ve tatil amaçlı yolculuklarınızı güven ve huzur içerisinde gerçekleştirmeniz için yanınızdayız.</p>
 </div>
 
 <div class="cta-band">
-  <h2>Aklınızdaki Soruyu Sormak İster misiniz?</h2>
-  <p>Cevabını bulamadığınız sorular için bize doğrudan ulaşın.</p>
+  <h2>Sorunuz mu var?</h2>
+  <p>Kişisel verilerinizle ilgili her türlü talebiniz için bize ulaşabilirsiniz.</p>
   <div class="cta-actions">
     <a href="iletisim.html" class="btn-navy">📋 İletişim Formu</a>
     <a href="https://wa.me/905331980781?text=Merhaba%2C%20sormak%20istedi%C4%9Fim%20bir%20soru%20var." class="btn-wa" target="_blank">💬 WhatsApp</a>
@@ -271,14 +320,6 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
 </footer>
 <a href="https://wa.me/905331980781" class="floating-wa" target="_blank">💬</a>
 
-<script>
-function toggleSSS(el){
-  var item=el.closest('.sss-item');
-  var was=item.classList.contains('open');
-  document.querySelectorAll('.sss-item').forEach(function(i){i.classList.remove('open')});
-  if(!was) item.classList.add('open');
-}
-</script>
 <script src="cerez.js" defer></script>
 </body>
 </html>

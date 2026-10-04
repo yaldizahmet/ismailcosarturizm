@@ -668,7 +668,7 @@ async function renderBasvurular() {
           ${b.eposta?`<a href="mailto:${esc(b.eposta)}" style="color:#0B1F3A;text-decoration:none">✉️ ${esc(b.eposta)}</a>`:''}
           ${b.hizmet?`<span>🏷 ${esc(b.hizmet)}</span>`:''}
           ${b.kisi_sayisi?`<span>👥 ${esc(b.kisi_sayisi)}${/^\d+$/.test(b.kisi_sayisi)?' kişi':''}</span>`:''}
-          ${ekstra.map(([k,v]) => `<span>• ${esc(({'tercih-tarih':'Tercih edilen tarih'})[k]||k)}: ${esc(v)}</span>`).join('')}
+          ${ekstra.map(([k,v]) => `<span>• ${esc(({'tercih-tarih':'Tercih edilen tarih','kvkk_onay':'KVKK onayı'})[k]||k)}: ${esc(v)}</span>`).join('')}
         </div>
         ${b.mesaj?`<div style="margin-top:12px;padding:10px 12px;background:#f7f7f7;border-radius:8px;font-size:13.5px;white-space:pre-wrap">${esc(b.mesaj)}</div>`:''}
         <div style="margin-top:12px;text-align:right"><button class="btn btn-red" style="padding:6px 12px;font-size:12px" onclick="basvuruSil(${b.id})">Sil</button></div>
