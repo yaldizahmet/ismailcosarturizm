@@ -204,10 +204,6 @@ async function sbTurlariYukle(kategori) {
   const { data } = await q.order('tarih');
   return data || [];
 }
-async function sbFiyatlariYukle(tip) {
-  const { data } = await _SB.from('fiyat_tablolari').select('*').eq('tip', tip).order('sira');
-  return data || [];
-}
 </script>
 <script>
 /* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
@@ -466,36 +462,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       }).join('');
     }
   }
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', async function() {
-  const { data: sezonlar } = await _SB.from('sezon_programlari').select('*').eq('aktif', true).order('sira');
-  if (!sezonlar || !sezonlar.length) return;
-  
-  const grid = document.querySelector('.seasons-grid');
-  if (!grid) return;
-  
-  grid.innerHTML = sezonlar.map(s => {
-    const safe = s.ad.replace(/'/g, "\'");
-    const ozellikler = [s.ozellik1, s.ozellik2].filter(Boolean).map(o => `<span class="stag">${o}</span>`).join('');
-    return `<div class="season-card">
-      <div class="season-top">
-        <div class="season-icon">${s.icon}</div>
-        <div>
-          <div class="season-label">${s.label}</div>
-          <div class="season-name">${s.ad}</div>
-        </div>
-      </div>
-      <div class="season-body">
-        <div class="season-tags"><span class="stag">⏱ ${s.sure}</span>${ozellikler}</div>
-        <p class="season-desc">${s.aciklama||''}</p>
-        <div class="season-footer">
-          <button class="btn-sm" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
 });
 </script>
 <script src="cerez.js" defer></script>

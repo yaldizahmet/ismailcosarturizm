@@ -197,10 +197,6 @@ async function sbTurlariYukle(kategori) {
   const { data } = await q.order('tarih');
   return data || [];
 }
-async function sbFiyatlariYukle(tip) {
-  const { data } = await _SB.from('fiyat_tablolari').select('*').eq('tip', tip).order('sira');
-  return data || [];
-}
 </script>
 <script>
 /* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
