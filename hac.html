@@ -172,20 +172,6 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
   <meta name="twitter:description" content="Hac programları: ekonomi, standart ve VIP paketler. Diyanet onaylı, 5 yıldızlı otel, uzman rehber. Hac için hemen kayıt olun: 0533 198 07 81">
 
   <!-- Schema.org Yapısal Veri -->
-  <script type="application/ld+json">
-  {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "Hac Organizasyonu",
-      "description": "Diyanet onaylı hac turu. Ekonomi, standart ve VIP paket seçenekleri.",
-      "brand": {"@type": "Brand", "name": "İsmail Coşar Turizm"},
-      "offers": [
-        {"@type": "Offer", "name": "Ekonomi Paket", "price": "58000", "priceCurrency": "TRY"},
-        {"@type": "Offer", "name": "Standart Paket", "price": "72000", "priceCurrency": "TRY"},
-        {"@type": "Offer", "name": "VIP Paket", "price": "115000", "priceCurrency": "TRY"}
-      ]
-    }
-  </script>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -417,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             <span class="paket-price-num">${p.fiyat} ${p.para_birimi}</span>${odaKisaHtml(p)}</div>
             ${p.tarih?`<div style="font-size:13px;color:var(--text-muted);margin:4px 0 12px">📅 ${turTarihAraligi(p)} ${kalkisaKalan(p)}</div>`:''}
             <ul class="paket-includes">
-              <li>Direkt uçuş (Türkiye–Cidde)</li>
+              <li>Türkiye–Cidde uçuşu</li>
               <li>Mekke ve Medine'de otel (${p.sure})</li>
               <li>Türkçe din görevlisi rehber</li>
               <li>Vize, kurban ve sigorta desteği</li>
