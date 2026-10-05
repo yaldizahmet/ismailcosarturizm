@@ -101,6 +101,7 @@ function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);ret
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
 function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return '<div>'+x[0].toLocaleLowerCase('tr')+' odada kişi başı: <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
+function kalkisaKalan(t){if(!/^\d{4}-\d{2}-\d{2}$/.test(t.tarih||''))return'';var k=new Date(t.tarih+'T00:00:00+03:00').getTime(),n=Date.now();if(k<=n-86400000)return'';var g=Math.ceil((k-n)/86400000);var y=g<=0?'Bugün kalkış':(g===1?'Yarın kalkış':'Kalkışa '+g+' gün');return '<span class="kalkis-etiket" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#8a5a00;background:#FBF1DC;border:1px solid #EBD3A0;padding:2px 9px;border-radius:50px;white-space:nowrap;vertical-align:middle">⏳ '+y+'</span>';}
 function odaListeHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:13px;line-height:1.7;margin-top:4px">'+o.map(function(x){return '<div><span style="color:var(--text-muted)">'+x[0].toLocaleLowerCase('tr')+' odada kişi başı:</span> <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 </script>
 <script>
@@ -259,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       </div>
       <h1 class="tur-baslik">${tur.gorsel ? '' : (tur.icon || '') + ' '}${tur.baslik}</h1>
       <div class="tur-meta">
-        <span class="tur-meta-item">📅 ${turTarihAraligi(tur)}</span>
+        <span class="tur-meta-item">📅 ${turTarihAraligi(tur)}</span>${kalkisaKalan(tur)}
         <span class="tur-meta-item">⏱ ${tur.sure}</span>
         <span class="tur-meta-item">📍 ${tur.konum}</span>
         <span class="tur-meta-item">👥 ${tur.kapasite||''}</span>
