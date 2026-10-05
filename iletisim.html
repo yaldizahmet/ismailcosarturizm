@@ -103,14 +103,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .form-submit:hover{background:var(--gold-light)}
 .form-success{display:none;text-align:center;padding:28px;background:#e8f5e9;border-radius:var(--r);color:#2e7d32}
 .form-success-icon{font-size:46px;margin-bottom:10px}
-.sss-section{background:var(--cream)}
-.sss-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:36px}
-.sss-item{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
-.sss-q{padding:15px 18px;font-size:14px;font-weight:600;color:var(--text-dark);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:background .2s}
-.sss-q:hover{background:rgba(201,151,43,.04)}.sss-q-icon{color:var(--gold);font-size:18px;transition:transform .25s;flex-shrink:0}
-.sss-a{display:none;padding:0 18px 14px;font-size:13.5px;color:var(--text-muted);line-height:1.7}
-.sss-item.open .sss-q-icon{transform:rotate(45deg)}.sss-item.open .sss-a{display:block}
-@media(max-width:900px){.contact-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.sss-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.contact-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
 
 
 </style>
@@ -319,17 +312,6 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
     </div>
   </div>
 </section>
-<section class="sss-section">
-  <div class="section-eyebrow">SSS</div><h2 class="section-title">Sıkça Sorulan Sorular</h2>
-  <div class="sss-grid">
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Ne zaman yanıt alırım? <span class="sss-q-icon">+</span></div><div class="sss-a">Hafta içi gönderilen formlar genellikle 2–3 saat içinde yanıtlanır. Hafta sonu en geç ertesi iş günü dönüş yapılır.</div></div>
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Kayıt için peşinat ne kadar? <span class="sss-q-icon">+</span></div><div class="sss-a">Genellikle toplam ücretin %20–30'u kadar ön ödeme alınmaktadır. Kalan tutar taksitli ödenebilir.</div></div>
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">İptal ve iade politikası nedir? <span class="sss-q-icon">+</span></div><div class="sss-a">60 gün öncesi iptallerde tam iade. 30–60 gün arasında %50. 30 günden az kalan iptallerde iade yapılmamaktadır.</div></div>
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Özel grup turu organize edebilir misiniz? <span class="sss-q-icon">+</span></div><div class="sss-a">Evet! Minimum 15 kişi ile özel tur düzenleyebiliyoruz. Tarih ve destinasyonu siz belirleyin, teklif hazırlayalım.</div></div>
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Çocuklar için indirim var mı? <span class="sss-q-icon">+</span></div><div class="sss-a">2–12 yaş arası çocuklar için özel indirim uygulanmaktadır. Detaylar için bizi arayın.</div></div>
-    <div class="sss-item"><div class="sss-q" onclick="toggleSSS(this)">Seyahat sigortası dahil mi? <span class="sss-q-icon">+</span></div><div class="sss-a">Evet, tüm programlarımıza hastalık, kaza ve bagaj kayıplarını kapsayan seyahat sigortası dahildir.</div></div>
-  </div>
-</section>
 <footer>
   <div class="footer-grid">
     <div><img src="logo.png" alt="İsmail Coşar Turizm" class="footer-logo-img"><p class="footer-brand-desc">Hac, umre ve yurt dışı turlarında güvenilir çözüm ortağınız.</p><div class="footer-badges"><span class="footer-badge">TURSAB</span><span class="footer-badge">Diyanet Onaylı</span></div>
@@ -384,7 +366,6 @@ function submitForm(){
   })
   .catch(function(){alert('Bir hata oluştu. Lütfen doğrudan bizi arayın: 0533 198 07 81');});
 }
-function toggleSSS(el){var item=el.closest('.sss-item'),was=item.classList.contains('open');document.querySelectorAll('.sss-item').forEach(i=>i.classList.remove('open'));if(!was)item.classList.add('open')}
 </script>
 <script src="cerez.js" defer></script>
 </body>
