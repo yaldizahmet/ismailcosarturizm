@@ -12,7 +12,7 @@
   var TEL_LINK = 'tel:+905331980781';
   var WA = 'https://wa.me/905331980781?text=';
   var EPOSTA = 'ismailcosarturizm@gmail.com';
-  var ADRES = 'Yavuzselim Mah. Hükümet Cad. No:24/1 Çubuk / Ankara';
+  var ADRES = 'Dr. Mediha Eldem Sk. 81/17 Çankaya / Ankara';
 
   /* ---------- Yardımcılar ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
