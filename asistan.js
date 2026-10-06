@@ -32,36 +32,55 @@
   }
   function waLink(metin) { return WA + encodeURIComponent('Merhaba, web sitenizden yazıyorum. ' + metin); }
 
-  /* ---------- Bilgi bankası (SSS sayfasından) ----------
-     k: anahtar kelime kökleri (sade yazımla, kelimenin başıyla eşleşir)
-     Her eşleşen kök +1 puan; 'g' (güçlü) kökler +2 puan. */
-  var SSS = [
-    { k: ['hizmet', 'neler', 'ne tur', 'hangi tur', 'duzenliyor'], g: ['hangi hizmet', 'neler yapiyor'], c: 'Hac ve Umre organizasyonlarının yanı sıra Balkanlar ve Avrupa başta olmak üzere yurt içi ve yurt dışı kültür, inanç ve grup turları düzenliyoruz. Farklı bütçe ve beklentilere uygun alternatifler sunuyoruz.' },
-    { k: ['kalkis', 'nereden', 'hangi sehir', 'katilim'], g: ['kalkis', 'nereden kalk'], c: 'Kalkış noktaları tur programına göre değişir. Ankara başta olmak üzere farklı şehirlerden katılım seçenekleri sunulabiliyor; güncel kalkış noktası her turun programında belirtilir.' },
-    { k: ['dahil', 'icinde', 'kapsa'], g: ['neler dahil', 'fiyata dahil', 'ucrete dahil'], c: 'Tura göre değişmekle birlikte konaklama, ulaşım, transferler, rehberlik ve programda belirtilen öğünler fiyata dahil olabilir. Her turun dahil olan ve olmayan hizmetleri, tur detay sayfasında açıkça yazar.' },
-    { k: ['haric', 'dahil degil', 'ekstra', 'harc'], g: ['dahil olmayan', 'haric'], c: 'Kişisel harcamalar, ekstra geziler, programda belirtilmeyen yemekler, yurt dışı çıkış harcı gibi kişisel giderler pakete göre ayrıca ücretlendirilebilir.' },
-    { k: ['odeme', 'taksit', 'pesin', 'kredi kart', 'kart', 'havale'], g: ['taksit', 'odeme'], c: 'Turun niteliğine ve rezervasyon tarihine göre peşin veya taksitli ödeme seçenekleri sunulabiliyor. Güncel ödeme koşulları için bize ulaşmanız en doğrusu.', wa: 'Ödeme ve taksit seçenekleri hakkında bilgi almak istiyorum.' },
-    { k: ['donem', 'hangi ay', 'ayda', 'somestr', 'tatil', 'yil boyu'], g: ['hangi donem', 'hangi ay'], c: 'Yıl içinde her ay Umre organizasyonu düzenliyoruz. Özellikle sömestr ve tatil dönemlerinde farklı süre ve konaklama seçenekleri sunuyoruz.', ek: 'umre' },
-    { k: ['otel', 'konum', 'mesafe', 'yakin', 'kabe', 'harem', 'mescid'], g: ['otel nerede', 'mesafe', 'yurume'], c: 'Umre programına göre Mekke ve Medine\'de farklı konum ve standartlarda oteller kullanılıyor. Otelin Kâbe-i Şerif\'e veya Mescid-i Nebevî\'ye mesafesi programda belirtiliyor.', ek: 'umre' },
-    { k: ['rehber', 'kafile', 'hoca', 'gorevli'], g: ['rehber', 'kafile baskan'], c: 'Evet. Programlarımızda grup boyunca deneyimli kafile başkanı ve rehberlik hizmeti sunuyoruz.' },
-    { k: ['kac gun', 'gun kal', 'sure', 'kac gece', 'medine de', 'mekke de'], g: ['kac gun', 'kac gece'], c: 'Konaklama süresi seçilen pakete göre değişiyor. 10, 14 gün ve farklı sürelerde Umre programları hazırlanabiliyor.', ek: 'umre' },
-    { k: ['ilk defa', 'ilk kez', 'bilgilendirme', 'ihram', 'egitim', 'seminer'], g: ['ilk defa', 'ilk kez', 'ihram'], c: 'Evet. Umre öncesinde yolculuk, ihram, umre ibadeti, dikkat edilmesi gerekenler ve programın işleyişi hakkında bilgilendirme yapıyoruz.' },
-    { k: ['yasli', 'engelli', 'tekerlekli', 'hasta', 'ozel destek', 'refakat', 'ozel ihtiyac'], g: ['yasli', 'engelli', 'tekerlekli'], c: 'Elbette. Yaşlı misafirlerimizin ve özel ihtiyacı olan yolcularımızın durumunu rezervasyon öncesinde bildirirseniz gerekli planlamayı birlikte yapıyoruz.', wa: 'Özel destek gerektiren bir yolcu için bilgi almak istiyorum.' },
-    { k: ['aile', 'cocuk', 'esim', 'beraber', 'birlikte'], g: ['aile', 'cocuk'], c: 'Evet. Aileler için uygun oda ve konaklama seçenekleri sunuyoruz. Aynı aileden katılanların mümkün olduğunca birlikte konaklaması için rezervasyon aşamasında planlama yapılıyor.' },
-    { k: ['hac nasil', 'hac organizasyon', 'hac kayit', 'hac basvuru', 'kontenjan'], g: ['hac basvuru', 'hac kayit'], c: 'Hac organizasyonları resmi mevzuat ve yetkili kurumların belirlediği şartlar doğrultusunda yapılıyor. Kontenjan, başvuru ve kayıt süreçleri dönemsel olarak değiştiği için güncel bilgileri biz paylaşıyoruz.', ek: 'hac', wa: 'Hac başvurusu hakkında bilgi almak istiyorum.' },
-    { k: ['belge', 'evrak', 'gerekli', 'saglik raporu', 'asi'], g: ['hangi belge', 'evrak', 'gerekli belge'], c: 'Gerekli belgeler dönemsel uygulamalara göre değişebiliyor. Pasaport, başvuru belgeleri, sağlık belgeleri ve diğer resmi evraklar konusunda kayıt sürecinde ayrıntılı bilgilendirme yapıyoruz.', wa: 'Gerekli belgeler hakkında bilgi almak istiyorum.' },
-    { k: ['fark', 'arasinda'], g: ['hac ile umre', 'hac ve umre fark', 'farki'], c: 'Hac, belirli bir zaman diliminde ve belirli şartlarla yapılan farz bir ibadettir. Umre ise yılın farklı dönemlerinde yapılabilir. İkisinin program ve hazırlık süreçleri farklıdır.' },
-    { k: ['hangi ulke', 'ulkeler', 'rota', 'guzergah', 'makedonya', 'kosova', 'arnavutluk', 'karadag', 'bosna', 'sirbistan'], g: ['hangi ulke', 'rota'], c: 'Programa göre değişmekle birlikte Makedonya, Kosova, Arnavutluk, Karadağ, Bosna-Hersek, Sırbistan ve çevre ülkeleri kapsayan farklı Balkan rotaları düzenliyoruz.', ek: 'diger' },
-    { k: ['vize', 'schengen', 'vizesiz'], g: ['vize', 'schengen'], c: 'Vize şartları ziyaret edilecek ülkelere göre değişiyor. Balkan ülkelerinin giriş kuralları farklı olabildiği için rezervasyon öncesinde pasaport ve vize durumunuzu birlikte kontrol ediyoruz.', wa: 'Vize durumu hakkında bilgi almak istiyorum.' },
-    { k: ['yildiz', 'kac yildiz', 'balkan otel'], g: ['kac yildiz'], c: 'Balkan turlarında programın kategorisine göre seçilen 4 ve 5 yıldızlı otellerde konaklanıyor. Otel bilgileri tur programı kesinleşince bildiriliyor.' },
-    { k: ['yemek', 'ogun', 'kahvalti', 'aksam yemegi', 'yarim pansiyon', 'tam pansiyon'], g: ['yemek', 'ogun'], c: 'Turdan tura değişiyor. Dahil olan öğünler tur programında açıkça belirtiliyor; bazı programlarda kahvaltı ve akşam yemeği dahil.' },
-    { k: ['tek basima', 'yalniz', 'tek kisi', 'single'], g: ['tek basima', 'single', 'tek kisilik'], c: 'Evet, tek başına seyahat eden misafirlerimiz de grup turlarına katılabiliyor. Tek kişilik oda isteyenler için pakete göre single oda farkı uygulanabiliyor.' },
-    { k: ['rezervasyon', 'kayit', 'nasil katil', 'yer ayirt', 'basvur'], g: ['nasil kayit', 'rezervasyon', 'kayit ol'], c: 'Web sitemizdeki kayıt formundan, telefonla, WhatsApp\'tan veya ofisimizden rezervasyon talebi oluşturabilirsiniz. Kontenjan ve uygunluk kontrolünden sonra kaydınız tamamlanıyor. Her programın yanındaki "Kayıt Ol" butonunu kullanabilirsiniz.', wa: 'Rezervasyon yaptırmak istiyorum.' },
-    { k: ['iptal', 'iade', 'vazgec', 'geri odeme'], g: ['iptal', 'iade'], c: 'İptal ve iade koşulları seçilen tura, rezervasyon tarihine ve ilgili hizmet sağlayıcıların kurallarına göre değişiyor. Kayıt sırasında geçerli iptal ve iade şartları size ayrıca bildiriliyor.', wa: 'İptal ve iade koşulları hakkında bilgi almak istiyorum.' },
-    { k: ['pasaport', 'gecerlilik'], g: ['pasaport'], c: 'Pasaport geçerlilik şartları gidilecek ülkeye göre değişebiliyor. Seyahat öncesinde pasaportunuzun süresini kontrol etmenizi ve rezervasyon sırasında pasaport durumunuzu bize bildirmenizi öneriyoruz.' },
-    { k: ['seyahat oncesi', 'bagaj', 'bulusma', 'ucus saati', 'hazirlik'], g: ['bagaj', 'bulusma'], c: 'Evet. Tur tarihinden önce uçuş, buluşma noktası, otel, transfer, bagaj, gerekli belgeler ve programla ilgili tüm önemli bilgileri sizinle paylaşıyoruz.' },
-    { k: ['belgeler', 'lisans', 'yetki', 'tursab', 'diyanet', 'guvenilir', 'resmi'], g: ['yetki belgesi', 'lisans', 'tursab', 'guvenilir'], c: 'A Grubu Seyahat Acentası İşletme Belgemiz (Belge No: 10597) ve Diyanet İşleri Başkanlığı Hac & Umre Organizasyonu Yetki Belgemiz bulunuyor. Belgeleri <a href="belgelerimiz.html">Belgelerimiz</a> sayfasında görebilirsiniz.' }
-  ];
+  /* ---------- Bilgi bankası: SSS sayfasındaki sorular ----------
+     Cevaplar doğrudan sss.html'den okunur; SSS güncellenince asistan da güncellenir. */
+  var DURAK_SOZ = ['mi', 'mu', 'mı', 'mü', 'misiniz', 'miyim', 'miyiz', 'musunuz', 'var', 'yok', 'ne', 'neler', 'nedir', 'nasil', 'icin', 'ile', 've', 'veya', 'bir', 'bu', 'su', 'da', 'de', 'ben', 'benim', 'biz', 'siz', 'sizin', 'sizde', 'size', 'bana', 'olur', 'olarak', 'gibi', 'kadar', 'hangi', 'mumkun', 'acaba', 'merhaba', 'selam', 'lutfen', 'istiyorum', 'istiyoruz', 'yapabilir', 'yapiliyor', 'oluyor', 'ediyor', 'ki', 'en', 'cok', 'daha', 'ise', 'diye'];
+  var sssSoz = null;
+  function kok(w) { return w.length > 5 ? w.slice(0, 5) : w; }
+  function anlamli(metin) {
+    return kelimeler(metin).filter(function (w) { return w.length >= 3 && DURAK_SOZ.indexOf(w) === -1; }).map(kok);
+  }
+  function sssGetir() {
+    if (sssSoz) return sssSoz;
+    sssSoz = fetch('sss.html').then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); }).then(function (html) {
+      var liste = [], parcalar = html.split('<div class="sss-category"');
+      parcalar.slice(1).forEach(function (p) {
+        var kat = (p.match(/class="sss-category-title"><span>[^<]*<\/span>\s*([^<]+)</) || [])[1] || '';
+        var re = /<div class="sss-item" id="soru-(\d+)">.*?<span class="sss-q-text">(.*?)<\/span>.*?<div class="sss-a">(.*?)<\/div><\/div>/g, m;
+        while ((m = re.exec(p))) {
+          var soru = m[2].replace(/<[^>]+>/g, ''), cevap = m[3];
+          liste.push({ no: m[1], kat: kat.trim(), s: soru, c: cevap, ts: anlamli(soru), tk: anlamli(kat), tc: anlamli(cevap.replace(/<[^>]+>/g, ' ')) });
+        }
+      });
+      var df = {};
+      liste.forEach(function (x) { x.ts.concat(x.tk).filter(function (v, i, a) { return a.indexOf(v) === i; }).forEach(function (t) { df[t] = (df[t] || 0) + 1; }); });
+      liste.forEach(function (x) { x.df = df; });
+      liste.N = liste.length;
+      return liste;
+    }).catch(function () { sssSoz = null; return []; });
+    return sssSoz;
+  }
+  function benzer(a, b) { return a === b || (a.length >= 4 && b.length >= 4 && (a.indexOf(b) === 0 || b.indexOf(a) === 0)); }
+  function sssAra(metin, liste) {
+    var sorgu = anlamli(metin).filter(function (v, i, a) { return a.indexOf(v) === i; });
+    if (!sorgu.length || !liste.length) return [];
+    return liste.map(function (x) {
+      var p = 0, soruEslesme = 0, eslesenIdf = 0, toplamIdf = 0;
+      sorgu.forEach(function (t) {
+        var idf = Math.log(1 + liste.N / ((x.df[t] || 0) + 1));
+        toplamIdf += idf;
+        if (x.ts.some(function (w) { return benzer(w, t); })) { p += 3 * idf; soruEslesme++; eslesenIdf += idf; }
+        else if (x.tk.some(function (w) { return benzer(w, t); })) p += 1 * idf;
+        else if (x.tc.some(function (w) { return benzer(w, t); })) p += 0.6 * idf;
+      });
+      // Sorgudaki kelimelerin çoğu soruda geçiyorsa ödüllendir
+      p *= (0.6 + 0.4 * soruEslesme / sorgu.length);
+      return { x: x, p: p, se: soruEslesme, kap: toplamIdf ? eslesenIdf / toplamIdf : 0 };
+    }).filter(function (r) { return r.se > 0; }).sort(function (a, b) { return b.p - a.p; });
+  }
+  function sssCevapHtml(x) {
+    return x.c + '<div style="margin-top:6px"><a href="sss.html#soru-' + x.no + '" style="font-size:12.5px">📖 Sıkça Sorulan Sorular\'da gör</a></div>';
+  }
 
   var ILETISIM = { k: ['telefon', 'numara', 'adres', 'nerede', 'ofis', 'iletisim', 'ulas', 'mail', 'e posta', 'eposta', 'whatsapp', 'ara'], g: ['telefon', 'adres', 'iletisim', 'ofis'] };
   var SELAM = ['merhaba', 'selam', 'slm', 'gunaydin', 'iyi gunler', 'iyi aksamlar', 'hey', 'sa', 'selamun', 'esselamu'];
@@ -141,6 +160,7 @@
   }
 
   /* ---------- Cevap üretimi ---------- */
+  var GENEL = ['umre', 'hac', 'hacc', 'fiyat', 'ucret', 'para', 'tutar', 'zaman', 'tarih', 'progr', 'tur', 'turu', 'turla', 'paket', 'gidis', 'yakin', 'sonra', 'ilk', 'yurt', 'disi'];
   function cevapla(metin) {
     var m = sade(metin), s = kelimeler(metin);
     if (!m) return Promise.resolve({ h: 'Sorunuzu yazabilir ya da aşağıdaki konulardan birini seçebilirsiniz.' });
@@ -148,47 +168,51 @@
     var kategori = null;
     ['umre', 'hac', 'diger'].forEach(function (k) { if (!kategori && herhangi(m, s, KAT[k].k)) kategori = k; });
     var fiyatSoru = herhangi(m, s, FIYAT), tarihSoru = herhangi(m, s, TARIH);
-
-    // SSS ve iletişim puanları
-    var enIyi = null, enPuan = 0;
-    SSS.forEach(function (x) { var p = puan(m, s, x.k, x.g); if (p > enPuan) { enPuan = p; enIyi = x; } });
     var ilePuan = puan(m, s, ILETISIM.k, ILETISIM.g);
+    var ozelKelime = anlamli(metin).filter(function (t) { return !GENEL.some(function (g) { return benzer(g, t); }); });
 
-    // Selam / teşekkür (kısa mesajlar)
-    if (s.length <= 4 && herhangi(m, s, SELAM) && enPuan === 0 && !kategori)
+    if (s.length <= 4 && herhangi(m, s, SELAM) && !kategori && ozelKelime.length <= 1)
       return Promise.resolve({ h: 'Merhaba, hoş geldiniz! 😊 Umre, Hac ve yurt dışı turlarımız hakkında merak ettiklerinizi sorabilirsiniz.' });
-    if (s.length <= 4 && herhangi(m, s, TESEKKUR) && enPuan === 0 && !kategori)
+    if (s.length <= 4 && herhangi(m, s, TESEKKUR) && !kategori && ozelKelime.length <= 1)
       return Promise.resolve({ h: 'Rica ederiz! Başka bir sorunuz olursa buradayım. Hayırlı yolculuklar dileriz. 🌙' });
 
-    if (ilePuan >= 2 && ilePuan >= enPuan)
+    if (ilePuan >= 2)
       return Promise.resolve({ h: '📞 <a href="' + TEL_LINK + '">' + TEL + '</a><br>✉️ <a href="mailto:' + EPOSTA + '">' + EPOSTA + '</a><br>📍 ' + ADRES + '<br>Tüm iletişim bilgileri: <a href="iletisim.html">İletişim</a>', wa: 'Bilgi almak istiyorum.' });
 
-    // Kategori + fiyat/tarih/program sorusu → canlı liste
-    if (kategori === 'diger' && (fiyatSoru || tarihSoru || enPuan < 2)) {
-      return turAdiylaBul(m, s).then(function (bulunan) {
-        if (bulunan) return { h: (bulunan.length > 1 ? 'Şu programlarımızı buldum:' : 'Bu programımızı buldum:') + bulunan.slice(0, 4).map(turKart).join(''), wa: bulunan[0].baslik + ' hakkında bilgi almak istiyorum.' };
-        return turListesiCevap('diger');
-      });
+    // "Umre ne zaman / fiyatı ne kadar" gibi genel program sorusu → canlı program listesi
+    var programSorusu = kategori && ozelKelime.length === 0;
+    if (programSorusu) {
+      if (kategori === 'diger') return turAdiylaBul(m, s).then(function (b) { return b ? turBulunduCevap(b) : turListesiCevap('diger'); });
+      return turListesiCevap(kategori);
     }
-    if (kategori && (fiyatSoru || tarihSoru || enPuan < 2)) {
-      return turListesiCevap(kategori).then(function (c) {
-        if (enIyi && enPuan >= 2) c.h = enIyi.c + '<br><br>' + c.h;
+
+    return Promise.all([sssGetir(), turAdiylaBul(m, s)]).then(function (r) {
+      var liste = r[0], bulunanTur = r[1];
+      var sonuc = sssAra(metin, liste);
+      var ilk = sonuc[0];
+      var guclu = ilk && ilk.p >= 3.5 && ilk.kap >= 0.6;
+      var zayif = ilk && !guclu && ilk.p >= 2.2 && ilk.kap >= 0.5;
+
+      // Belirli bir turun adı geçiyorsa (ör. "Balkan turu ne kadar", "İspanya'ya gitmek istiyorum") turu göster;
+      // ancak tur hakkında belirli bir SSS sorusu soruluyorsa (ör. "Balkan turunda hangi ülkeler geziliyor") SSS cevabı öncelikli
+      if (bulunanTur && (fiyatSoru || tarihSoru || !guclu || ilk.se < 2)) return turBulunduCevap(bulunanTur);
+
+      if (guclu || zayif) {
+        var c = { h: sssCevapHtml(ilk.x), wa: ilk.x.s };
+        var digerleri = sonuc.slice(1, 4).filter(function (y) { return y.p >= ilk.p * 0.55; }).map(function (y) { return y.x.s; });
+        if (digerleri.length) c.chips = digerleri.slice(0, 3);
+        if (!guclu) c.h += '<div class="ca-not" style="margin-top:6px">Aradığınız bu değilse sorunuzu biraz daha açık yazabilir ya da bize doğrudan sorabilirsiniz.</div>';
+        if (kategori && kategori !== 'diger' && (fiyatSoru || herhangi(m, s, ['ne zaman', 'tarih', 'hangi tarih'])))
+          return turListesiCevap(kategori).then(function (l) { c.h += '<br>' + l.h; return c; });
         return c;
-      });
-    }
-    // Belirli bir SSS cevabı
-    if (enIyi && enPuan >= 2) {
-      var c = { h: enIyi.c, wa: enIyi.wa };
-      if (enIyi.ek && (fiyatSoru || tarihSoru)) return turListesiCevap(enIyi.ek).then(function (l) { c.h += '<br><br>' + l.h; return c; });
-      return Promise.resolve(c);
-    }
-    // Tur adı geçiyor mu? (ör. "balkan", "ispanya")
-    return turAdiylaBul(m, s).then(function (bulunan) {
-      if (bulunan) return { h: (bulunan.length > 1 ? 'Şu programlarımızı buldum:' : 'Bu programımızı buldum:') + bulunan.slice(0, 4).map(turKart).join(''), wa: bulunan[0].baslik + ' hakkında bilgi almak istiyorum.' };
+      }
+      if (kategori) return turListesiCevap(kategori);
       if (fiyatSoru || tarihSoru) return { h: 'Hangi programla ilgileniyorsunuz? Aşağıdan Umre, Hac ya da yurt dışı turlarını seçebilirsiniz.', chips: ['Umre programları', 'Hac programları', 'Yurt dışı turları'] };
-      if (enIyi && enPuan === 1) return { h: enIyi.c + '<br><br><span class="ca-not">Sorunuzu tam anlayamadıysam, ekibimize doğrudan sorabilirsiniz.</span>', wa: enIyi.wa };
-      return { h: 'Bu soruyu en doğru şekilde ekibimiz cevaplar. 🙏 WhatsApp\'tan yazabilir, <a href="' + TEL_LINK + '">' + TEL + '</a> numarasından arayabilir ya da ilgilendiğiniz programın sayfasındaki <b>Kayıt Ol</b> formunu doldurabilirsiniz; size dönüş yapalım.', wa: 'Bir sorum var: ' + metin.slice(0, 200), oncelikWa: true };
+      return { h: 'Bu soruyu en doğru şekilde ekibimiz cevaplar. 🙏 WhatsApp\'tan yazabilir, <a href="' + TEL_LINK + '">' + TEL + '</a> numarasından arayabilir ya da <a href="sss.html">Sıkça Sorulan Sorular</a> sayfamıza göz atabilirsiniz.', wa: 'Bir sorum var: ' + metin.slice(0, 200) };
     });
+  }
+  function turBulunduCevap(bulunan) {
+    return { h: (bulunan.length > 1 ? 'Şu programlarımızı buldum:' : 'Bu programımızı buldum:') + bulunan.slice(0, 4).map(turKart).join(''), wa: bulunan[0].baslik + ' hakkında bilgi almak istiyorum.' };
   }
 
   /* ---------- Arayüz ---------- */
@@ -225,7 +249,7 @@
     + '@keyframes caZip{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}'
     + '@media(max-width:520px){#caBtn{right:20px;bottom:88px;width:52px;height:52px}#caPanel{right:0;left:0;bottom:0;width:100%;max-width:100%;height:82vh;max-height:82vh;border-radius:18px 18px 0 0}}';
 
-  var CIPLER = ['Umre programları', 'Hac programları', 'Yurt dışı turları', 'Ödeme ve taksit', 'Gerekli belgeler', 'İletişim'];
+  var CIPLER = ['Umre programları', 'Hac programları', 'Yurt dışı turları', 'Taksit yapılıyor mu?', 'Valize neler koymalıyım?', 'İletişim'];
   var panel, akis, girdi, ilkAcilis = true;
 
   function mesajEkle(html, kim) {
@@ -238,9 +262,8 @@
   }
   function botCevap(c) {
     var html = c.h;
-    if (c.wa) html += '<br><a class="ca-wa" target="_blank" rel="noopener" href="' + waLink(c.wa) + '">💬 WhatsApp\'tan sor</a>';
+    if (c.wa) html += '<div><a class="ca-wa" target="_blank" rel="noopener" href="' + waLink(c.wa) + '">💬 WhatsApp\'tan sor</a></div>';
     mesajEkle(html, 'bot');
-    if (c.chips) cipGoster(c.chips);
   }
   function cipGoster(liste) {
     var kutu = panel.querySelector('.ca-cipler');
@@ -260,7 +283,7 @@
     var y = mesajEkle('<span class="ca-yaziyor"><span></span><span></span><span></span></span>', 'bot');
     var bas = Date.now();
     cevapla(metin).then(function (c) {
-      setTimeout(function () { y.remove(); botCevap(c); cipGoster(CIPLER); }, Math.max(0, 450 - (Date.now() - bas)));
+      setTimeout(function () { y.remove(); botCevap(c); cipGoster(c.chips ? c.chips.concat(CIPLER.slice(0, 3)) : CIPLER); }, Math.max(0, 450 - (Date.now() - bas)));
     }).catch(function () {
       y.remove(); botCevap({ h: 'Bir sorun oluştu. Lütfen bize WhatsApp\'tan yazın ya da <a href="' + TEL_LINK + '">' + TEL + '</a> numarasını arayın.', wa: 'Bilgi almak istiyorum.' });
     });
@@ -274,6 +297,7 @@
       mesajEkle('Merhaba! 👋 Ben <b>Coşar Asistan</b>. Umre, Hac ve yurt dışı turlarımızla ilgili sorularınızı cevaplayabilirim: tarihler, oteller, fiyatlar, gerekli belgeler…<br>Aşağıdan bir konu seçin ya da sorunuzu yazın.', 'bot');
       cipGoster(CIPLER);
       turlariGetir();
+      sssGetir();
     }
     if (window.innerWidth > 520) setTimeout(function () { girdi.focus(); }, 50);
   }
