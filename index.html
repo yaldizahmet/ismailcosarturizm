@@ -215,6 +215,23 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .btn-outline-white{display:inline-flex;align-items:center;gap:8px;background:transparent;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;border:2px solid rgba(255,255,255,.6);transition:all .2s}.btn-outline-white:hover{background:rgba(255,255,255,.1);border-color:#fff}
 
 
+.kayit-modal-bg{position:fixed;inset:0;background:rgba(11,31,58,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.kayit-modal-bg.open{opacity:1;pointer-events:all}
+.kayit-modal{background:#fff;border-radius:20px;padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(11,31,58,.3)}
+.kayit-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.kayit-modal-title{font-family:var(--ff-head);font-size:20px;font-weight:700;color:var(--navy)}
+.kayit-modal-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:6px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.kayit-form-group{margin-bottom:14px}
+.kayit-form-group label{display:block;font-size:12px;font-weight:600;color:#6b7a94;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kayit-form-group input,.kayit-form-group select{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:var(--ff-body);outline:none;transition:border-color .2s}
+.kayit-form-group input:focus,.kayit-form-group select:focus{border-color:var(--gold)}
+.kayit-program-info{background:#f8f9fa;border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13.5px;color:var(--navy);font-weight:600;border-left:3px solid var(--gold)}
+.kayit-submit{width:100%;padding:13px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:var(--ff-body);transition:background .2s}
+.kayit-submit:hover{background:var(--gold-light)}
+.kayit-success{text-align:center;padding:20px 0;display:none}
+.kayit-success-icon{font-size:48px;margin-bottom:12px}
+.kayit-success h3{font-family:var(--ff-head);font-size:20px;color:var(--navy);margin-bottom:8px}
+.kayit-success p{font-size:14px;color:#6b7a94;line-height:1.6}
 </style>
 
   <!-- SEO Meta Etiketleri -->
@@ -915,6 +932,81 @@ document.addEventListener('DOMContentLoaded', async function() {
     </div>`;
   }).join('');
 });
+</script>
+<div class="kayit-modal-bg" id="kayitModalBg" onclick="kayitModalKapat(event)">
+  <div class="kayit-modal">
+    <div class="kayit-modal-header">
+      <div class="kayit-modal-title">📋 Programa Kayıt Ol</div>
+      <button class="kayit-modal-close" onclick="kayitModalKapat()">✕</button>
+    </div>
+    
+    <div id="kayitForm">
+      <div class="kayit-program-info" id="kayitProgramAdi">Program seçilmedi</div>
+      
+      <form name="tur-kayit" method="POST" onsubmit="kayitGonder(event)">
+        <input type="hidden" name="form-name" value="tur-kayit">
+        <input type="hidden" name="program" id="kayitProgramGizli">
+        
+        <div class="kayit-form-group">
+          <label>Ad Soyad *</label>
+          <input type="text" name="adsoyad" id="kayitAd" placeholder="Adınız Soyadınız" required>
+        </div>
+        <div class="kayit-form-group">
+          <label>Telefon *</label>
+          <input type="tel" name="telefon" id="kayitTel" placeholder="05XX XXX XX XX" required>
+        </div>
+        <div class="kayit-form-group">
+          <label>E-posta</label>
+          <input type="email" name="eposta" id="kayitMail" placeholder="ornek@mail.com">
+        </div>
+        <div class="kayit-form-group">
+          <label>Mesajınız</label>
+          <input type="text" name="mesaj" id="kayitMesaj" placeholder="Sormak istediğiniz bir şey var mı?">
+        </div>
+        <label style="display:flex;gap:9px;align-items:flex-start;font-size:12px;color:#6b7280;line-height:1.5;margin:4px 0 14px;cursor:pointer"><input type="checkbox" name="kvkk_onay" value="evet" required style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:#C9972B"><span><a href="kvkk.html" target="_blank" style="color:#C9972B;text-decoration:underline">KVKK Aydınlatma Metni</a>'ni okudum. Başvurumun değerlendirilmesi için kişisel verilerimin işlenmesine ve metinde belirtilen yurt dışındaki hizmet sağlayıcılara aktarılmasına açık rıza veriyorum.</span></label>
+        <button type="submit" class="kayit-submit">📩 Kayıt Talebimi Gönder</button>
+      </form>
+    </div>
+    
+    <div class="kayit-success" id="kayitSuccess">
+      <div class="kayit-success-icon">✅</div>
+      <h3>Talebiniz Alındı!</h3>
+      <p>En kısa sürede sizi arayarak kayıt işleminizi tamamlayacağız.<br>
+      <strong>0533 198 07 81</strong> numarasından da ulaşabilirsiniz.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function kayitModalAc(programAdi) {
+  document.getElementById('kayitProgramAdi').textContent = '📋 ' + programAdi;
+  document.getElementById('kayitProgramGizli').value = programAdi;
+  document.getElementById('kayitModalBg').classList.add('open');
+  document.getElementById('kayitForm').style.display = 'block';
+  document.getElementById('kayitSuccess').style.display = 'none';
+}
+
+function kayitModalKapat(e) {
+  if(!e || e.target === document.getElementById('kayitModalBg')) {
+    document.getElementById('kayitModalBg').classList.remove('open');
+  }
+}
+
+function kayitGonder(e) {
+  e.preventDefault();
+  var form = e.target;
+  var data = new FormData(form);
+  
+  basvuruKaydet(form).then(function() {
+    document.getElementById('kayitForm').style.display = 'none';
+    document.getElementById('kayitSuccess').style.display = 'block';
+    setTimeout(function() {
+      kayitModalKapat({target: document.getElementById('kayitModalBg')});
+    }, 4000);
+  }).catch(function() {
+    alert('Bir hata oluştu. Lütfen telefonla arayın: 0533 198 07 81');
+  });
+}
 </script>
 <script src="asistan.js" defer></script>
 <script src="cerez.js" defer></script>
