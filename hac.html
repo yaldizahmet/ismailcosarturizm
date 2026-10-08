@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const badge = f ? '<span class="paket-feat-badge">⭐ En Çok Tercih</span>' : '';
         const baslik = p.baslik || 'Hac Paketi';
         const title = baslik.includes('–') ? baslik.split('–').pop().trim() : baslik;
-        const safe = baslik.replace(/'/g, "\'");
+        const safe = baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
         return `<div class="paket-card${f?' featured':''}">${badge}
           <div class="paket-header" style="background:${bg}">
             <div class="paket-header-icon">${p.icon || '🕋'}</div><h3>${title}</h3><p>${p.aciklama||''}</p>

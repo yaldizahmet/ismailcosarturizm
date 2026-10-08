@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const list = document.getElementById('progList');
     if (list) {
       list.innerHTML = turlar.map(p => {
-        const safe = p.baslik.replace(/'/g, "\'");
+        const safe = p.baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
         return `<div class="prog-item">
           <div class="prog-body">
             <div class="prog-badges">

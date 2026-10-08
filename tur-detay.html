@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       ${tur.otel?`<div class="sidebar-info-item"><span class="sidebar-info-label">Otel</span><span class="sidebar-info-value">${tur.otel}</span></div>`:''}
     </div>
     <span class="kontenjan ${kMap[tur.kontenjan]||'k-var'}" style="margin-bottom:16px;display:inline-flex">${kLabel[tur.kontenjan]||'Yer Var'}</span>
-    <button class="btn-kayit" onclick="kayitModalAc('${tur.baslik.replace(/'/g,"\\'")}')">📋 Hemen Kayıt Ol</button>
+    <button class="btn-kayit" onclick="kayitModalAc('${tur.baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">📋 Hemen Kayıt Ol</button>
     <a href="https://wa.me/905331980781?text=Merhaba, ${encodeURIComponent(tur.baslik)} hakkında bilgi almak istiyorum." class="btn-whatsapp" target="_blank">💬 WhatsApp'tan Yaz</a>`;
 
   document.getElementById('tur-detay').style.display = 'block';

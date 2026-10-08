@@ -913,7 +913,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (!grid || !turlar || !turlar.length) return;
   
   grid.innerHTML = turlar.map(t => {
-    const safe = t.baslik.replace(/'/g, "\'");
+    const safe = t.baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     const kayitBtn = t.kontenjan !== 'dolu' ? `<button class="btn-tur" onclick="kayitModalAc('${safe}')" style="border:none;cursor:pointer">Kayıt Ol</button>` : '';
     return `<div class="tour-card">
       <div class="tc-top">${t.gorsel ? `<img src="${t.gorsel}" alt="" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;display:block">` : `<div class="tc-icon">${t.icon}</div>`}</div>
