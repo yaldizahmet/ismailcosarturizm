@@ -223,6 +223,8 @@ const _SB = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 's
 // URL'den tur ID'sini al
 const params = new URLSearchParams(window.location.search);
 const turId = params.get('id');
+if (turId) { const c = document.createElement('link'); c.rel = 'canonical'; c.href = 'https://ismailcosarturizm.com.tr/tur-detay.html?id=' + encodeURIComponent(turId); document.head.appendChild(c); }
+else { const r = document.createElement('meta'); r.name = 'robots'; r.content = 'noindex, follow'; document.head.appendChild(r); }
 
 const kMap = {var:'k-var', az:'k-az', dolu:'k-dolu'};
 const kLabel = {var:'Yer Var', az:'Az Kaldı', dolu:'Dolu'};
