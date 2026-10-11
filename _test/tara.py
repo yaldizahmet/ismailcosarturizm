@@ -7,7 +7,22 @@ from playwright.sync_api import sync_playwright
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 BASE = 'http://localhost:8765/'
-DB = open(os.path.join(HERE, 'db.json'), encoding='utf-8').read()
+def _db_hazirla():
+    """db.json'daki tur tarihlerini bugüne göre kaydırır (test verisi eskimesin) ve
+    kalkışı geçmiş bir tur ekler (gizlendiğini doğrulamak için)."""
+    import datetime
+    veri = json.load(open(os.path.join(HERE, 'db.json'), encoding='utf-8'))
+    bugun = datetime.date.today()
+    tarihler = [datetime.date.fromisoformat(t['tarih']) for t in veri['turlar'] if t.get('tarih')]
+    kayma = (bugun + datetime.timedelta(days=20)) - min(tarihler)
+    for t in veri['turlar']:
+        for alan in ('tarih', 'donus_tarihi'):
+            if t.get(alan): t[alan] = (datetime.date.fromisoformat(t[alan]) + kayma).isoformat()
+    gecmis = dict(veri['turlar'][1]); gecmis.update(id='gecmis-tur', baslik='GEÇMİŞ TEST TURU', kontenjan='var',
+                  tarih=(bugun - datetime.timedelta(days=3)).isoformat(), donus_tarihi=(bugun + datetime.timedelta(days=8)).isoformat())
+    veri['turlar'].insert(0, gecmis)
+    return json.dumps(veri, ensure_ascii=False)
+DB = _db_hazirla()
 MOCK = 'window.__DB=' + DB + ';\n' + open(os.path.join(HERE, 'mock.js'), encoding='utf-8').read()
 PAGES = ['index.html', 'umre.html', 'hac.html', 'turlar.html', 'tur-detay.html?id=umre-kasim', 'tur-detay.html?id=balkanlar-2025',
          'sss.html', 'iletisim.html', 'galeri.html', 'hakkimizda.html', 'belgelerimiz.html', 'kvkk.html', 'tesekkurler.html']

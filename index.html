@@ -290,6 +290,9 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 <script>
 /* Tur gösterim yardımcıları: tarih aralığı, oda tipi fiyatları, açıklama */
 function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)return String(d);var ay=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];var m=parseInt(p[1],10);if(!m||m>12)return String(d);return parseInt(p[2],10)+' '+ay[m-1]+' '+p[0];}
+/* Kalkış tarihi geçmiş turlar ziyaretçiye gösterilmez (veritabanında kalır). Tarihi girilmemiş turlar gösterilir. */
+function bugunTR(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date());}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}}
+function turGuncel(t){var d=String((t&&t.tarih)||'');return !/^\d{4}-\d{2}-\d{2}$/.test(d)||d>=bugunTR();}
 function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
 function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return '<div>'+x[0].toLocaleLowerCase('tr')+' odada kişi başı: <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
@@ -904,13 +907,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   const besAy = new Date();
   besAy.setMonth(besAy.getMonth() + 5);
   
-  const { data: turlar } = await _SB.from('turlar').select('*').eq('aktif', true).order('tarih').limit(3);
+  const { data: tumTurlar } = await _SB.from('turlar').select('*').eq('aktif', true).order('tarih');
+  const turlar = (tumTurlar || []).filter(turGuncel).slice(0, 3);
   
   const kMap = {az:'background:#fff3e0;color:#c65f00', var:'background:#e8f5e9;color:#2e7d32', dolu:'background:#ffebee;color:#c62828'};
   const kLabel = {az:'Az Kaldı', var:'Yer Var', dolu:'Dolu'};
   
   const grid = document.getElementById('toursGrid');
-  if (!grid || !turlar || !turlar.length) return;
+  if (!grid) return;
+  if (!turlar.length) { grid.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center;grid-column:1/-1">Yeni programlarımız yakında burada olacak. Bilgi için bize WhatsApp\'tan yazabilirsiniz.</p>'; return; }
   
   grid.innerHTML = turlar.map(t => {
     const safe = t.baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
