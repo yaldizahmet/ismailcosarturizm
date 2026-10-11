@@ -38,6 +38,22 @@ with sync_playwright() as p:
         hata += not ok
         print('✓' if ok else '✗', 'KESME İŞARETİ', sayfa, '->', ad or '(buton yok)', errs)
         pg.close()
+    # Kalkışı geçmiş tur hiçbir listede ve asistanda görünmemeli; detay sayfasında kayıt butonu olmamalı
+    for sayfa in ['index.html', 'umre.html', 'turlar.html', 'hac.html']:
+        pg = b.new_page(); errs = []; kur(pg, errs)
+        pg.goto(BASE + sayfa, wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
+        gorunur = 'GEÇMİŞ TEST TURU' in pg.inner_text('body')
+        asistan = pg.evaluate("window.cosarAsistan ? window.cosarAsistan.cevapla('umre ne zaman').then(c=>c.h.includes('GEÇMİŞ TEST TURU')) : false")
+        ok = not gorunur and not asistan and not errs
+        hata += not ok
+        print('✓' if ok else '✗', 'GEÇMİŞ TUR GİZLİ', sayfa, '-> sayfada:', gorunur, 'asistanda:', asistan, errs)
+        pg.close()
+    pg = b.new_page(); errs = []; kur(pg, errs)
+    pg.goto(BASE + 'tur-detay.html?id=gecmis-tur', wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
+    ok = not pg.query_selector('.btn-kayit') and 'kalkış tarihi geçmiştir' in pg.inner_text('body') and not errs
+    hata += not ok
+    print('✓' if ok else '✗', 'GEÇMİŞ TUR DETAYI -> kayıt butonu yok, bilgi notu var:', ok, errs)
+    pg.close()
     for sayfa, acici, secici in [('index.html', None, '#contactForm'), ('index.html', "kayitModalAc('Test')", '#kayitForm form'),
                                  ('umre.html', "kayitModalAc('Test')", '#kayitForm form'), ('hac.html', "kayitModalAc('Test')", '#kayitModalBg form'),
                                  ('tur-detay.html?id=umre-kasim', "kayitModalAc('Test')", 'form[name=tur-kayit]'), ('iletisim.html', None, '#contactForm, form')]:

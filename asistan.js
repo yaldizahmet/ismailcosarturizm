@@ -114,11 +114,15 @@
 
   /* ---------- Tur verisi ---------- */
   var turlarSoz = null;
+  /* Kalkış tarihi geçmiş turlar gösterilmez (tarihi girilmemiş olanlar gösterilir) */
+  function bugunTR() { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date()); } catch (e) { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); } }
+  function turGuncel(t) { var d = String((t && t.tarih) || ''); return !/^\d{4}-\d{2}-\d{2}$/.test(d) || d >= bugunTR(); }
   function turlariGetir() {
     if (turlarSoz) return turlarSoz;
     turlarSoz = fetch(SB_URL + '/rest/v1/turlar?aktif=eq.true&order=tarih&select=id,kategori,baslik,tarih,donus_tarihi,sure,konum,otel,fiyat,fiyat_2,fiyat_3,fiyat_4,para_birimi,kontenjan',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (liste) { return (liste || []).filter(turGuncel); })
       .catch(function () { turlarSoz = null; return null; });
     return turlarSoz;
   }
