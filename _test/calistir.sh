@@ -27,7 +27,7 @@ print('  ✓ temiz' if not bad else f'  {bad} hata'); sys.exit(1 if bad else 0)
 EOF
 
 echo "▶ Bağlantı ve buton taraması (sayfalar paralel)"
-for p in index umre hac turlar "id=umre-kasim" "id=balkan" sss iletisim galeri hakkimizda belgelerimiz kvkk tesekkurler; do
+for p in index umre hac turlar "id=umre-kasim" "id=balkan" sss iletisim galeri hakkimizda belgelerimiz kvkk tesekkurler 404; do
   python3 _test/tara.py "$p" > "$CIKTI/${p//[^a-z]/_}.txt" 2>&1 &
 done
 wait $(jobs -p | grep -v "^$SUNUCU$") 2>/dev/null

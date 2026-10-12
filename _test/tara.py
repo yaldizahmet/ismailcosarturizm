@@ -25,7 +25,7 @@ def _db_hazirla():
 DB = _db_hazirla()
 MOCK = 'window.__DB=' + DB + ';\n' + open(os.path.join(HERE, 'mock.js'), encoding='utf-8').read()
 PAGES = ['index.html', 'umre.html', 'hac.html', 'turlar.html', 'tur-detay.html?id=umre-kasim', 'tur-detay.html?id=balkanlar-2025',
-         'sss.html', 'iletisim.html', 'galeri.html', 'hakkimizda.html', 'belgelerimiz.html', 'kvkk.html', 'tesekkurler.html']
+         'sss.html', 'iletisim.html', 'galeri.html', 'hakkimizda.html', 'belgelerimiz.html', 'kvkk.html', 'tesekkurler.html', '404.html']
 ONLY = sys.argv[1:] or None
 
 ids_cache = {}
@@ -84,7 +84,9 @@ with sync_playwright() as p:
                         continue
                     if href.startswith('javascript:') or href == '#': continue
                     yol, _, capa = href.partition('#')
-                    yol = unquote(yol.split('?')[0]) or dosya
+                    yol = unquote(yol.split('?')[0])
+                    if yol.startswith('/'): yol = yol.lstrip('/') or 'index.html'
+                    yol = yol or dosya
                     idler = ids_of(yol)
                     if idler is None: sorun(sayfa, 'kırık bağlantı', f'{href} ({metin})'); continue
                     if capa and capa not in idler:

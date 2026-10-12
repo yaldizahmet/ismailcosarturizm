@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<title>Sayfa Taşındı – İsmail Coşar Turizm</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* Eski siteden (ismailcosarturizm.com) kalan adresleri yeni sayfalara yönlendirir.
+   Adresteki kelimeye göre eşleşir; eşleşme yoksa aşağıdaki "Sayfa taşındı" mesajı gösterilir. */
+(function () {
+  var yol = decodeURIComponent(location.pathname + ' ' + location.search).toLocaleLowerCase('tr');
+  var KURALLAR = [
+    [/umre|umra/, '/umre.html'],
+    [/(^|[^a-zçğıöşü])hac(c|ı|i)?([^a-zçğıöşü]|$)|hajj/, '/hac.html'],
+    [/balkan|end[uü]l[uü]s|ispanya|[oö]zbek|k[uü]lt[uü]r|yurt-?d[iı]s|tur(lar|lari)?\b|tours?\b/, '/turlar.html'],
+    [/ileti[sş]im|contact|bize-?ula/, '/iletisim.html'],
+    [/hakk[iı]m[iı]zda|about|kurumsal/, '/hakkimizda.html'],
+    [/galeri|gallery|foto|video/, '/galeri.html'],
+    [/sss|s[iı]k[cç]a|faq|soru/, '/sss.html'],
+    [/belge|lisans|sertifika/, '/belgelerimiz.html'],
+    [/kvkk|gizlilik|privacy|cerez|çerez/, '/kvkk.html'],
+    [/^\/(index|anasayfa|home|default)(\.\w+)?\/?\s*$/, '/']
+  ];
+  for (var i = 0; i < KURALLAR.length; i++) {
+    if (KURALLAR[i][0].test(yol)) { location.replace(KURALLAR[i][1]); return; }
+  }
+})();
+</script>
+<style>
+:root{--navy:#0B1F3A;--navy-mid:#132d52;--gold:#C9972B;--gold-light:#E4B84A;--cream:#FAF7F0;--text:#3a4a62;--muted:#6b7a94}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;font-family:'DM Sans',system-ui,sans-serif;background:var(--cream);color:var(--text)}
+header{background:var(--navy);padding:14px 5vw;display:flex;align-items:center}
+header img{height:44px;width:auto;display:block}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 5vw}
+.kutu{max-width:620px;width:100%;text-align:center}
+.rozet{display:inline-block;font-size:12px;letter-spacing:2px;font-weight:700;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+h1{font-family:'Playfair Display',Georgia,serif;color:var(--navy);font-size:clamp(28px,6vw,40px);line-height:1.2;margin:0 0 14px}
+p{font-size:16px;line-height:1.7;margin:0 0 28px;color:var(--muted)}
+.baglantilar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+.baglantilar a{display:block;padding:14px 12px;border-radius:12px;background:#fff;border:1.5px solid #e6dfcc;color:var(--navy);font-weight:600;text-decoration:none;font-size:15px}
+.baglantilar a:hover{border-color:var(--gold);color:var(--gold)}
+.ana{display:inline-block;background:var(--gold);color:var(--navy);font-weight:700;padding:14px 26px;border-radius:50px;text-decoration:none;margin:0 6px 10px}
+.wa{display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:14px 26px;border-radius:50px;text-decoration:none;margin:0 6px 10px}
+footer{text-align:center;font-size:13px;color:var(--muted);padding:20px}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header><a href="/" aria-label="Ana sayfa"><img src="/logo.png" alt="İsmail Coşar Turizm"></a></header>
+<main>
+  <div class="kutu">
+    <div class="rozet">Sayfa bulunamadı</div>
+    <h1>Aradığınız sayfa taşınmış olabilir</h1>
+    <p>Web sitemizi yeniledik; eski bir bağlantıdan geldiyseniz aradığınız bilgi aşağıdaki bölümlerden birinde.</p>
+    <nav class="baglantilar" aria-label="Site bölümleri">
+      <a href="/umre.html">🌙 Umre Programları</a>
+      <a href="/hac.html">🕋 Hac Organizasyonu</a>
+      <a href="/turlar.html">✈️ Kültür Turları</a>
+      <a href="/sss.html">❓ Sıkça Sorulan Sorular</a>
+      <a href="/hakkimizda.html">🏢 Hakkımızda</a>
+      <a href="/iletisim.html">📞 İletişim</a>
+    </nav>
+    <a class="ana" href="/">Ana Sayfaya Dön</a>
+    <a class="wa" href="https://wa.me/905331980781?text=Merhaba%2C%20web%20sitenizden%20yaz%C4%B1yorum.%20Bilgi%20almak%20istiyorum." target="_blank" rel="noopener">💬 WhatsApp'tan Yazın</a>
+  </div>
+</main>
+<footer>© İsmail Coşar Turizm · <a href="tel:+905331980781">0533 198 07 81</a></footer>
+</body>
+</html>
