@@ -71,6 +71,27 @@ with sync_playwright() as p:
         hata += not ok
         print('✓' if ok else '✗', 'FORM', sayfa, acici or '(sayfa formu)', '-> veritabanı:', len(posts), 'mail:', len(mails), 'başarı mesajı:', basari, errs)
         pg.close()
+    # Tıklama/başvuru sayacı: çerez onayı varsa olay gönderilir, yoksa hiçbir şey gönderilmez; tıklama ve form davranışı değişmez
+    for tercih in ['kabul', 'red']:
+        pg = b.new_page(); errs = []; kur(pg, errs); posts = []
+        pg.add_init_script("try{localStorage.setItem('cerez-tercihi','%s')}catch(e){}" % tercih)
+        # WhatsApp bağlantısı test sırasında gerçekten açılmasın (sayaç yakalama aşamasında önce çalışır)
+        pg.add_init_script("document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href*=\"wa.me\"]');if(a)e.preventDefault();});")
+        pg.route('**/rest/v1/basvurular**', lambda r, q: (posts.append(1), r.fulfill(status=201, body='', headers={'access-control-allow-origin': '*'})))
+        pg.goto(BASE + 'umre.html', wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
+        pg.evaluate("window.__olaylar=[]; if(window.gtag){var g=window.gtag; window.gtag=function(){window.__olaylar.push([].slice.call(arguments)); return g.apply(this,arguments);};}")
+        pg.locator('a[href*="wa.me"]').first.click(); pg.wait_for_timeout(200)
+        pg.locator('#progList [onclick*="kayitModalAc"]').first.click(); pg.wait_for_timeout(300)
+        pencere = pg.is_visible('#kayitModalBg.open')
+        f2 = pg.query_selector('#kayitForm form'); f2.evaluate(DOLDUR); pg.wait_for_timeout(1200)
+        olaylar = [o[1] for o in (pg.evaluate('window.__olaylar') or []) if o and o[0] == 'event']
+        if tercih == 'kabul':
+            ok = {'whatsapp_tiklama', 'kayit_formu_acildi', 'basvuru_gonderildi'} <= set(olaylar) and pencere and len(posts) == 1 and not errs
+        else:
+            ok = olaylar == [] and pg.evaluate('!window.__gaYuklendi') and pencere and len(posts) == 1 and not errs
+        hata += not ok
+        print('✓' if ok else '✗', 'SAYAÇ (çerez %s) ->' % tercih, 'olaylar:', olaylar, '| kayıt penceresi:', pencere, '| başvuru kaydı:', len(posts), errs)
+        pg.close()
     b.close()
 print('\n=== FORM TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')
 sys.exit(1 if hata else 0)

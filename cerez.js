@@ -66,6 +66,57 @@
 
   window.cerezAyarlari = bantGoster;
 
+  /* Tıklama ve başvuru sayacı (yalnızca çerez onayı verilmiş ve Analytics yüklenmişse çalışır).
+     Google Analytics'te "Etkinlikler" altında görünür:
+       whatsapp_tiklama, telefon_tiklama, eposta_tiklama, kayit_formu_acildi, basvuru_gonderildi
+     Kişisel bilgi (ad, telefon vb.) gönderilmez; yalnızca hangi sayfada ne yapıldığı sayılır.
+     Sayaç hata verse bile tıklamayı/formu asla engellemez. */
+  function olay(ad, ek) {
+    try {
+      if (!window.__gaYuklendi || typeof window.gtag !== 'function') return;
+      var p = { sayfa: location.pathname.replace(/^\//, '') || 'index.html', transport_type: 'beacon' };
+      for (var k in ek) if (ek[k]) p[k] = String(ek[k]).slice(0, 100);
+      window.gtag('event', ad, p);
+    } catch (e) {}
+  }
+  window.cosarOlay = olay;
+
+  document.addEventListener('click', function (e) {
+    try {
+      var el = e.target && e.target.closest ? e.target.closest('a[href], [onclick]') : null;
+      if (!el) return;
+      var href = el.getAttribute('href') || '';
+      var onclick = el.getAttribute('onclick') || '';
+      if (/wa\.me\//i.test(href)) olay('whatsapp_tiklama', { yer: el.className || el.id || 'baglanti' });
+      else if (/^tel:/i.test(href)) olay('telefon_tiklama', { yer: el.className || el.id || 'baglanti' });
+      else if (/^mailto:/i.test(href)) olay('eposta_tiklama', {});
+      else if (/kayitModalAc\(/.test(onclick)) {
+        var m = onclick.match(/kayitModalAc\('((?:\\.|[^'\\])*)'/);
+        olay('kayit_formu_acildi', { program: m ? m[1].replace(/\\(.)/g, '$1') : '' });
+      }
+    } catch (err) {}
+  }, { capture: true, passive: true });
+
+  // Başvuru başarıyla kaydedildiğinde say (sayfadaki basvuruKaydet fonksiyonu sarmalanır, davranışı değişmez)
+  function basvuruSayaciniBagla() {
+    try {
+      var asil = window.basvuruKaydet;
+      if (typeof asil !== 'function' || asil.__sayacli) return;
+      var sarili = function (form) {
+        var sonuc = asil.apply(this, arguments);
+        try {
+          var ad = (form && (form.getAttribute('name') || (form.querySelector('[name="form-name"]') || {}).value)) || '';
+          var program = form && form.querySelector ? ((form.querySelector('[name="program"]') || {}).value || '') : '';
+          if (sonuc && typeof sonuc.then === 'function') sonuc.then(function () { olay('basvuru_gonderildi', { form: ad, program: program }); }, function () {});
+        } catch (e) {}
+        return sonuc;
+      };
+      sarili.__sayacli = true;
+      window.basvuruKaydet = sarili;
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', basvuruSayaciniBagla); else basvuruSayaciniBagla();
+
   var t = oku();
   if (t === 'kabul') gaYukle();
   else if (t !== 'red') {
