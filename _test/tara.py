@@ -25,7 +25,8 @@ def _db_hazirla():
 DB = _db_hazirla()
 MOCK = 'window.__DB=' + DB + ';\n' + open(os.path.join(HERE, 'mock.js'), encoding='utf-8').read()
 PAGES = ['index.html', 'umre.html', 'hac.html', 'turlar.html', 'tur-detay.html?id=umre-kasim', 'tur-detay.html?id=balkanlar-2025',
-         'sss.html', 'iletisim.html', 'galeri.html', 'hakkimizda.html', 'belgelerimiz.html', 'kvkk.html', 'tesekkurler.html', '404.html']
+         'sss.html', 'iletisim.html', 'galeri.html', 'hakkimizda.html', 'belgelerimiz.html', 'kvkk.html', 'tesekkurler.html', '404.html',
+         'rehber-ilk-umre.html', 'rehber-umre-valiz-listesi.html', 'rehber-umre-donemleri.html']
 ONLY = sys.argv[1:] or None
 
 ids_cache = {}
