@@ -38,5 +38,9 @@ echo "▶ Başvuru formları"
 python3 _test/formlar.py 2>&1 | grep -E "^(✓|✗|===)"
 FORM=${PIPESTATUS[0]}
 
+echo "▶ Admin paneli"
+python3 _test/admin.py 2>&1 | grep -E "^(✓|✗|===)"
+ADMIN=${PIPESTATUS[0]}
+
 echo
-if [ -z "$SORUN" ] && [ "$FORM" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi
+if [ -z "$SORUN" ] && [ "$FORM" = 0 ] && [ "$ADMIN" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi

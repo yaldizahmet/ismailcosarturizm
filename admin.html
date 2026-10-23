@@ -163,10 +163,28 @@ async function renderTurlar() {
           <span class="badge ${t.aktif?'badge-green':'badge-red'}">${t.aktif?'Aktif':'Pasif'}</span>
           <a class="btn btn-navy" href="tur-detay.html?id=${t.id}" target="_blank" style="text-decoration:none">Detay</a>
           <button class="btn btn-navy" onclick="turDuzenle('${t.id}')">Düzenle</button>
+          <button class="btn btn-gold" onclick="turKopyala('${t.id}')" title="Bu turun bilgileriyle yeni bir tur oluşturur">📄 Kopyala</button>
           <button class="btn btn-red" onclick="turSil('${t.id}')">Sil</button>
         </div>
       </div>`).join('') +
     '</div></div>';
+}
+
+// Mevcut bir turun bütün bilgileriyle yeni bir tur oluşturur. Kopya "(KOPYA)" başlıklı ve PASİF olarak
+// oluşur (düzenlenmeden sitede görünmez); ardından kopyanın düzenleme ekranı açılır.
+async function turKopyala(id) {
+  const { data, error: okumaHatasi } = await sb.from('turlar').select('*').eq('id', id).single();
+  if (okumaHatasi || !data) { toast('❌ Tur okunamadı', 'error'); return; }
+  if (!confirm('"' + data.baslik + '" turunun bir kopyası oluşturulsun mu?\n\nKopya pasif olarak oluşur; tarihleri ve başlığı düzenleyip Aktif yaptığınızda sitede görünür.')) return;
+  const kopya = Object.assign({}, data);
+  kopya.id = 'tur-' + Date.now();
+  kopya.baslik = '(KOPYA) ' + String(data.baslik || '').replace(/^\(KOPYA\)\s*/, '');
+  kopya.aktif = false;
+  kopya.kontenjan = 'var';
+  const { error } = await sb.from('turlar').insert(kopya);
+  if (error) { toast('❌ Kopyalanamadı: ' + error.message, 'error'); return; }
+  toast('✅ Kopya oluşturuldu. Tarihleri ve başlığı düzenleyip Aktif yapın.', 'success');
+  turDuzenle(kopya.id);
 }
 
 async function turSil(id) {
