@@ -54,6 +54,15 @@ with sync_playwright() as p:
     hata += not ok
     print('✓' if ok else '✗', 'GEÇMİŞ TUR DETAYI -> kayıt butonu yok, bilgi notu var:', ok, errs)
     pg.close()
+    # Kapasite (kişi sayısı) veritabanında durur ama sitede gösterilmez
+    for sayfa in ['turlar.html', 'tur-detay.html?id=balkanlar-2025', 'tur-detay.html?id=umre-kasim', 'umre.html', 'index.html']:
+        pg = b.new_page(); errs = []; kur(pg, errs)
+        pg.goto(BASE + sayfa, wait_until='domcontentloaded'); pg.wait_for_timeout(1100)
+        metin = pg.inner_text('body')
+        ok = '40 kişi' not in metin and 'Kapasite' not in metin and '👥' not in metin and 'Yer Var' in metin and not errs
+        hata += not ok
+        print('✓' if ok else '✗', 'KAPASİTE GİZLİ', sayfa, '-> kişi sayısı görünmüyor, Yer Var etiketi duruyor:', ok, errs)
+        pg.close()
     for sayfa, acici, secici in [('index.html', None, '#contactForm'), ('index.html', "kayitModalAc('Test')", '#kayitForm form'),
                                  ('umre.html', "kayitModalAc('Test')", '#kayitForm form'), ('hac.html', "kayitModalAc('Test')", '#kayitModalBg form'),
                                  ('tur-detay.html?id=umre-kasim', "kayitModalAc('Test')", 'form[name=tur-kayit]'), ('iletisim.html', None, '#contactForm, form')]:

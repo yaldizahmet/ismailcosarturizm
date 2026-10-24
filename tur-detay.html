@@ -273,7 +273,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         <span class="tur-meta-item">📅 ${turTarihAraligi(tur)}</span>${kalkisaKalan(tur)}
         <span class="tur-meta-item">⏱ ${tur.sure}</span>
         <span class="tur-meta-item">📍 ${tur.konum}</span>
-        <span class="tur-meta-item">👥 ${tur.kapasite||''}</span>
       </div>
       <div class="tur-fiyat-hero">
         ${fiyatBlok}
@@ -371,7 +370,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       ${odalar.map(o => `<div class="sidebar-info-item"><span class="sidebar-info-label">${o[0].toLocaleLowerCase('tr')} odada kişi başı</span><span class="sidebar-info-value">${o[1]} ${tur.para_birimi}</span></div>`).join('')}
       <div class="sidebar-info-item"><span class="sidebar-info-label">Süre</span><span class="sidebar-info-value">${tur.sure}</span></div>
       <div class="sidebar-info-item"><span class="sidebar-info-label">Konum</span><span class="sidebar-info-value">${tur.konum}</span></div>
-      <div class="sidebar-info-item"><span class="sidebar-info-label">Kapasite</span><span class="sidebar-info-value">${tur.kapasite||'-'}</span></div>
       ${tur.otel?`<div class="sidebar-info-item"><span class="sidebar-info-label">Otel</span><span class="sidebar-info-value">${tur.otel}</span></div>`:''}
     </div>
     <span class="kontenjan ${kMap[tur.kontenjan]||'k-var'}" style="margin-bottom:16px;display:inline-flex">${kLabel[tur.kontenjan]||'Yer Var'}</span>
