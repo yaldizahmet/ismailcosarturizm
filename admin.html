@@ -77,6 +77,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item active" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
+    <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Kafileler (Uygulama)</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
@@ -84,6 +85,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <div id="sayfa-turlar"></div>
     <div id="sayfa-ekle" style="display:none"></div>
   <div id="sayfa-duyuru" style="display:none"></div>
+    <div id="sayfa-kafile" style="display:none"></div>
   </div>
 </div>
 
@@ -132,7 +134,7 @@ async function cikisYap() {
 }
 
 function sekmeAc(ad) {
-  ['basvuru','turlar','ekle','duyuru'].forEach(s => {
+  ['basvuru','turlar','ekle','duyuru','kafile'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -141,6 +143,7 @@ function sekmeAc(ad) {
   if (ad === 'turlar') renderTurlar();
   if (ad === 'ekle') renderEkle();
   if (ad === 'duyuru') renderDuyuru();
+  if (ad === 'kafile') renderKafileler();
 }
 
 // ── TUR LİSTESİ ──
@@ -470,6 +473,219 @@ async function duyuruGuncelle(id) {
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Kaydedildi', 'success');
   renderDuyuru();
+}
+
+// ── KAFİLELER (yolcu uygulaması: ismailcosarturizm.com.tr/kafile/) ──
+const KAFILE_URL = 'https://ismailcosarturizm.com.tr/kafile/';
+const KOD_HARF = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // karışan 0/O, 1/I yok
+
+function kafileKodUret(ad) {
+  const tr = {'Ç':'C','Ğ':'G','İ':'I','I':'I','Ö':'O','Ş':'S','Ü':'U'};
+  let on = String(ad || '').toLocaleUpperCase('tr').replace(/[ÇĞİIÖŞÜ]/g, c => tr[c]).replace(/[^A-Z]/g, ' ').trim().split(/\s+/)[0] || 'KAFILE';
+  on = on.slice(0, 8);
+  const r = new Uint32Array(5); crypto.getRandomValues(r);
+  return on + '-' + Array.from(r, x => KOD_HARF[x % KOD_HARF.length]).join('');
+}
+
+function kafileTarih(t) { return t ? new Date(t + 'T12:00:00').toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '—'; }
+
+function kafilePaylasMetni(k) {
+  return `${k.ad} – Kafile uygulamanız:\n${KAFILE_URL}#${k.kod}\n\nBağlantıyı açın; telefonunuza "Ana ekrana ekle" ile uygulama olarak kurabilirsiniz. Kafile kodu: ${k.kod}`;
+}
+
+async function renderKafileler() {
+  const el = document.getElementById('sayfa-kafile');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data, error } = await sb.from('kafileler').select('*').order('baslangic', { ascending: false });
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Yolcular <b>' + KAFILE_URL + '</b> adresinden kafile koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
+  html += '<div class="card"><div class="tur-list">';
+  if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz kafile yok. “Yeni Kafile” ile ekleyin.</p>';
+  html += (data || []).map(k => `
+    <div class="tur-item kafile-item">
+      <div class="tur-item-info">
+        <h4>${esc(k.ad)}</h4>
+        <p>Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır</p>
+      </div>
+      <div class="tur-item-actions" style="flex-wrap:wrap">
+        <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
+        <button class="btn btn-navy" onclick="kafileDuzenle('${k.id}')">Düzenle</button>
+        <button class="btn btn-gold" onclick="kafileDuyurular('${k.id}')">📢 Duyurular</button>
+        <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">Paylaş</a>
+        <button class="btn btn-red" onclick="kafileSil('${k.id}')">Sil</button>
+      </div>
+    </div>`).join('');
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function programSatiri(p) {
+  p = p || {};
+  return `<div class="prog-satir" style="display:grid;grid-template-columns:130px 90px 1.4fr 1fr 1fr 34px;gap:6px;margin-bottom:6px">
+    <input type="date" class="p_tarih" value="${esc(p.tarih)}" aria-label="Tarih" style="padding:7px;border:1.5px solid #ddd;border-radius:6px">
+    <input type="time" class="p_saat" value="${esc(p.saat)}" aria-label="Saat" style="padding:7px;border:1.5px solid #ddd;border-radius:6px">
+    <input class="p_baslik" value="${esc(p.baslik)}" placeholder="Etkinlik (ör. Mekke ziyaretleri)" aria-label="Etkinlik" style="padding:7px;border:1.5px solid #ddd;border-radius:6px">
+    <input class="p_yer" value="${esc(p.yer)}" placeholder="Buluşma yeri (ör. Otel lobisi)" aria-label="Buluşma yeri" style="padding:7px;border:1.5px solid #ddd;border-radius:6px">
+    <input class="p_konum" value="${esc(p.konum)}" placeholder="Konum linki (isteğe bağlı)" aria-label="Konum linki" style="padding:7px;border:1.5px solid #ddd;border-radius:6px">
+    <button type="button" class="btn btn-red" style="padding:0" onclick="this.closest('.prog-satir').remove()" aria-label="Satırı sil">✕</button>
+  </div>`;
+}
+
+function programSatirEkle() {
+  const kutu = document.getElementById('k_program');
+  const son = kutu.querySelector('.prog-satir:last-child');
+  kutu.insertAdjacentHTML('beforeend', programSatiri({ tarih: son ? son.querySelector('.p_tarih').value : '' }));
+}
+
+function otelBlogu(i, o) {
+  o = o || {};
+  const v = (k) => esc(o[k]);
+  return `<div class="otel-blok" style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">
+    <div class="form-row">
+      <div class="form-group"><label>Şehir</label><input class="o_sehir" value="${v('sehir') || (i === 0 ? 'Mekke' : 'Medine')}"></div>
+      <div class="form-group"><label>Otel adı</label><input class="o_ad" value="${v('ad')}" placeholder="Boş bırakılırsa gösterilmez"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Adres</label><input class="o_adres" value="${v('adres')}"></div>
+      <div class="form-group"><label>Adres (Arapça – taksiye göstermek için)</label><input class="o_adres_ar" dir="rtl" value="${v('adres_ar')}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Resepsiyon telefonu</label><input class="o_tel" value="${v('tel')}" placeholder="+966 ..."></div>
+      <div class="form-group"><label>Konum linki (Google Haritalar)</label><input class="o_konum" value="${v('konum')}"></div>
+    </div>
+  </div>`;
+}
+
+function kafileFormu(k) {
+  const yeni = !k.id;
+  const oteller = (k.oteller && k.oteller.length) ? k.oteller : [{}, {}];
+  while (oteller.length < 2) oteller.push({});
+  document.getElementById('sayfa-kafile').innerHTML = `
+    <div class="header"><h2>${yeni ? '➕ Yeni Kafile' : '✏️ Kafile Düzenle'}</h2></div>
+    <div class="card"><h3>Kafile bilgileri</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Kafile adı</label><input id="k_ad" value="${esc(k.ad)}" placeholder="Kasım 2026 Umre Kafilesi"></div>
+        <div class="form-group"><label>Kafile kodu (yolcular bununla girer)</label>
+          <div style="display:flex;gap:6px"><input id="k_kod" value="${esc(k.kod)}" style="text-transform:uppercase;letter-spacing:1px"><button type="button" class="btn btn-navy" onclick="document.getElementById('k_kod').value=kafileKodUret(document.getElementById('k_ad').value)">Yeni kod</button></div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gidiş tarihi</label><input id="k_baslangic" type="date" value="${esc(k.baslangic)}"></div>
+        <div class="form-group"><label>Dönüş tarihi</label><input id="k_bitis" type="date" value="${esc(k.bitis)}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Rehber adı</label><input id="k_rehber_ad" value="${esc(k.rehber_ad)}"></div>
+        <div class="form-group"><label>Rehber telefonu (WhatsApp)</label><input id="k_rehber_tel" value="${esc(k.rehber_tel)}" placeholder="0533 ..."></div>
+      </div>
+      <div class="form-group" style="max-width:200px"><label>Durum</label>
+        <select id="k_aktif"><option value="true" ${k.aktif !== false ? 'selected' : ''}>Aktif</option><option value="false" ${k.aktif === false ? 'selected' : ''}>Pasif</option></select></div>
+    </div>
+    <div class="card"><h3>Oteller</h3><div id="k_oteller">${oteller.slice(0, 2).map((o, i) => otelBlogu(i, o)).join('')}</div></div>
+    <div class="card"><h3>Gün gün program</h3>
+      <p style="font-size:12px;color:#666;margin-bottom:10px">Her satır bir etkinlik. Uygulamada tarihe ve saate göre sıralanır; “Bugün” ekranında o günün satırları görünür.</p>
+      <div id="k_program">${(k.program || []).map(programSatiri).join('')}</div>
+      <button type="button" class="btn btn-navy" onclick="programSatirEkle()">➕ Satır ekle</button>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gold" id="kafileKaydetBtn" onclick="kafileKaydet(${yeni ? 'null' : `'${k.id}'`})">💾 Kaydet</button>
+      <button class="btn btn-navy" onclick="renderKafileler()">İptal</button>
+    </div>`;
+}
+
+function kafileYeni() {
+  kafileFormu({ kod: kafileKodUret(''), aktif: true, program: [{}] });
+}
+
+async function kafileDuzenle(id) {
+  const { data, error } = await sb.from('kafileler').select('*').eq('id', id).single();
+  if (error || !data) { toast('❌ Kafile okunamadı', 'error'); return; }
+  kafileFormu(data);
+}
+
+function kafileFormOku() {
+  const d = (id) => document.getElementById(id).value.trim();
+  const program = [...document.querySelectorAll('#k_program .prog-satir')].map(s => ({
+    tarih: s.querySelector('.p_tarih').value, saat: s.querySelector('.p_saat').value,
+    baslik: s.querySelector('.p_baslik').value.trim(), yer: s.querySelector('.p_yer').value.trim(), konum: s.querySelector('.p_konum').value.trim()
+  })).filter(p => p.baslik).sort((a, b) => ((a.tarih || '9999') + (a.saat || '99:99')).localeCompare((b.tarih || '9999') + (b.saat || '99:99')));
+  const oteller = [...document.querySelectorAll('#k_oteller .otel-blok')].map(b => {
+    const o = {}; ['sehir', 'ad', 'adres', 'adres_ar', 'tel', 'konum'].forEach(f => o[f] = b.querySelector('.o_' + f).value.trim()); return o;
+  }).filter(o => o.ad);
+  return {
+    ad: d('k_ad'), kod: d('k_kod').toLocaleUpperCase('en').replace(/\s+/g, ''),
+    baslangic: d('k_baslangic') || null, bitis: d('k_bitis') || null,
+    rehber_ad: d('k_rehber_ad'), rehber_tel: d('k_rehber_tel'),
+    aktif: d('k_aktif') === 'true', oteller, program
+  };
+}
+
+async function kafileKaydet(id) {
+  const k = kafileFormOku();
+  if (!k.ad) { toast('❌ Kafile adı gerekli', 'error'); return; }
+  if (!/^[A-Z0-9-]{4,40}$/.test(k.kod)) { toast('❌ Kod en az 4 karakter olmalı; yalnızca harf, rakam ve tire', 'error'); return; }
+  const { error } = id ? await sb.from('kafileler').update(k).eq('id', id) : await sb.from('kafileler').insert(k);
+  if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir kafilede kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
+  toast('✅ Kafile kaydedildi', 'success');
+  renderKafileler();
+}
+
+async function kafileSil(id) {
+  if (!confirm('Kafile ve tüm duyuruları silinsin mi? Bu geri alınamaz.')) return;
+  const { error } = await sb.from('kafileler').delete().eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Silindi', 'success');
+  renderKafileler();
+}
+
+async function kafileDuyurular(id) {
+  const el = document.getElementById('sayfa-kafile');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const [{ data: k }, { data: liste }] = await Promise.all([
+    sb.from('kafileler').select('*').eq('id', id).single(),
+    sb.from('kafile_duyurular').select('*').eq('kafile_id', id).order('olusturma', { ascending: false })
+  ]);
+  if (!k) { toast('❌ Kafile okunamadı', 'error'); renderKafileler(); return; }
+  el.innerHTML = `
+    <div class="header"><h2>📢 ${esc(k.ad)} – Duyurular</h2><button class="btn btn-navy" onclick="renderKafileler()">← Kafileler</button></div>
+    <div class="card"><h3>Yeni duyuru</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Başlık</label><input id="kd_baslik" placeholder="Medine'ye hareket"></div>
+        <div class="form-group"><label>Yazan</label><input id="kd_yazan" value="${esc(k.rehber_ad || '')}" placeholder="Rehber / Ofis"></div>
+      </div>
+      <div class="form-group"><label>Duyuru metni</label><textarea id="kd_metin" rows="4" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px"></textarea></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px"><input type="checkbox" id="kd_onemli"> Önemli (en üstte sabitlenir)</label>
+      <button class="btn btn-gold" onclick="kafileDuyuruEkle('${k.id}')">📢 Yayınla</button>
+    </div>
+    <div class="card"><h3>Yayındaki duyurular (${(liste || []).length})</h3><div class="tur-list">
+      ${(liste || []).map(d => `
+        <div class="tur-item kafile-duyuru">
+          <div class="tur-item-info"><h4>${d.onemli ? '📌 ' : ''}${esc(d.baslik || 'Duyuru')}</h4><p style="white-space:pre-wrap">${esc(d.metin)}</p>
+            <p style="margin-top:4px">${esc(d.yazan || '')} · ${new Date(d.olusturma).toLocaleString('tr-TR', {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'})}</p></div>
+          <div class="tur-item-actions"><button class="btn btn-red" onclick="kafileDuyuruSil('${k.id}', ${d.id})">Sil</button></div>
+        </div>`).join('') || '<p style="color:#666;font-size:14px">Henüz duyuru yok.</p>'}
+    </div></div>`;
+}
+
+async function kafileDuyuruEkle(kafileId) {
+  const metin = document.getElementById('kd_metin').value.trim();
+  if (!metin) { toast('❌ Duyuru metni boş olamaz', 'error'); return; }
+  const { error } = await sb.from('kafile_duyurular').insert({
+    kafile_id: kafileId, metin,
+    baslik: document.getElementById('kd_baslik').value.trim() || null,
+    yazan: document.getElementById('kd_yazan').value.trim() || null,
+    onemli: document.getElementById('kd_onemli').checked
+  });
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Duyuru yayınlandı', 'success');
+  kafileDuyurular(kafileId);
+}
+
+async function kafileDuyuruSil(kafileId, id) {
+  if (!confirm('Duyuru silinsin mi?')) return;
+  const { error } = await sb.from('kafile_duyurular').delete().eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Silindi', 'success');
+  kafileDuyurular(kafileId);
 }
 
 // ── TOAST ──

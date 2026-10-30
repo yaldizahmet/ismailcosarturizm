@@ -14,6 +14,8 @@ Ne kontrol edilir:
 - **Formlar:** 6 başvuru formu doldurulup gönderilir; veritabanı kaydı, mail bildirimi ve "Talebiniz alındı" mesajı beklenir.
 - **Admin paneli:** oturum açık sahte veritabanıyla bütün sekmeler, Düzenle/Kaydet, Kopyala ve Sil; asıl veriye dokunulmadığı kontrol edilir.
 - **Rehber yazıları:** `rehber-*.html` sayfaları da bağlantı/buton taramasında; yeni bir rehber sayfası eklenirse `tara.py` PAGES listesine ve `calistir.sh` döngüsüne eklenmeli.
+- **Kafile uygulaması (`kafile/`):** telefon boyutunda kod girişi (yanlış kod, internet yok), Bugün/Duyurular/Rehber/Vakitler/Acil ekranları, sayaç ve valiz listesinin kalıcılığı, paylaşılan `#KOD` bağlantısı, pasif kafile, çevrimdışı açılış, konum gönderme, kıble yönü, namaz vakitlerinin Ümmü'l-Kurâ referansıyla karşılaştırılması ve HTML enjeksiyonu. Uygulamadaki butonlar `onclick` yerine `data-sekme` / `data-eylem` kullanır; yeni bir eylem eklenirse `kafile.py`'ye testi eklenmeli.
+- **Admin – Kafileler sekmesi:** kafile ekle/düzenle/sil, program satırları, otel bilgileri, duyuru yayınla/sil, paylaş bağlantısı.
 - **Kesme işareti:** tur başlığında `'` ve `"` olsa da "Kayıt Ol" butonlarının çalıştığı.
 
 Veritabanı (`supabase-js`) testte `mock.js` + `db.json` ile taklit edilir; gerçek veritabanına hiçbir şey yazılmaz. `db.json` gerçek turlara benzer örnek veridir; yeni bir tur türü ya da alan eklenirse buraya da eklenmeli.

@@ -15,7 +15,7 @@ echo "▶ JavaScript sözdizimi kontrolü"
 python3 - <<'EOF' || exit 1
 import re, subprocess, glob, sys, tempfile, os
 bad = 0
-for fn in sorted(glob.glob('*.html')) + sorted(glob.glob('*.js')):
+for fn in sorted(glob.glob('*.html')) + sorted(glob.glob('*.js')) + sorted(glob.glob('kafile/*.html')) + sorted(glob.glob('kafile/*.js')):
     s = open(fn, encoding='utf-8').read()
     parcalar = [s] if fn.endswith('.js') else [m.group(1) for m in re.finditer(r'<script(?![^>]*\bsrc=)(?![^>]*application/ld\+json)[^>]*>(.*?)</script>', s, re.S)]
     for kod in parcalar:
@@ -42,5 +42,9 @@ echo "▶ Admin paneli"
 python3 _test/admin.py 2>&1 | grep -E "^(✓|✗|===)"
 ADMIN=${PIPESTATUS[0]}
 
+echo "▶ Kafile uygulaması (kafile/)"
+python3 _test/kafile.py 2>&1 | grep -E "^(✓|✗|===)"
+KAFILE=${PIPESTATUS[0]}
+
 echo
-if [ -z "$SORUN" ] && [ "$FORM" = 0 ] && [ "$ADMIN" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi
+if [ -z "$SORUN" ] && [ "$FORM" = 0 ] && [ "$ADMIN" = 0 ] && [ "$KAFILE" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi
