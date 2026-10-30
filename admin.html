@@ -478,6 +478,7 @@ async function duyuruGuncelle(id) {
 // ── KAFİLELER (yolcu uygulaması: ismailcosarturizm.com.tr/kafile/) ──
 const KAFILE_URL = 'https://ismailcosarturizm.com.tr/kafile/';
 const KOD_HARF = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // karışan 0/O, 1/I yok
+const TUR_TURLERI = { umre: 'Umre', hac: 'Hac', kultur: 'Kültür turu' };
 
 function kafileKodUret(ad) {
   const tr = {'Ç':'C','Ğ':'G','İ':'I','I':'I','Ö':'O','Ş':'S','Ü':'U'};
@@ -490,7 +491,7 @@ function kafileKodUret(ad) {
 function kafileTarih(t) { return t ? new Date(t + 'T12:00:00').toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '—'; }
 
 function kafilePaylasMetni(k) {
-  return `${k.ad} – Kafile uygulamanız:\n${KAFILE_URL}#${k.kod}\n\nBağlantıyı açın; telefonunuza "Ana ekrana ekle" ile uygulama olarak kurabilirsiniz. Kafile kodu: ${k.kod}`;
+  return `${k.ad} – Yolcu uygulamanız:\n${KAFILE_URL}#${k.kod}\n\nBağlantıyı açın; telefonunuza "Ana ekrana ekle" ile uygulama olarak kurabilirsiniz. Grup kodu: ${k.kod}`;
 }
 
 async function renderKafileler() {
@@ -499,14 +500,14 @@ async function renderKafileler() {
   const { data, error } = await sb.from('kafileler').select('*').order('baslangic', { ascending: false });
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
-  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Yolcular <b>' + KAFILE_URL + '</b> adresinden kafile koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Yolcular <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
   if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz kafile yok. “Yeni Kafile” ile ekleyin.</p>';
   html += (data || []).map(k => `
     <div class="tur-item kafile-item">
       <div class="tur-item-info">
         <h4>${esc(k.ad)}</h4>
-        <p>Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır</p>
+        <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır</p>
       </div>
       <div class="tur-item-actions" style="flex-wrap:wrap">
         <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
@@ -548,7 +549,7 @@ function otelBlogu(i, o) {
     </div>
     <div class="form-row">
       <div class="form-group"><label>Adres</label><input class="o_adres" value="${v('adres')}"></div>
-      <div class="form-group"><label>Adres (Arapça – taksiye göstermek için)</label><input class="o_adres_ar" dir="rtl" value="${v('adres_ar')}"></div>
+      <div class="form-group"><label>Adres (yerel dilde – taksiye göstermek için)</label><input class="o_adres_ar" dir="auto" value="${v('adres_ar')}"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Resepsiyon telefonu</label><input class="o_tel" value="${v('tel')}" placeholder="+966 ..."></div>
@@ -566,7 +567,7 @@ function kafileFormu(k) {
     <div class="card"><h3>Kafile bilgileri</h3>
       <div class="form-row">
         <div class="form-group"><label>Kafile adı</label><input id="k_ad" value="${esc(k.ad)}" placeholder="Kasım 2026 Umre Kafilesi"></div>
-        <div class="form-group"><label>Kafile kodu (yolcular bununla girer)</label>
+        <div class="form-group"><label>Grup kodu (yolcular bununla girer)</label>
           <div style="display:flex;gap:6px"><input id="k_kod" value="${esc(k.kod)}" style="text-transform:uppercase;letter-spacing:1px"><button type="button" class="btn btn-navy" onclick="document.getElementById('k_kod').value=kafileKodUret(document.getElementById('k_ad').value)">Yeni kod</button></div></div>
       </div>
       <div class="form-row">
@@ -576,6 +577,13 @@ function kafileFormu(k) {
       <div class="form-row">
         <div class="form-group"><label>Rehber adı</label><input id="k_rehber_ad" value="${esc(k.rehber_ad)}"></div>
         <div class="form-group"><label>Rehber telefonu (WhatsApp)</label><input id="k_rehber_tel" value="${esc(k.rehber_tel)}" placeholder="0533 ..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tur türü</label>
+          <select id="k_tur_turu">${Object.entries(TUR_TURLERI).map(([d, a]) => `<option value="${d}" ${(k.tur_turu || 'umre') === d ? 'selected' : ''}>${a}</option>`).join('')}</select>
+          <div style="font-size:11.5px;color:#888;margin-top:4px">Umre/Hac: tavaf sayacı, Mekke-Medine vakitleri ve Suudi acil numaraları görünür. Kültür turu: bunlar gizlenir, vakitler yolcunun bulunduğu yere göre hesaplanır.</div></div>
+        <div class="form-group"><label>Yerel acil numara (isteğe bağlı)</label><input id="k_acil_tel" value="${esc(k.acil_tel)}" placeholder="Ör. 112">
+          <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında gidilen ülkenin acil numarası. Umre/Hac'da 911 ve 997 zaten gösterilir.</div></div>
       </div>
       <div class="form-group" style="max-width:200px"><label>Durum</label>
         <select id="k_aktif"><option value="true" ${k.aktif !== false ? 'selected' : ''}>Aktif</option><option value="false" ${k.aktif === false ? 'selected' : ''}>Pasif</option></select></div>
@@ -615,6 +623,7 @@ function kafileFormOku() {
     ad: d('k_ad'), kod: d('k_kod').toLocaleUpperCase('en').replace(/\s+/g, ''),
     baslangic: d('k_baslangic') || null, bitis: d('k_bitis') || null,
     rehber_ad: d('k_rehber_ad'), rehber_tel: d('k_rehber_tel'),
+    tur_turu: d('k_tur_turu'), acil_tel: d('k_acil_tel') || null,
     aktif: d('k_aktif') === 'true', oteller, program
   };
 }

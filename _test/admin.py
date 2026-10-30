@@ -110,6 +110,7 @@ with sync_playwright() as p:
     pg.fill('#k_baslangic', '2026-11-10'); pg.fill('#k_bitis', '2026-11-23')
     pg.fill('#k_rehber_ad', "Ali O'Hoca"); pg.fill('#k_rehber_tel', '0533 000 00 00')
     pg.locator('.o_ad').first.fill('Test Otel Mekke')
+    pg.select_option('#k_tur_turu', 'kultur'); pg.fill('#k_acil_tel', '112')
     satir = pg.locator('#k_program .prog-satir').first
     satir.locator('.p_tarih').fill('2026-11-11'); satir.locator('.p_saat').fill('14:30'); satir.locator('.p_baslik').fill('Mekke ziyaretleri'); satir.locator('.p_yer').fill('Otel lobisi')
     pg.get_by_role('button', name=re.compile('Satır ekle')).click()
@@ -120,14 +121,14 @@ with sync_playwright() as p:
     ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'kafileler']
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
-            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca",
+            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112',
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
     kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile'), 'Kafile: listede görünüyor')
     href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''
     kontrol('kafile%2F%23' + kod in href, 'Kafile: Paylaş bağlantısı kodlu uygulama adresini içeriyor')
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
-    kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca", 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
+    kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca" and pg.input_value('#k_tur_turu') == 'kultur' and pg.input_value('#k_acil_tel') == '112', 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
     pg.fill('#k_ad', 'Kasım 2026 Umre Kafilesi (güncel)'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
     kontrol(len(g) == 1 and g[0]['tablo'] == 'kafileler' and g[0]['veri']['ad'].endswith('(güncel)') and len(g[0]['veri']['program']) == 2, 'Kafile: düzenle → kaydet doğru kafileyi güncelliyor', errs)

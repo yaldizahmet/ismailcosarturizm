@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Coşar Kafile">
-<title>Coşar Kafile – İsmail Coşar Turizm</title>
+<meta name="apple-mobile-web-app-title" content="Coşar Turizm">
+<title>Yolcu Uygulaması – İsmail Coşar Turizm</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="ikon-192.png">
 <link rel="apple-touch-icon" href="ikon-180.png">
@@ -139,7 +139,7 @@ details.tum[open] summary::after{content:'▴'}
 .otel-karti{background:#fff;border:1px dashed #b8ad92;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .otel-karti .ad{font-size:18px;font-weight:700}
 .otel-karti .adres{font-size:14px;color:var(--yazi2);line-height:1.5}
-.otel-karti .arapca{font-size:19px;line-height:1.6;direction:rtl;text-align:right}
+.otel-karti .yerel{font-size:19px;line-height:1.6;text-align:start}
 .kucuk-not{font-size:12px;color:var(--soluk);line-height:1.5}
 .cikis{background:none;border:0;color:var(--soluk);font-size:13.5px;text-decoration:underline;align-self:center;padding:10px;min-height:44px}
 
@@ -159,14 +159,14 @@ details.tum[open] summary::after{content:'▴'}
   <div class="giris-logo">
     <div class="giris-ikon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V9l8-5 8 5v12"/><path d="M4 21h16"/><path d="M9 21v-6h6v6"/><path d="M12 4V2"/></svg></div>
     <h1>İsmail Coşar Turizm</h1>
-    <div class="ust-etiket">Kafile Uygulaması</div>
+    <div class="ust-etiket">Yolcu Uygulaması</div>
   </div>
   <form id="girisForm" novalidate>
-    <label for="kodKutu">Kafile kodunuz</label>
+    <label for="kodKutu">Grup kodunuz</label>
     <input id="kodKutu" name="kod" type="text" placeholder="Örn. KASIM-7K3QX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40" required>
-    <div class="aciklama">Kodu rehberinizden ya da kafilenizin WhatsApp grubundan alabilirsiniz.</div>
+    <div class="aciklama">Kodu rehberinizden ya da tur grubunuzun WhatsApp grubundan alabilirsiniz.</div>
     <div class="hata" id="girisHata" role="alert" hidden></div>
-    <button type="submit" class="btn-altin" id="girisBtn">Kafileme gir
+    <button type="submit" class="btn-altin" id="girisBtn">Grubuma gir
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
   </form>
   <div class="giris-alt">
@@ -221,11 +221,14 @@ details.tum[open] summary::after{content:'▴'}
   function bildir(m) { var b = $('bildirim'); b.textContent = m; b.hidden = false; clearTimeout(bildir.z); bildir.z = setTimeout(function () { b.hidden = true; }, 2800); }
   function titret() { try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {} }
 
-  // Mekke/Medine saati (Türkiye ile aynı, UTC+3). Testlerde window.__SIMDI ile sabitlenebilir.
+  // Umre/Hac: Mekke saati (Türkiye ile aynı, UTC+3). Kültür turu: telefonun bulunduğu ülkenin saati
+  // (program o ülkenin saatiyle girilir). Testlerde window.__SIMDI ile sabitlenebilir.
+  function kutsalMi() { var t = (typeof S !== 'undefined' && S && S.veri) ? S.veri.tur_turu : null; return t !== 'kultur'; }
+  function saatDilimi() { return kutsalMi() ? 'Asia/Riyadh' : undefined; }
   function simdi() {
     var d = window.__SIMDI ? new Date(window.__SIMDI) : new Date();
     var p = {};
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' })
+    new Intl.DateTimeFormat('en-CA', { timeZone: saatDilimi(), year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' })
       .formatToParts(d).forEach(function (x) { p[x.type] = x.value; });
     return { tarih: p.year + '-' + p.month + '-' + p.day, dk: (+p.hour) * 60 + (+p.minute) + (+p.second) / 60, y: +p.year, m: +p.month, g: +p.day };
   }
@@ -235,8 +238,11 @@ details.tum[open] summary::after{content:'▴'}
   function saatDk(s) { var m = /^(\d{1,2}):(\d{2})/.exec(s || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; }
   function saatYaz(h) { var dk = Math.round(h * 60); dk = ((dk % 1440) + 1440) % 1440; return String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0'); }
 
-  // ── Namaz vakitleri: Ümmü'l-Kurâ yöntemi (Mekke/Medine'de resmi): imsak 18.5°, yatsı akşamdan 90 dk sonra (Ramazan'da 120), ikindi Şâfiî ──
-  function namazVakitleri(t, enlem, boylam, dilim, ramazan) {
+  // ── Namaz vakitleri ──
+  // Varsayılan: Ümmü'l-Kurâ (Mekke/Medine'de resmi): imsak 18.5°, yatsı akşamdan 90 dk sonra (Ramazan'da 120), ikindi Şâfiî (gölge 1 kat).
+  // yontem 'yerel' (kültür turları, yolcunun konumu): imsak 18°, yatsı 17°, ikindi gölge 1 kat — yaklaşık değerdir.
+  function namazVakitleri(t, enlem, boylam, dilim, ramazan, yontem) {
+    var yerel = yontem === 'yerel';
     var D = Math.PI / 180;
     var sin = function (d) { return Math.sin(d * D); }, cos = function (d) { return Math.cos(d * D); }, tan = function (d) { return Math.tan(d * D); };
     var asin = function (x) { return Math.asin(x) / D; }, acos = function (x) { return Math.acos(x) / D; }, atan2 = function (y, x) { return Math.atan2(y, x) / D; };
@@ -258,11 +264,11 @@ details.tum[open] summary::after{content:'▴'}
       return ogle(k) + yon * acos(Math.max(-1, Math.min(1, c))) / 15;
     }
     function ikindi(k) { var s = gunes(k); return aci(-Math.atan(1 / (1 + tan(Math.abs(enlem - s.dek)))) / D, k, 1); }
-    var v = { imsak: 5, gunes: 6, ogle: 12, ikindi: 13, aksam: 18 };
-    for (var i = 0; i < 2; i++) v = { imsak: aci(18.5, v.imsak / 24, -1), gunes: aci(0.833, v.gunes / 24, -1), ogle: ogle(v.ogle / 24), ikindi: ikindi(v.ikindi / 24), aksam: aci(0.833, v.aksam / 24, 1) };
+    var v = { imsak: 5, gunes: 6, ogle: 12, ikindi: 13, aksam: 18, yatsi: 19.5 };
+    for (var i = 0; i < 2; i++) v = { imsak: aci(yerel ? 18 : 18.5, v.imsak / 24, -1), gunes: aci(0.833, v.gunes / 24, -1), ogle: ogle(v.ogle / 24), ikindi: ikindi(v.ikindi / 24), aksam: aci(0.833, v.aksam / 24, 1), yatsi: aci(17, v.yatsi / 24, 1) };
     var fark = dilim - boylam / 15, r = {};
     Object.keys(v).forEach(function (k) { r[k] = v[k] + fark; });
-    r.yatsi = r.aksam + (ramazan ? 2 : 1.5);
+    if (!yerel) r.yatsi = r.aksam + (ramazan ? 2 : 1.5);
     return r;
   }
   function ramazanMi(d) { try { return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric', timeZone: 'Asia/Riyadh' }).format(d) === '9'; } catch (e) { return false; } }
@@ -272,7 +278,7 @@ details.tum[open] summary::after{content:'▴'}
   var S = {
     kod: oku('kafile-kod', ''), veri: null, sekme: 'bugun', guncelleme: null, cevrimdisi: false,
     sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}),
-    sehir: oku('kafile-sehir', 'mekke'), kible: null, yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
+    sehir: oku('kafile-sehir', 'mekke'), kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
   };
 
   // ── veri ──
@@ -287,7 +293,7 @@ details.tum[open] summary::after{content:'▴'}
     return kafileGetir(S.kod).then(function (v) {
       if (!v) { // kafile silinmiş ya da pasif
         sil('kafile-veri-' + S.kod); sil('kafile-kod'); S.kod = ''; S.veri = null;
-        girisGoster('Bu kafile artık aktif değil. Yeni bir kodunuz varsa girin.'); return;
+        girisGoster('Bu grup artık aktif değil. Yeni bir kodunuz varsa girin.'); return;
       }
       S.veri = v; S.cevrimdisi = false; S.guncelleme = Date.now();
       yaz('kafile-veri-' + S.kod, { veri: v, zaman: S.guncelleme });
@@ -307,11 +313,11 @@ details.tum[open] summary::after{content:'▴'}
   $('girisForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var kod = $('kodKutu').value.toLocaleUpperCase('en').replace(/\s+/g, '');
-    if (kod.length < 4) { girisGoster('Lütfen kafile kodunuzu girin.'); return; }
+    if (kod.length < 4) { girisGoster('Lütfen grup kodunuzu girin.'); return; }
     var btn = $('girisBtn'); btn.disabled = true;
     kafileGetir(kod).then(function (v) {
       btn.disabled = false;
-      if (!v) { girisGoster('Bu kodla aktif bir kafile bulunamadı. Kodu kontrol edip tekrar deneyin.'); return; }
+      if (!v) { girisGoster('Bu kodla aktif bir grup bulunamadı. Kodu kontrol edip tekrar deneyin.'); return; }
       S.kod = kod; S.veri = v; S.guncelleme = Date.now(); S.cevrimdisi = false; S.sekme = 'bugun';
       yaz('kafile-kod', kod); yaz('kafile-veri-' + kod, { veri: v, zaman: S.guncelleme });
       uygulamaGoster();
@@ -319,7 +325,7 @@ details.tum[open] summary::after{content:'▴'}
   });
   function uygulamaGoster() { $('giris').hidden = true; $('uygulama').hidden = false; ciz(); window.scrollTo(0, 0); }
   function kafiledenCik() {
-    if (!confirm('Bu telefondan kafileden çıkılsın mı? Tekrar girmek için kodu yeniden girmeniz gerekir.')) return;
+    if (!confirm('Bu telefondan gruptan çıkılsın mı? Tekrar girmek için kodu yeniden girmeniz gerekir.')) return;
     sil('kafile-veri-' + S.kod); sil('kafile-kod'); S.kod = ''; S.veri = null; $('kodKutu').value = ''; girisGoster();
   }
 
@@ -363,7 +369,10 @@ details.tum[open] summary::after{content:'▴'}
     var baslik = esc(v.ad), alt = '';
     var aralik = v.baslangic ? tarihYaz(v.baslangic) + (v.bitis ? ' – ' + tarihYaz(v.bitis) : '') : '';
     if (v.baslangic && gunSayisi(bugun, v.baslangic) > 0) { baslik = 'Yolculuğa ' + gunSayisi(bugun, v.baslangic) + ' gün'; alt = aralik; }
-    else if (v.bitis && gunSayisi(v.bitis, bugun) > 0) { baslik = 'Hayırlı umreler'; alt = 'Allah kabul etsin · ' + aralik; }
+    else if (v.bitis && gunSayisi(v.bitis, bugun) > 0) {
+      if (v.tur_turu === 'kultur') { baslik = 'Turumuz tamamlandı'; alt = 'Bizimle yolculuk ettiğiniz için teşekkürler · ' + aralik; }
+      else { baslik = v.tur_turu === 'hac' ? 'Hayırlı hac' : 'Hayırlı umreler'; alt = 'Allah kabul etsin · ' + aralik; }
+    }
     else if (v.baslangic) {
       baslik = (gunSayisi(v.baslangic, bugun) + 1) + '. Gün';
       var kalan = v.bitis ? gunSayisi(bugun, v.bitis) : null;
@@ -421,7 +430,7 @@ details.tum[open] summary::after{content:'▴'}
       });
       h += '</details>';
     }
-    h += '<button type="button" class="cikis" data-eylem="cikis">Kafileden çık</button></div>';
+    h += '<button type="button" class="cikis" data-eylem="cikis">Gruptan çık</button></div>';
     return h;
   }
 
@@ -440,8 +449,8 @@ details.tum[open] summary::after{content:'▴'}
   function kisalt(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   function duyuruZamani(iso) {
     var d = new Date(iso); if (isNaN(d)) return '';
-    var gun = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
-    var saat = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Riyadh' });
+    var gun = new Intl.DateTimeFormat('en-CA', { timeZone: saatDilimi(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+    var saat = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: saatDilimi() });
     var f = gunSayisi(gun, simdi().tarih);
     return f === 0 ? saat : f === 1 ? 'Dün ' + saat : tarihYaz(gun) + ' ' + saat;
   }
@@ -455,7 +464,7 @@ details.tum[open] summary::after{content:'▴'}
     onemli.forEach(function (d) { h += duyuruKarti(d, true); });
     var sonGun = null, bugun = simdi().tarih;
     diger.forEach(function (d) {
-      var gun = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(d.olusturma));
+      var gun = new Intl.DateTimeFormat('en-CA', { timeZone: saatDilimi(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(d.olusturma));
       if (gun !== sonGun) { h += '<div class="gun-baslik">' + esc(gunEtiketi(gun, bugun)) + '</div>'; sonGun = gun; }
       h += duyuruKarti(d, false);
     });
@@ -475,14 +484,24 @@ details.tum[open] summary::after{content:'▴'}
     ['İlaçlar', ['Düzenli ilaçlar (reçete ya da raporuyla, orijinal kutusunda)', 'Ağrı kesici, yara bandı']],
     ['Para', ['Suudi Riyali (nakit)', 'Banka ya da kredi kartı']]
   ];
+  var VALIZ_KULTUR = [
+    ['Belgeler', ['Pasaport', 'Kimlik kartı', 'Uçuş ve otel bilgileri (telefonda ya da çıktı)']],
+    ['Kıyafet', ['Mevsime uygun, rahat kıyafetler', 'Yağmurluk ya da ince mont', 'İç çamaşırı ve çorap']],
+    ['Ayakkabı', ['Rahat, daha önce giyilmiş yürüyüş ayakkabısı', 'Hafif terlik']],
+    ['Kişisel bakım', ['Diş fırçası, diş macunu, tarak', 'Güneş kremi', 'Mendil ve ıslak mendil']],
+    ['İlaçlar', ['Düzenli ilaçlar (reçete ya da raporuyla, orijinal kutusunda)', 'Ağrı kesici, yara bandı']],
+    ['Elektronik', ['Telefon şarj aleti', 'Taşınabilir şarj cihazı (powerbank)']],
+    ['Para', ['Gidilen ülkede geçerli para (nakit)', 'Banka ya da kredi kartı']]
+  ];
 
   function rehberEkrani() {
+    if (!kutsalMi()) return yolculukRehberi();
     var sc = S.sayac, mod = sc.mod === 'say' ? 'say' : 'tavaf', n = Math.max(0, Math.min(7, sc[mod] || 0)), bitti = n >= 7;
     var ipucu = mod === 'tavaf'
       ? (bitti ? 'Tavafınız tamamlandı. Allah kabul etsin.' : 'Hacerü\'l-Esved hizasından başlayın. Her şavtı bitirdiğinizde büyük butona dokunun.')
       : (bitti ? 'Sa\'yiniz Merve\'de tamamlandı. Allah kabul etsin.' : 'Safa\'dan Merve\'ye her geçiş bir tur sayılır. Yedinci tur Merve\'de biter.');
     var ofset = (490.1 * (1 - n / 7)).toFixed(1);
-    var h = '<header class="bas"><h1>Umre Rehberi</h1><div class="secim" role="group" aria-label="Sayaç türü">' +
+    var h = '<header class="bas"><h1>' + (S.veri.tur_turu === 'hac' ? 'Hac Rehberi' : 'Umre Rehberi') + '</h1><div class="secim" role="group" aria-label="Sayaç türü">' +
       '<button type="button" data-eylem="mod-tavaf" aria-pressed="' + (mod === 'tavaf') + '">Tavaf sayacı</button>' +
       '<button type="button" data-eylem="mod-say" aria-pressed="' + (mod === 'say') + '">Sa\'y sayacı</button></div></header><div class="icerik">';
     h += '<div class="halka"><svg width="184" height="184" viewBox="0 0 184 184" aria-hidden="true"><circle cx="92" cy="92" r="78" fill="#FFFFFF" stroke="#ece6d6" stroke-width="12"/>' +
@@ -492,15 +511,7 @@ details.tum[open] summary::after{content:'▴'}
     h += '<button type="button" class="btn-sayac" data-eylem="arttir"' + (bitti ? ' disabled' : '') + '>' + (bitti ? 'Tamamlandı' : (mod === 'tavaf' ? 'Şavt tamamlandı +1' : 'Tur tamamlandı +1')) + '</button>';
     h += '<div class="ikili"><button type="button" class="btn-ince" data-eylem="azalt">Geri al</button><button type="button" class="btn-ince" data-eylem="sifirla">Sıfırla</button></div>';
     h += '<p class="kucuk-not" style="text-align:center">Sayaç telefonda saklanır; uygulama kapansa da kaldığınız yerden devam eder.</p>';
-    // Valiz listesi
-    var toplam = 0, isaretli = 0;
-    VALIZ.forEach(function (b) { b[1].forEach(function (x) { toplam++; if (S.valiz[x]) isaretli++; }); });
-    h += '<h2 class="bolum-baslik">Valiz listesi <span style="font-family:var(--ff);font-size:14px;color:var(--soluk);font-weight:600">' + isaretli + '/' + toplam + '</span></h2>';
-    VALIZ.forEach(function (b) {
-      h += '<div class="gun-baslik">' + esc(b[0]) + '</div><div class="liste">';
-      b[1].forEach(function (x) { h += '<label><input type="checkbox" data-valiz="' + esc(x) + '"' + (S.valiz[x] ? ' checked' : '') + '><span>' + esc(x) + '</span></label>'; });
-      h += '</div>';
-    });
+    h += valizListesi(VALIZ);
     h += '<p class="kucuk-not">Zemzem: Her yolcumuz için 5 litre zemzem tarafımızdan alınıp dönüşte teslim edilir; ayrıca almanıza gerek yok.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
       '<a href="' + SITE + 'rehber-ilk-umre.html" target="_blank" rel="noopener">İlk kez umreye gideceklere rehber<span class="ok" aria-hidden="true">›</span></a>' +
@@ -509,30 +520,64 @@ details.tum[open] summary::after{content:'▴'}
     return h + '</div>';
   }
 
+  function valizListesi(liste) {
+    var toplam = 0, isaretli = 0, h = '';
+    liste.forEach(function (b) { b[1].forEach(function (x) { toplam++; if (S.valiz[x]) isaretli++; }); });
+    h += '<h2 class="bolum-baslik">Valiz listesi <span style="font-family:var(--ff);font-size:14px;color:var(--soluk);font-weight:600">' + isaretli + '/' + toplam + '</span></h2>';
+    liste.forEach(function (b) {
+      h += '<div class="gun-baslik">' + esc(b[0]) + '</div><div class="liste">';
+      b[1].forEach(function (x) { h += '<label><input type="checkbox" data-valiz="' + esc(x) + '"' + (S.valiz[x] ? ' checked' : '') + '><span>' + esc(x) + '</span></label>'; });
+      h += '</div>';
+    });
+    return h;
+  }
+
+  function yolculukRehberi() {
+    var h = '<header class="bas"><h1>Yolculuk Rehberi</h1><div class="bas-alt">Valiz listesi ve faydalı bilgiler</div></header><div class="icerik">';
+    h += valizListesi(VALIZ_KULTUR);
+    h += '<p class="kucuk-not">İşaretleriniz telefonda saklanır; uygulama kapansa da kaybolmaz.</p>';
+    h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
+      '<a href="' + SITE + 'turlar.html" target="_blank" rel="noopener">Kültür turlarımız<span class="ok" aria-hidden="true">›</span></a>' +
+      '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a></div>';
+    return h + '</div>';
+  }
+
   var VAKIT_ADLARI = [['imsak', 'İmsak'], ['gunes', 'Güneş'], ['ogle', 'Öğle'], ['ikindi', 'İkindi'], ['aksam', 'Akşam'], ['yatsi', 'Yatsı']];
   function vakitlerEkrani() {
-    var n = simdi(), s = SEHIRLER[S.sehir] || SEHIRLER.mekke;
-    var vk = namazVakitleri(n, s.enlem, s.boylam, 3, ramazanMi(window.__SIMDI ? new Date(window.__SIMDI) : new Date()));
+    var n = simdi(), yerel = !kutsalMi(), k0 = S.konumVakit;
+    var s = yerel ? (k0 ? { ad: 'Bulunduğunuz yer', enlem: k0.enlem, boylam: k0.boylam } : null) : (SEHIRLER[S.sehir] || SEHIRLER.mekke);
+    if (yerel && !s) {
+      return '<header class="bas"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></header><div class="icerik">' +
+        '<div class="kart"><div class="kart-etiket">Bulunduğunuz yerin vakitleri</div><p class="bos">Namaz vakitlerini bulunduğunuz şehre göre hesaplamak için konumunuzu bir kez paylaşmanız yeterli. Konum yalnızca bu telefonda kullanılır, hiçbir yere gönderilmez.</p>' +
+        (S.konumHata ? '<p class="bos" style="color:var(--kirmizi)">' + esc(S.konumHata) + '</p>' : '') +
+        '<button type="button" class="btn-dolu" data-eylem="konum-vakit">Konumumu kullan</button></div>' + kibleKarti() + '</div>';
+    }
+    var dilim = yerel ? -(window.__SIMDI ? new Date(window.__SIMDI) : new Date()).getTimezoneOffset() / 60 : 3;
+    var vk = namazVakitleri(n, s.enlem, s.boylam, dilim, ramazanMi(window.__SIMDI ? new Date(window.__SIMDI) : new Date()), yerel ? 'yerel' : null);
     var siradaki = null;
     VAKIT_ADLARI.forEach(function (a) { if (!siradaki && vk[a[0]] * 60 > n.dk) siradaki = a; });
     var kalanDk, siraAd, siraSaat;
     if (siradaki) { kalanDk = vk[siradaki[0]] * 60 - n.dk; siraAd = siradaki[1]; siraSaat = saatYaz(vk[siradaki[0]]); }
     else { // yarının imsakı
       var y = new Date(Date.UTC(n.y, n.m - 1, n.g + 1)), yt = { y: y.getUTCFullYear(), m: y.getUTCMonth() + 1, g: y.getUTCDate() };
-      var yv = namazVakitleri(yt, s.enlem, s.boylam, 3, false); kalanDk = yv.imsak * 60 + 1440 - n.dk; siraAd = 'İmsak (yarın)'; siraSaat = saatYaz(yv.imsak);
+      var yv = namazVakitleri(yt, s.enlem, s.boylam, dilim, false, yerel ? 'yerel' : null); kalanDk = yv.imsak * 60 + 1440 - n.dk; siraAd = 'İmsak (yarın)'; siraSaat = saatYaz(yv.imsak);
     }
     kalanDk = Math.max(0, Math.ceil(kalanDk));
     var kalan = (kalanDk >= 60 ? Math.floor(kalanDk / 60) + ' sa ' : '') + (kalanDk % 60) + ' dk';
     var h = '<header class="bas"><div class="bas-ust"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></div>' +
-      '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (S.sehir !== 'medine') + '">Mekke</button>' +
-      '<button type="button" data-eylem="sehir-medine" aria-pressed="' + (S.sehir === 'medine') + '">Medine</button></div></header><div class="icerik">';
+      (yerel ? '<div class="bas-alt">Bulunduğunuz yere göre</div>' : '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (S.sehir !== 'medine') + '">Mekke</button>' +
+      '<button type="button" data-eylem="sehir-medine" aria-pressed="' + (S.sehir === 'medine') + '">Medine</button></div>') + '</header><div class="icerik">';
     h += '<div class="altin-kart" style="flex-direction:row;justify-content:space-between;align-items:center"><div><div class="kart-etiket">Sıradaki vakit</div>' +
       '<div style="font-family:var(--ff-b);font-size:24px;font-weight:700;margin-top:2px" id="siradakiVakit">' + esc(siraAd) + ' · ' + siraSaat + '</div></div><div style="font-size:15px;font-weight:700;text-align:right">' + kalan + '</div></div>';
     h += '<div class="kart" style="padding:4px 18px;gap:0" id="vakitListesi">';
     VAKIT_ADLARI.forEach(function (a) { h += '<div class="vakit-satir' + (siradaki && siradaki[0] === a[0] ? ' siradaki' : '') + '"><span>' + a[1] + '</span><span>' + saatYaz(vk[a[0]]) + '</span></div>'; });
-    h += '<p class="kucuk-not" style="padding:8px 0 10px">' + esc(s.ad) + ' için Ümmü\'l-Kurâ takvimine göre hesaplanmıştır; Harem\'deki ezan esastır. Türkiye ile saat farkı yoktur.</p></div>';
-    // Kıble
-    var k = S.kible;
+    if (yerel) h += '<p class="kucuk-not" style="padding:8px 0 10px">Konumunuza ve telefonunuzun saatine göre yaklaşık hesaplanmıştır; Diyanet takvimiyle birkaç dakika fark olabilir. Yerel caminin vakitleri esastır. <button type="button" class="cikis" style="padding:0;min-height:0;display:inline" data-eylem="konum-vakit">Konumu yenile</button></p></div>';
+    else h += '<p class="kucuk-not" style="padding:8px 0 10px">' + esc(s.ad) + ' için Ümmü\'l-Kurâ takvimine göre hesaplanmıştır; Harem\'deki ezan esastır. Türkiye ile saat farkı yoktur.</p></div>';
+    return h + kibleKarti() + '</div>';
+  }
+
+  function kibleKarti() {
+    var k = S.kible, h = '';
     var yazi;
     if (!k) yazi = 'Konumunuza göre kıble yönünü gösterir. Otel odasında ve yolculukta kullanışlıdır.<button type="button" data-eylem="kible">Kıbleyi göster</button>';
     else if (k.hata) yazi = esc(k.hata) + '<button type="button" data-eylem="kible">Tekrar dene</button>';
@@ -542,7 +587,16 @@ details.tum[open] summary::after{content:'▴'}
     h += '<div class="kible"><div class="pusula"><svg id="pusulaOk" width="110" height="110" viewBox="0 0 96 96" role="img" aria-label="Kıble pusulası"><circle cx="48" cy="48" r="44" fill="#132d52" stroke="#3a5480" stroke-width="2"/>' +
       '<g id="pusulaOkGrup"><path d="M48 12 L56 50 L48 44 L40 50 Z" fill="#E4B84A"/><path d="M48 84 L56 50 L48 56 L40 50 Z" fill="#3a5480"/></g><circle cx="48" cy="48" r="4" fill="#FFFFFF"/></svg></div>' +
       '<div class="kible-yazi"><div class="etiket">KIBLE YÖNÜ</div><div id="kibleYazi">' + yazi + '</div></div></div>';
-    return h + '</div>';
+    return h;
+  }
+
+  function konumVakitAl() {
+    if (!navigator.geolocation) { S.konumHata = 'Bu telefonda konum kullanılamıyor.'; ciz(); return; }
+    bildir('Konumunuz alınıyor…');
+    navigator.geolocation.getCurrentPosition(function (p) {
+      S.konumHata = null; S.konumVakit = { enlem: p.coords.latitude, boylam: p.coords.longitude, zaman: Date.now() };
+      yaz('kafile-konum', S.konumVakit); ciz();
+    }, function () { S.konumHata = 'Konum izni verilmedi. Telefon ayarlarından tarayıcıya konum izni verip tekrar deneyin.'; ciz(); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 1800000 });
   }
 
   function pusulaCiz() {
@@ -595,16 +649,18 @@ details.tum[open] summary::after{content:'▴'}
     oteller.forEach(function (o) {
       var konum = guvenliUrl(o.konum), tel = telNo(o.tel);
       h += '<div class="otel-karti"><div class="kart-etiket" style="color:var(--soluk)"><span>Otel kartı' + (o.sehir ? ' · ' + esc(o.sehir) : '') + '</span></div><div class="ad">' + esc(o.ad) + '</div>' +
-        (o.adres_ar ? '<div class="arapca" lang="ar">' + esc(o.adres_ar) + '</div>' : '') + (o.adres ? '<div class="adres">' + esc(o.adres) + '</div>' : '') +
+        (o.adres_ar ? '<div class="yerel" dir="auto">' + esc(o.adres_ar) + '</div>' : '') + (o.adres ? '<div class="adres">' + esc(o.adres) + '</div>' : '') +
         ((konum || tel) ? '<div class="ikili">' + (konum ? '<a class="btn-cizgi" href="' + esc(konum) + '" target="_blank" rel="noopener">' + IKON.konum + 'Konum</a>' : '<span></span>') + (tel ? '<a class="btn-dolu" href="tel:' + esc(tel) + '">' + IKON.tel + 'Resepsiyon</a>' : '') + '</div>' : '') + '</div>';
     });
     h += '<h2 class="bolum-baslik">Önemli numaralar</h2><div class="liste">';
     oteller.forEach(function (o) { var tel = telNo(o.tel); if (tel) h += '<a href="tel:' + esc(tel) + '">' + esc(o.ad) + ' resepsiyonu<span class="numara">' + esc(o.tel) + '</span></a>'; });
-    h += '<a href="tel:' + OFIS_TEL + '">İsmail Coşar Turizm<span class="numara">0533 198 07 81</span></a>' +
-      '<a href="tel:911">Suudi Arabistan acil (polis, ambulans, itfaiye)<span class="numara">911</span></a>' +
-      '<a href="tel:997">Kızılay ambulans<span class="numara">997</span></a>' +
-      '<a href="tel:+903122922929">Dışişleri Konsolosluk Çağrı Merkezi (7/24)<span class="numara">+90 312 292 29 29</span></a></div>';
-    h += '<p class="kucuk-not">911, Mekke ve Medine dahil Suudi Arabistan\'ın birçok bölgesinde tüm acil durumlar için geçerlidir.</p>';
+    var acil = String(v.acil_tel || '').trim(), acilNo = acil.replace(/[^\d+]/g, '');
+    h += '<a href="tel:' + OFIS_TEL + '">İsmail Coşar Turizm<span class="numara">0533 198 07 81</span></a>';
+    if (acilNo) h += '<a href="tel:' + esc(acilNo) + '">' + (kutsalMi() ? 'Ek acil numara' : 'Yerel acil numara') + '<span class="numara">' + esc(acil) + '</span></a>';
+    if (kutsalMi()) h += '<a href="tel:911">Suudi Arabistan acil (polis, ambulans, itfaiye)<span class="numara">911</span></a>' +
+      '<a href="tel:997">Kızılay ambulans<span class="numara">997</span></a>';
+    h += '<a href="tel:+903122922929">Dışişleri Konsolosluk Çağrı Merkezi (7/24)<span class="numara">+90 312 292 29 29</span></a></div>';
+    h += '<p class="kucuk-not">' + (kutsalMi() ? '911, Mekke ve Medine dahil Suudi Arabistan\'ın birçok bölgesinde tüm acil durumlar için geçerlidir.' : 'Dışişleri Konsolosluk Çağrı Merkezi yurt dışındaki Türk vatandaşlarına 7/24 yardımcı olur.' + (acilNo ? '' : ' Bulunduğunuz ülkenin acil numarasını rehberinizden öğrenebilirsiniz.')) + '</p>';
     return h + '</div>';
   }
 
@@ -631,6 +687,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'sifirla') { if ((sc[mod] || 0) && !confirm('Sayaç sıfırlansın mı?')) return; sc[mod] = 0; yaz('kafile-sayac', sc); ciz(); }
     else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehir = ey.slice(6); yaz('kafile-sehir', S.sehir); ciz(); }
     else if (ey === 'kible') kibleBaslat();
+    else if (ey === 'konum-vakit') konumVakitAl();
     else if (ey === 'konum-gonder') konumGonder();
     else if (ey === 'cikis') kafiledenCik();
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }

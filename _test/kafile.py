@@ -152,6 +152,39 @@ with sync_playwright() as p:
     kontrol(not errs, 'Konum/kıble sırasında JavaScript hatası yok', errs)
     c.close()
 
+    # ── Kültür turu (Saraybosna): sayaç yok, yerel saat, yerel vakitler, yerel acil numara ──
+    KULTUR = dict(KAFILE, kod='TEST-KULTR', ad='Balkan Turu', tur_turu='kultur', acil_tel='112', baslangic='2026-11-10', bitis='2026-11-16',
+                  oteller=[{'sehir': 'Saraybosna', 'ad': 'Test Otel Saraybosna', 'adres': 'Ferhadija 1', 'adres_ar': '', 'tel': '+387 33 000 000', 'konum': ''}],
+                  program=[{'tarih': '2026-11-12', 'saat': '09:00', 'baslik': 'Kahvaltı', 'yer': 'Otel'},
+                           {'tarih': '2026-11-12', 'saat': '12:30', 'baslik': 'Başçarşı gezisi', 'yer': 'Otel lobisi'}], duyurular=[])
+    c = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', locale='tr-TR', timezone_id='Europe/Sarajevo',
+                      permissions=['geolocation'], geolocation={'latitude': 43.8563, 'longitude': 18.4131})
+    c.add_init_script("window.__SIMDI = '2026-11-12T11:00:00+01:00';")
+    c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(KULTUR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+    c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR')
+    kart = pg.locator('section[aria-label="Sıradaki buluşma"]')
+    kontrol(kart.count() == 1 and '12:30' in kart.inner_text() and pg.locator('.icerik > .zaman-cizelge .zc-satir.gecti', has_text='Kahvaltı').count() == 1,
+            'Kültür turu: program yerel saate göre (Saraybosna 11:00 → sıradaki 12:30)', errs)
+    pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(200)
+    m = pg.inner_text('#ekran')
+    kontrol(pg.locator('#sayacSayi').count() == 0 and 'Yolculuk Rehberi' in m and 'powerbank' in m and 'Zemzem' not in m and 'Riyali' not in m,
+            'Kültür turu: tavaf sayacı ve umreye özel valiz maddeleri yok')
+    pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('[data-eylem="sehir-mekke"]').count() == 0 and pg.locator('#ekran [data-eylem="konum-vakit"]').count() >= 1, 'Kültür turu: Mekke/Medine yerine "Konumumu kullan" çıkıyor')
+    pg.click('#ekran .btn-dolu[data-eylem="konum-vakit"]'); pg.wait_for_timeout(600)
+    mk = [re.findall(r'\d\d:\d\d', x)[0] for x in pg.locator('#vakitListesi .vakit-satir').all_inner_texts()]
+    kontrol(len(mk) == 6 and '06:30' <= mk[1] <= '07:10' and '11:30' <= mk[2] <= '11:55' and '16:05' <= mk[4] <= '16:40' and 'Öğle' in pg.inner_text('#siradakiVakit'),
+            'Kültür turu: Saraybosna vakitleri yerel saatle makul, sıradaki Öğle', ' '.join(mk))
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(400); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#vakitListesi .vakit-satir').count() == 6, 'Kültür turu: konum hatırlanıyor, tekrar sorulmuyor')
+    pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(200)
+    hrefler = pg.eval_on_selector_all('#ekran a[href^="tel:"]', 'els => els.map(e => e.getAttribute("href"))')
+    kontrol('tel:112' in hrefler and 'tel:911' not in hrefler and 'tel:997' not in hrefler and 'tel:+903122922929' in hrefler and 'tel:+38733000000' in hrefler,
+            'Kültür turu: acil ekranında yerel 112 ve konsolosluk var, Suudi numaraları yok', str(hrefler))
+    kontrol(not tasma(pg) and not errs, 'Kültür turu: taşma ve JavaScript hatası yok', errs)
+    c.close()
+
     # ── Kafile pasife alınmış ──
     c = baglam(b); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
     c.__rpc = 'yok'; pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(700)
