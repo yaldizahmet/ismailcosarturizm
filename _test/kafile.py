@@ -122,6 +122,11 @@ with sync_playwright() as p:
     pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(400); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(200)
     kontrol(pg.inner_text('#sayacSayi') == '7' and "1 tavaf, 1 sa'y" in pg.inner_text('#gecmisListe') and "Toplam: 1 tavaf, 1 sa'y" in pg.inner_text('#gecmisToplam'),
             'Geçmiş: tavaf da kaydediliyor, sayfa yenilenince geçmiş ve özet korunuyor')
+    from urllib.parse import unquote
+    wa = unquote((pg.get_attribute('#gecmisPaylas', 'href') or '').split('text=', 1)[-1])
+    kontrol(wa and (pg.get_attribute('#gecmisPaylas', 'href') or '').startswith('https://wa.me/?text=') and 'Umre geçmişim – Kasım 2026 Umre Kafilesi' in wa
+            and '12 Kasım Perşembe: ' in wa and 'tavaf 11:00' in wa and "sa'y 11:00" in wa and "Toplam: 1 tavaf, 1 sa'y" in wa,
+            'Geçmiş: "WhatsApp\'ta paylaş" tarihli ve saatli özet metniyle açılıyor', wa.replace('\n', ' | ')[:140])
     pg.click('[data-eylem="yeni"]'); pg.click('[data-eylem="arttir"]'); pg.click('[data-eylem="arttir"]'); pg.click('[data-eylem="arttir"]')
     pg.click('[data-eylem="mod-say"]')
     pg.click('[data-eylem="mod-tavaf"]')

@@ -606,9 +606,25 @@ details.tum[open] summary::after{content:'▴'}
       h += '<div class="gecmis-gun" style="padding:12px 14px;border-bottom:1px solid #f0ebde"><div style="display:flex;justify-content:space-between;gap:10px;font-size:15px"><b>' + esc(gunEtiketi(k, bugun)) + '</b><span style="color:var(--altin-yazi);font-weight:600">' + esc(sayiMetni(t, s)) + '</span></div>' +
         '<div class="kucuk-not" style="margin-top:3px">' + esc(saatler) + '</div></div>';
     });
-    h += '</div><p class="kucuk-not" id="gecmisToplam">Toplam: ' + esc(sayiMetni(tt, ts)) + '. Geçmiş yalnızca bu telefonda tutulur. <button type="button" class="cikis" style="padding:0;min-height:0;display:inline" data-eylem="gecmis-temizle">Geçmişi temizle</button></p>';
+    h += '</div><a class="btn-cizgi" style="background:#25D366;border-color:#25D366;color:#fff" href="' + esc(gecmisWhatsapp()) + '" target="_blank" rel="noopener" id="gecmisPaylas">' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.2-.7-2.7-1.1-4.4-3.9-4.6-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.7 1.2 1.6 2 1.1 1 2 1.3 2.3 1.4.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.7-.1 1.3z"/></svg>' +
+      'WhatsApp\'ta paylaş / kendime gönder</a>' +
+      (navigator.share ? '<button type="button" class="btn-ince" data-eylem="gecmis-paylas">Başka uygulamayla paylaş</button>' : '') +
+      '<p class="kucuk-not" id="gecmisToplam">Toplam: ' + esc(sayiMetni(tt, ts)) + '. Geçmiş yalnızca bu telefonda tutulur; WhatsApp\'ta kendinize gönderirseniz telefon değişse de kaybolmaz. <button type="button" class="cikis" style="padding:0;min-height:0;display:inline" data-eylem="gecmis-temizle">Geçmişi temizle</button></p>';
     return h;
   }
+  function gecmisMetni() {
+    var g = (S.gecmis || []).slice().sort(function (a, b) { return String(a.zaman).localeCompare(String(b.zaman)); });
+    var gunler = [], grup = {}, tt = 0, ts = 0;
+    g.forEach(function (x) { var k = gunAnahtari(x.zaman); if (!grup[k]) { grup[k] = []; gunler.push(k); } grup[k].push(x); if (x.tur === 'say') ts++; else tt++; });
+    var satirlar = gunler.map(function (k) {
+      return '• ' + tarihYaz(k, true) + ': ' + grup[k].map(function (x) { return (x.tur === 'say' ? 'sa\'y' : 'tavaf') + ' ' + saatAl(x.zaman); }).join(', ');
+    });
+    var bas = (S.veri && S.veri.tur_turu === 'hac') ? 'Hac' : 'Umre';
+    return '🕋 ' + bas + ' geçmişim' + (S.veri && S.veri.ad ? ' – ' + S.veri.ad : '') + '\n\n' + satirlar.join('\n') +
+      '\n\nToplam: ' + sayiMetni(tt, ts) + '\n\nİsmail Coşar Turizm yolcu uygulaması · ismailcosarturizm.com.tr';
+  }
+  function gecmisWhatsapp() { return 'https://wa.me/?text=' + encodeURIComponent(gecmisMetni()); }
 
   function valizListesi(liste) {
     var toplam = 0, isaretli = 0, h = '';
@@ -792,6 +808,7 @@ details.tum[open] summary::after{content:'▴'}
       sc[mod] = Math.max(0, (sc[mod] || 0) - 1); yaz('kafile-sayac', sc); ciz();
     }
     else if (ey === 'sifirla') { if ((sc[mod] || 0) && (sc[mod] || 0) < 7 && !confirm('Sayaç sıfırlansın mı?')) return; sc[mod] = 0; delete sc['kayit_' + mod]; yaz('kafile-sayac', sc); ciz(); }
+    else if (ey === 'gecmis-paylas') { try { navigator.share({ text: gecmisMetni() }).catch(function () {}); } catch (x) {} }
     else if (ey === 'gecmis-temizle') { if (!confirm('Tavaf ve sa\'y geçmişiniz bu telefondan silinsin mi?')) return; S.gecmis = []; yaz('kafile-gecmis', S.gecmis); ciz(); }
     else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehir = ey.slice(6); yaz('kafile-sehir', S.sehir); ciz(); }
     else if (ey === 'kible') kibleBaslat();
