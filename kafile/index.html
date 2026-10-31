@@ -48,6 +48,12 @@ a{color:#8A6516}
 .bas{background:var(--navy);color:#fff;padding:calc(22px + env(safe-area-inset-top)) 22px 22px;display:flex;flex-direction:column;gap:6px}
 .marka{align-self:flex-start;background:#fff;border-radius:10px;padding:4px 10px;margin-bottom:8px;line-height:0}.marka img{height:34px;width:auto;display:block}
 .giris-marka{background:#fff;border-radius:14px;padding:8px 16px;line-height:0}.giris-marka img{height:60px;width:auto;display:block}
+.adim{background:#fff;border-radius:18px;border:1px solid var(--cizgi);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+.adim-no{width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--goldl);font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;font-size:16px}
+.adim-no.tamam{background:#2e7d32;color:#fff}
+.adim h3{font-size:16.5px;margin:4px 0 4px;color:var(--navy)}
+.adim p{font-size:14px;line-height:1.5;color:var(--soluk);margin:0}
+.adim .btn-dolu{margin-top:10px;width:100%;font-size:15.5px;min-height:50px;border:0;font-family:inherit;cursor:pointer}
 .bas-ust{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bas-etiket{font-size:12px;letter-spacing:2px;font-weight:700;color:var(--goldl);text-transform:uppercase}
 .bas h1{font-family:var(--ff-b);font-size:30px;font-weight:700;line-height:1.15}
@@ -369,7 +375,7 @@ details.tum[open] summary::after{content:'▴'}
 
   // ── giriş ──
   function girisGoster(hata) {
-    $('uygulama').hidden = true; $('giris').hidden = false;
+    S.karsilama = false; $('uygulama').hidden = true; $('giris').hidden = false;
     var h = $('girisHata'); h.hidden = !hata; h.textContent = hata || '';
   }
   $('girisForm').addEventListener('submit', function (e) {
@@ -382,6 +388,7 @@ details.tum[open] summary::after{content:'▴'}
       if (!v) { girisGoster('Bu kodla aktif bir grup bulunamadı. Kodu kontrol edip tekrar deneyin.'); return; }
       S.kod = kod; S.veri = v; S.guncelleme = Date.now(); S.cevrimdisi = false; S.sekme = 'bugun';
       yaz('kafile-kod', kod); yaz('kafile-veri-' + kod, { veri: v, zaman: S.guncelleme });
+      S.karsilama = !oku('kafile-karsilandi-' + kod, false);
       uygulamaGoster();
     }).catch(function () { btn.disabled = false; girisGoster('Bağlantı kurulamadı. İnternetinizi kontrol edip tekrar deneyin.'); });
   });
@@ -409,7 +416,8 @@ details.tum[open] summary::after{content:'▴'}
   function ciz() {
     if (!S.veri) return;
     var e = $('ekran');
-    var f = { bugun: bugunEkrani, duyurular: duyurularEkrani, rehber: rehberEkrani, vakitler: vakitlerEkrani, acil: acilEkrani }[S.sekme] || bugunEkrani;
+    var menu = document.querySelector('.alt-menu'); if (menu) menu.hidden = !!S.karsilama;
+    var f = S.karsilama ? karsilamaEkrani : { bugun: bugunEkrani, duyurular: duyurularEkrani, rehber: rehberEkrani, vakitler: vakitlerEkrani, acil: acilEkrani }[S.sekme] || bugunEkrani;
     var acikMi = !!(e.querySelector('details.tum') && e.querySelector('details.tum').open); // yenilemede "Tüm program" açık kalsın
     e.innerHTML = f().replace('<header class="bas">', '<header class="bas">' + MARKA); // her ekranın üstünde şirket logosu
     if (acikMi && e.querySelector('details.tum')) e.querySelector('details.tum').open = true;
@@ -427,6 +435,34 @@ details.tum[open] summary::after{content:'▴'}
   }
 
   function programListesi() { return ((S.veri && S.veri.program) || []).filter(function (p) { return p && p.baslik; }); }
+
+  // ── İlk girişte bir kez: hoş geldiniz + bildirimleri aç + telefona kur ──
+  function karsilamaEkrani() {
+    var v = S.veri, b = S.bildirim, kurulu = ekranaKurulu();
+    var aralik = v.baslangic ? tarihYaz(v.baslangic) + (v.bitis ? ' – ' + tarihYaz(v.bitis) : '') : '';
+    var h = '<header class="bas"><div class="bas-etiket">' + esc(v.ad) + '</div><h1>Hoş geldiniz</h1>' +
+      '<div class="bas-alt">' + esc(aralik) + (aralik ? ' · ' : '') + 'Başlamadan önce 2 kısa adım</div></header><div class="icerik" id="karsilama">';
+    if (v.rehber_tel) h += '<div class="kart"><div class="kart-etiket">Rehberiniz</div><div style="font-size:16px;font-weight:600">' + esc((v.rehber_ad ? v.rehber_ad + ' · ' : '') + v.rehber_tel) + '</div></div>';
+    // 1. Bildirimler
+    var b1 = b === 'acik', y1;
+    if (b1) y1 = '<p>Bildirimler açık. Yeni duyurular telefonunuza gelecek.</p>';
+    else if (b === 'kapali' || b === 'bekliyor') y1 = '<p>Rehberinizin duyuruları (saat değişikliği, buluşma yeri) telefonunuza bildirim olarak gelsin.</p><button type="button" class="btn-dolu" data-eylem="bildirim-ac"' + (b === 'bekliyor' ? ' disabled' : '') + '>' + (b === 'bekliyor' ? 'Açılıyor…' : '🔔 Bildirimleri aç') + '</button>';
+    else if (b === 'ios-kur') y1 = '<p>iPhone\'da bildirim için önce uygulamayı telefona kurun (2. adım). Sonra uygulamayı ana ekrandaki simgesinden açıp Duyurular\'dan bildirimleri açın.</p>';
+    else if (b === 'reddedildi') y1 = '<p>Bildirim izni verilmemiş. İsterseniz telefon ayarlarından izin verebilirsiniz. Duyuruları yine de Duyurular ekranından görebilirsiniz.</p>';
+    else if (b === 'bilinmiyor') y1 = '<p>Kontrol ediliyor…</p>';
+    else y1 = '<p>Bu telefon bildirimleri desteklemiyor. Duyuruları Duyurular ekranından görebilirsiniz.</p>';
+    h += '<div class="adim" id="adimBildirim"><div class="adim-no' + (b1 ? ' tamam' : '') + '">' + (b1 ? '✓' : '1') + '</div><div style="flex:1;min-width:0"><h3>Duyuruları kaçırmayın</h3>' + y1 + '</div></div>';
+    // 2. Telefona kur
+    var y2;
+    if (kurulu) y2 = '<p>Uygulama telefonunuzda kurulu.</p>';
+    else if (S.yukleIstemi) y2 = '<p>Uygulama telefonunuzda simge olarak dursun, internet olmasa da açılsın.</p><button type="button" class="btn-dolu" data-eylem="yukle">📲 Telefona kur</button>';
+    else if (iosMu()) y2 = '<p>Ekranın altındaki <b>Paylaş</b> simgesine (kare ve yukarı ok), sonra <b>Ana Ekrana Ekle</b>\'ye dokunun.</p>';
+    else y2 = '<p>Tarayıcının sağ üstündeki menüye (⋮) dokunup <b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>\'yi seçin.</p>';
+    h += '<div class="adim" id="adimKur"><div class="adim-no' + (kurulu ? ' tamam' : '') + '">' + (kurulu ? '✓' : '2') + '</div><div style="flex:1;min-width:0"><h3>Telefonunuza kurun</h3>' + y2 + '</div></div>';
+    h += '<button type="button" class="btn-altin" data-eylem="karsilama-bitti">Başla →</button>';
+    h += '<p class="kucuk-not" style="text-align:center">Bu ekran yalnızca bir kez gösterilir. Bildirim ve kurulumu sonra da yapabilirsiniz.</p>';
+    return h + '</div>';
+  }
 
   function bugunEkrani() {
     var v = S.veri, n = simdi(), bugun = n.tarih;
@@ -833,6 +869,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'bildirim-kapat') bildirimKapat();
     else if (ey === 'konum-gonder') konumGonder();
     else if (ey === 'cikis') kafiledenCik();
+    else if (ey === 'karsilama-bitti') { S.karsilama = false; yaz('kafile-karsilandi-' + S.kod, true); S.sekme = 'bugun'; ciz(); window.scrollTo(0, 0); }
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }
     else if (ey === 'yukle' && S.yukleIstemi) { S.yukleIstemi.prompt(); S.yukleIstemi.userChoice.finally(function () { S.yukleIstemi = null; ciz(); }); }
   });
@@ -842,7 +879,7 @@ details.tum[open] summary::after{content:'▴'}
     if (e.target.checked) S.valiz[x] = 1; else delete S.valiz[x];
     yaz('kafile-valiz', S.valiz); ciz();
   });
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); S.yukleIstemi = e; if (S.sekme === 'bugun') ciz(); });
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); S.yukleIstemi = e; if (S.sekme === 'bugun' || S.karsilama) ciz(); });
   window.addEventListener('appinstalled', function () { S.yukleIstemi = null; ciz(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.kod) yenile(true); });
   window.addEventListener('online', function () { if (S.kod) yenile(true); });

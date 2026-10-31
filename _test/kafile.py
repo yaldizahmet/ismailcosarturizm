@@ -50,8 +50,10 @@ def baglam(b, rpc='veri', konum=None):
     c.route(re.compile(r'^https?://(?!localhost)(?!wa\.me)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
     return c
 
-def sayfa(c, errs, adres=URL):
+def sayfa(c, errs, adres=URL, karsilama=False):
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    if not karsilama:  # karşılama ekranı yalnızca kendi testinde; diğer testler doğrudan Bugün ile başlasın
+        pg.add_init_script("try{['TEST-ABCDE','TEST-KULTR'].forEach(function(k){localStorage.setItem('kafile-karsilandi-'+k,'true')})}catch(e){}")
     pg.goto(adres, wait_until='domcontentloaded'); pg.wait_for_timeout(500)
     return pg
 
@@ -62,7 +64,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
 
     # ── Giriş ──
-    c = baglam(b); errs = []; pg = sayfa(c, errs)
+    c = baglam(b); errs = []; pg = sayfa(c, errs, karsilama=True)
     kontrol(pg.is_visible('#giris') and not pg.is_visible('#uygulama'), 'Giriş: kod ekranı açılıyor', errs)
     kontrol(pg.evaluate("(()=>{const i=document.querySelector('#giris .giris-marka img');return !!i&&i.complete&&i.naturalWidth>0})()"), 'Giriş: şirket logosu görünüyor')
     pg.click('#girisBtn'); pg.wait_for_timeout(200)
@@ -73,6 +75,17 @@ with sync_playwright() as p:
     kontrol('Bağlantı kurulamadı' in pg.inner_text('#girisHata'), 'Giriş: internet yokken bağlantı uyarısı veriyor')
     c.__rpc = 'veri'; pg.fill('#kodKutu', ' test-abcde '); pg.click('#girisBtn'); pg.wait_for_timeout(500)
     kontrol(pg.is_visible('#uygulama') and c.__istek[-1].get('p_kod') == 'TEST-ABCDE', 'Giriş: küçük harf/boşluklu kod düzeltilip kabul ediliyor', errs)
+
+    # ── Karşılama (yalnızca ilk girişte) ──
+    k = pg.inner_text('#ekran') if pg.locator('#karsilama').count() else ''
+    kontrol('Hoş geldiniz' in k and pg.locator('#adimBildirim').count() == 1 and pg.locator('#adimKur').count() == 1 and not pg.is_visible('.alt-menu'),
+            'Karşılama: ilk girişte "Hoş geldiniz", 2 adım (bildirim, kurulum); alt menü gizli', k[:100].replace('\n', ' | '))
+    kontrol('REHBERİNİZ' in k.upper() and pg.locator('#ekran header.bas .marka img').count() == 1, 'Karşılama: rehber bilgisi ve logo var')
+    kontrol(not tasma(pg), 'Karşılama: telefonda yatay taşma yok')
+    pg.click('[data-eylem="karsilama-bitti"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#karsilama').count() == 0 and pg.is_visible('.alt-menu') and '3. Gün' in pg.inner_text('#ekran'), 'Karşılama: "Başla" ile Bugün ekranına geçiyor')
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(500)
+    kontrol(pg.locator('#karsilama').count() == 0 and '3. Gün' in pg.inner_text('#ekran'), 'Karşılama: ikinci açılışta tekrar çıkmıyor')
 
     # ── Bugün ──
     m = pg.inner_text('#ekran')
@@ -245,7 +258,12 @@ with sync_playwright() as p:
         c.route('**/rest/v1/rpc/**', rpc)
         c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
         return c
-    c = push_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300)
+    c = push_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE', karsilama=True); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#adimBildirim [data-eylem="bildirim-ac"]').count() == 1, 'Karşılama: "Bildirimleri aç" butonu var', errs)
+    pg.click('#adimBildirim [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(500)
+    kontrol('Bildirimler açık' in pg.inner_text('#adimBildirim') and pg.locator('#adimBildirim .adim-no.tamam').count() == 1, 'Karşılama: bildirim açılınca adım ✓ oluyor')
+    pg.evaluate("localStorage.removeItem('test-abone'); localStorage.removeItem('test-izin')"); pg.close()
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300)
     kontrol(pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 1, 'Bildirim: Bugün ekranında "Bildirimleri aç" kartı var', errs)
     pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(500)
     ab = [g for a_, g in c.__rpc if a_ == 'bildirim_abone_ol']
