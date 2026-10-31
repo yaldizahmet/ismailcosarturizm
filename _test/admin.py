@@ -151,6 +151,16 @@ with sync_playwright() as p:
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s_) == 1 and s_[0]['tablo'] == 'kafileler' and pg.locator('.kafile-item').count() == 0, 'Kafile: siliniyor', errs)
 
+    # Telefon görünümü: her sekmede yatay taşma yok, seçili sekme üst şeritte görünür
+    pg.set_viewport_size({'width': 390, 'height': 844})
+    for sekme, ek in [('basvuru', ''), ('turlar', ''), ('ekle', ''), ('duyuru', ''), ('kafile', ''), ('kafile', 'kafileYeni()'), ('turlar', f"turDuzenle('{VERI['turlar'][1]['id']}')")]:
+        errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(250)
+        if ek: pg.evaluate(ek); pg.wait_for_timeout(250)
+        genis = pg.evaluate('document.documentElement.scrollWidth')
+        gorunur = pg.evaluate(f"(() => {{ const r = document.getElementById('btn-{sekme}').getBoundingClientRect(); return r.left >= 0 && r.right <= window.innerWidth + 1; }})()")
+        kontrol(genis <= 391 and gorunur and not errs, f'Telefon: {sekme}{" / " + ek.split("(")[0] if ek else ""} sığıyor, sekme görünür', f'(genişlik {genis})')
+    pg.set_viewport_size({'width': 1300, 'height': 900})
+
     # Sil onayla çalışıyor
     pg.evaluate("sekmeAc('turlar')"); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []"); son = VERI['turlar'][-1]['id']
