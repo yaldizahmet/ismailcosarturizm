@@ -2,7 +2,8 @@
    İsim veritabanında maskelenir (ad_gorunen: "Ayşe K***"); ziyaretçi tam ismi hiç okuyamaz.
    Az yer kaplasın diye tek satırlık, yana kaydırılan bir şerit olarak gösterilir:
      #yorumGrid           (ana sayfa: Google yorumlarının hemen üstüne şerit eklenir)
-     #yolcuMesajlari      (Umre/Hac/Turlar sayfası: data-kategori ile; tur detayında data-tur-id="adres" → ?id=;
+     #yolcuMesajlari      (Umre/Hac/Turlar sayfası: data-kategori ile; tur detayında data-tur-id="adres" → ?id=: o turun yorumları +
+                           turu seçilmemiş ama kategorisi aynı yorumlar;
                            yorum yoksa gizli kalır)
    Hata olursa sessizce hiçbir şey yapmaz; sayfanın geri kalanını asla etkilemez. */
 (function () {
@@ -56,10 +57,19 @@
       '<div class="ym-serit" role="list">' + l.map(kart).join('') + '</div>';
   }
 
+  var BAS = { headers: { apikey: K, Authorization: 'Bearer ' + K } };
+  var TUR_KATEGORI = { umre: 'umre', hac: 'hac', diger: 'kultur' };
   function getir(kategori, turId) {
-    var url = SB + '/rest/v1/yorumlar?select=id,ad_gorunen,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20' +
-      (kategori ? '&kategori=eq.' + encodeURIComponent(kategori) : '') + (turId ? '&tur_id=eq.' + encodeURIComponent(turId) : '');
-    return fetch(url, { headers: { apikey: K, Authorization: 'Bearer ' + K } }).then(function (r) { return r.ok ? r.json() : []; });
+    var url = SB + '/rest/v1/yorumlar?select=id,ad_gorunen,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20';
+    if (turId) { // tur detayı: o tur seçilerek eklenenler + turu seçilmemiş ama kategorisi aynı olanlar
+      return fetch(SB + '/rest/v1/turlar?select=kategori&id=eq.' + encodeURIComponent(turId), BAS).then(function (r) { return r.ok ? r.json() : []; }).then(function (t) {
+        var kat = t && t[0] && TUR_KATEGORI[t[0].kategori];
+        var filtre = kat ? 'or=(tur_id.eq.' + encodeURIComponent(turId) + ',and(tur_id.is.null,kategori.eq.' + kat + '))' : 'tur_id=eq.' + encodeURIComponent(turId);
+        return fetch(url + '&' + filtre, BAS).then(function (r) { return r.ok ? r.json() : []; });
+      });
+    }
+    if (kategori) url += '&kategori=eq.' + encodeURIComponent(kategori);
+    return fetch(url, BAS).then(function (r) { return r.ok ? r.json() : []; });
   }
 
   document.addEventListener('click', function (e) {

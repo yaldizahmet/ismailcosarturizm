@@ -29,13 +29,20 @@ def sayfa(b, yol, veri, vp={'width': 1300, 'height': 900}):
     def yorum(r, q):
         istekler.append(unquote(q.url))
         kat = re.search(r'kategori=eq\.(\w+)', q.url)
-        tid = re.search(r'tur_id=eq\.([\w-]+)', q.url)
-        l = [y for y in veri if (not kat or y['kategori'] == kat.group(1)) and (not tid or y.get('tur_id') == tid.group(1))]
+        u = unquote(q.url)
+        veya = re.search(r'or=\(tur_id\.eq\.([\w-]+),and\(tur_id\.is\.null,kategori\.eq\.(\w+)\)\)', u)
+        tid = re.search(r'[?&]tur_id=eq\.([\w-]+)', u)
+        if veya:
+            l = [y for y in veri if y.get('tur_id') == veya.group(1) or (y.get('tur_id') is None and y['kategori'] == veya.group(2))]
+        else:
+            l = [y for y in veri if (not kat or y['kategori'] == kat.group(1)) and (not tid or y.get('tur_id') == tid.group(1))]
         r.fulfill(status=200, body=json.dumps(l), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
     pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
     pg.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=MOCK, headers={'content-type': 'application/javascript'}))
     pg.route('**/rest/v1/yorumlar**', yorum)
-    pg.route('**/rest/v1/**', lambda r, q: r.fulfill(status=200, body='[]', headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}) if 'yorumlar' not in q.url else r.fallback())
+    TUR_KAT = {'balkanlar-2025': 'diger', 'endulus-2025': 'diger', 'umre-kasim': 'umre'}
+    pg.route('**/rest/v1/turlar?select=kategori**', lambda r, q: r.fulfill(status=200, body=json.dumps([{'kategori': TUR_KAT.get(re.search(r'id=eq\.([\w-]+)', q.url).group(1), 'diger')}]), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+    pg.route('**/rest/v1/**', lambda r, q: r.fulfill(status=200, body='[]', headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}) if 'yorumlar' not in q.url and 'turlar?select=kategori' not in q.url else r.fallback())
     pg.route('**/storage/v1/object/public/**', lambda r, q: r.fulfill(status=200, body=PNG, headers={'content-type': 'image/png'}))
     pg.goto(BASE + yol, wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
     return pg, errs, istekler
@@ -81,8 +88,14 @@ with sync_playwright() as p:
     pg, errs, ist = sayfa(b, 'hac.html', YORUMLAR)
     kontrol(not pg.is_visible('#yolcuMesajlari') and any('kategori=eq.hac' in u for u in ist) and not errs, 'Hac sayfası: hac mesajı yoksa bölüm gizli', errs)
     pg.close()
-    pg, errs, ist = sayfa(b, 'tur-detay.html?id=balkanlar-2025', [dict(YORUMLAR[1], tur_id='balkanlar-2025')])
-    kontrol(pg.is_visible('#yolcuMesajlari') and any('tur_id=eq.balkanlar-2025' in u for u in ist), 'Tur detayı: yalnızca o tur seçilerek eklenmiş mesajlar isteniyor ve gösteriliyor', errs)
+    veri = [dict(YORUMLAR[1], id=11, tur_id='balkanlar-2025', kategori='kultur', ad_gorunen='Balkan Seçili'),
+            dict(YORUMLAR[1], id=12, tur_id=None, kategori='kultur', ad_gorunen='Kultur Turusuz'),
+            dict(YORUMLAR[1], id=13, tur_id='endulus-2025', kategori='kultur', ad_gorunen='Endulus Secili'),
+            dict(YORUMLAR[1], id=14, tur_id=None, kategori='umre', ad_gorunen='Umre Turusuz')]
+    pg, errs, ist = sayfa(b, 'tur-detay.html?id=balkanlar-2025', veri)
+    m = pg.inner_text('#yolcuMesajlari') if pg.is_visible('#yolcuMesajlari') else ''
+    kontrol('Balkan Seçili' in m and 'Kultur Turusuz' in m and 'Endulus Secili' not in m and 'Umre Turusuz' not in m,
+            'Tur detayı: o turun yorumları + turu seçilmemiş aynı kategori yorumları; başka turunkiler yok', errs or m.replace('\n', ' | ')[:120])
     pg.close()
     pg, errs, _ = sayfa(b, 'umre.html', [])
     kontrol(not pg.is_visible('#yolcuMesajlari') and not errs, 'Umre sayfası: mesaj yoksa bölüm gizli', errs)
