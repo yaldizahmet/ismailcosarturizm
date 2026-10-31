@@ -217,6 +217,14 @@ window.addEventListener('load', async function() {
   </div>
 </div>
 
+<!-- YOLCULARIMIZDAN (admin panelindeki "Yorumlar" sekmesinden; yorum yoksa görünmez) -->
+<section id="yolcuMesajlari" data-tur-id="adres" hidden style="padding:40px 5vw 12px;background:var(--cream)">
+  <div style="max-width:1100px;margin:0 auto">
+    <h2 style="font-family:var(--ff-head);font-size:clamp(20px,2.6vw,28px);font-weight:700;color:var(--navy);margin-bottom:14px">Bu Turun Yolcuları Ne Diyor?</h2>
+    <div class="ym-yer"></div>
+  </div>
+</section>
+
 <footer>
   <div class="footer-bottom">
     <span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span>
@@ -402,6 +410,7 @@ function kayitGonder(e) {
 }
 </script>
 <script src="asistan.js" defer></script>
+<script src="yorumlar.js" defer></script>
 <script src="cerez.js" defer></script>
 </body>
 </html>

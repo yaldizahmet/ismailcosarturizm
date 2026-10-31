@@ -2,7 +2,8 @@
    İsim veritabanında maskelenir (ad_gorunen: "Ayşe K***"); ziyaretçi tam ismi hiç okuyamaz.
    Az yer kaplasın diye tek satırlık, yana kaydırılan bir şerit olarak gösterilir:
      #yorumGrid           (ana sayfa: Google yorumlarının hemen üstüne şerit eklenir)
-     #yolcuMesajlari      (Umre sayfası: data-kategori="umre" ile süzülür; yorum yoksa gizli kalır)
+     #yolcuMesajlari      (Umre/Hac/Turlar sayfası: data-kategori ile; tur detayında data-tur-id="adres" → ?id=;
+                           yorum yoksa gizli kalır)
    Hata olursa sessizce hiçbir şey yapmaz; sayfanın geri kalanını asla etkilemez. */
 (function () {
   var SB = 'https://wpkjxwbvewwgdclbsdya.supabase.co', K = 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
@@ -55,8 +56,9 @@
       '<div class="ym-serit" role="list">' + l.map(kart).join('') + '</div>';
   }
 
-  function getir(kategori) {
-    var url = SB + '/rest/v1/yorumlar?select=id,ad_gorunen,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20' + (kategori ? '&kategori=eq.' + encodeURIComponent(kategori) : '');
+  function getir(kategori, turId) {
+    var url = SB + '/rest/v1/yorumlar?select=id,ad_gorunen,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20' +
+      (kategori ? '&kategori=eq.' + encodeURIComponent(kategori) : '') + (turId ? '&tur_id=eq.' + encodeURIComponent(turId) : '');
     return fetch(url, { headers: { apikey: K, Authorization: 'Bearer ' + K } }).then(function (r) { return r.ok ? r.json() : []; });
   }
 
@@ -80,7 +82,9 @@
       if (!Array.isArray(l) || !l.length) return;
       stil(); grid.insertAdjacentHTML('beforebegin', '<div id="yolcuSerit">' + serit(l) + '</div>');
     }).catch(function () {});
-    if (bolum) getir(bolum.getAttribute('data-kategori') || null).then(function (l) {
+    var turId = bolum && bolum.getAttribute('data-tur-id') === 'adres' ? new URLSearchParams(location.search).get('id') : null;
+    if (bolum && bolum.getAttribute('data-tur-id') === 'adres' && !turId) bolum = null; // tur kimliği yoksa hiçbir şey gösterme
+    if (bolum) getir(bolum.getAttribute('data-kategori') || null, turId).then(function (l) {
       if (!Array.isArray(l) || !l.length) return;
       stil(); var g = bolum.querySelector('.ym-yer'); if (!g) return;
       g.innerHTML = serit(l.slice(0, 10)); bolum.hidden = false;

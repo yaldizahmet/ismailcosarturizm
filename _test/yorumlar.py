@@ -29,7 +29,8 @@ def sayfa(b, yol, veri, vp={'width': 1300, 'height': 900}):
     def yorum(r, q):
         istekler.append(unquote(q.url))
         kat = re.search(r'kategori=eq\.(\w+)', q.url)
-        l = [y for y in veri if not kat or y['kategori'] == kat.group(1)]
+        tid = re.search(r'tur_id=eq\.([\w-]+)', q.url)
+        l = [y for y in veri if (not kat or y['kategori'] == kat.group(1)) and (not tid or y.get('tur_id') == tid.group(1))]
         r.fulfill(status=200, body=json.dumps(l), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
     pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
     pg.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=MOCK, headers={'content-type': 'application/javascript'}))
@@ -72,6 +73,16 @@ with sync_playwright() as p:
     pg, errs, ist = sayfa(b, 'umre.html', YORUMLAR)
     kontrol(pg.is_visible('#yolcuMesajlari') and pg.locator('#yolcuMesajlari .yolcu-mesaji').count() == 1 and any('kategori=eq.umre' in u for u in ist),
             'Umre sayfası: yalnızca umre mesajları gösteriliyor', errs)
+    pg.close()
+    pg, errs, ist = sayfa(b, 'turlar.html', YORUMLAR)
+    kontrol(pg.is_visible('#yolcuMesajlari') and pg.locator('#yolcuMesajlari .yolcu-mesaji').count() == 1 and any('kategori=eq.kultur' in u for u in ist),
+            'Turlar sayfası: kültür turu mesajları gösteriliyor', errs)
+    pg.close()
+    pg, errs, ist = sayfa(b, 'hac.html', YORUMLAR)
+    kontrol(not pg.is_visible('#yolcuMesajlari') and any('kategori=eq.hac' in u for u in ist) and not errs, 'Hac sayfası: hac mesajı yoksa bölüm gizli', errs)
+    pg.close()
+    pg, errs, ist = sayfa(b, 'tur-detay.html?id=balkanlar-2025', [dict(YORUMLAR[1], tur_id='balkanlar-2025')])
+    kontrol(pg.is_visible('#yolcuMesajlari') and any('tur_id=eq.balkanlar-2025' in u for u in ist), 'Tur detayı: yalnızca o tur seçilerek eklenmiş mesajlar isteniyor ve gösteriliyor', errs)
     pg.close()
     pg, errs, _ = sayfa(b, 'umre.html', [])
     kontrol(not pg.is_visible('#yolcuMesajlari') and not errs, 'Umre sayfası: mesaj yoksa bölüm gizli', errs)
