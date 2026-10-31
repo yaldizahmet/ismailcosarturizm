@@ -781,7 +781,7 @@ async function renderYorumlar() {
 function yorumFormu(y, turlar) {
   const yeni = !y.id;
   const KAT = { umre: 'umre', hac: 'hac', diger: 'kultur' };
-  const turSecenek = (turlar || []).map(t => `<option value="${esc(t.id)}" data-baslik="${esc(t.baslik)}" data-kategori="${KAT[t.kategori] || 'genel'}" ${y.tur && y.tur === t.baslik ? 'selected' : ''}>${esc(t.baslik)}${t.tarih ? ' (' + esc(String(t.tarih).slice(0, 7)) + ')' : ''}${t.aktif === false ? ' – pasif' : ''}</option>`).join('');
+  const turSecenek = (turlar || []).map(t => `<option value="${esc(t.id)}" data-baslik="${esc(t.baslik)}" data-kategori="${KAT[t.kategori] || 'genel'}" ${y.tur_id === t.id ? 'selected' : ''}>${esc(t.baslik)}${t.tarih ? ' (' + esc(String(t.tarih).slice(0, 7)) + ')' : ''}${t.aktif === false ? ' – pasif' : ''}</option>`).join('');
   document.getElementById('sayfa-yorum').innerHTML = `
     <div class="header"><h2>${yeni ? '➕ Yeni Yorum' : '✏️ Yorum Düzenle'}</h2></div>
     <div class="card">
@@ -794,7 +794,7 @@ function yorumFormu(y, turlar) {
       <div class="form-row">
         <div class="form-group"><label>Kategori</label>
           <select id="y_kategori">${Object.entries(YORUM_KATEGORI).map(([d, a]) => `<option value="${d}" ${(y.kategori || 'umre') === d ? 'selected' : ''}>${a}</option>`).join('')}</select>
-          <div style="font-size:11.5px;color:#888;margin-top:4px">“Umre” olanlar Umre sayfasında da görünür.</div></div>
+          <div id="y_kategoriNot" style="font-size:11.5px;color:#888;margin-top:4px">“Umre” olanlar Umre sayfasında da görünür.</div></div>
         <div class="form-group"><label>Mesaj tarihi (isteğe bağlı)</label><input id="y_tarih" type="date" value="${esc(y.tarih)}"></div>
       </div>
       <div class="form-group"><label>Mesaj (WhatsApp'tan kopyalayıp yapıştırın)</label><textarea id="y_metin" rows="6" maxlength="3000">${esc(y.metin)}</textarea></div>
@@ -814,6 +814,8 @@ function yorumFormu(y, turlar) {
         <button class="btn btn-navy" onclick="renderYorumlar()">İptal</button>
       </div>
     </div>`;
+  const sec = document.getElementById('y_tur_sec');
+  if (sec && sec.value) yorumTurSec(sec, true); // düzenlemede listeden seçilmiş tur varsa kategori kilitli açılır
   window.scrollTo(0, 0);
 }
 
@@ -822,11 +824,12 @@ async function yorumTurlari() {
   return data || [];
 }
 
-function yorumTurSec(sel) {
-  const o = sel.options[sel.selectedIndex];
-  if (!o || !o.value) return;
-  document.getElementById('y_tur').value = o.getAttribute('data-baslik');
-  document.getElementById('y_kategori').value = o.getAttribute('data-kategori');
+function yorumTurSec(sel, ilkAcilis) {
+  const o = sel.options[sel.selectedIndex], kat = document.getElementById('y_kategori'), not_ = document.getElementById('y_kategoriNot');
+  if (!o || !o.value) { kat.disabled = false; if (not_) not_.textContent = '“Umre” olanlar Umre sayfasında da görünür.'; return; }
+  if (!ilkAcilis) document.getElementById('y_tur').value = o.getAttribute('data-baslik');
+  kat.value = o.getAttribute('data-kategori'); kat.disabled = true; // listeden seçilen turun kategorisi değiştirilemez
+  if (not_) not_.textContent = 'Kategori seçilen turdan geliyor. Değiştirmek için tur seçimini kaldırın.';
 }
 
 async function yorumYeni() { yorumFormu({ kategori: 'umre', yayinda: true }, await yorumTurlari()); }
@@ -839,7 +842,8 @@ async function yorumDuzenle(id) {
 
 async function yorumKaydet(id) {
   const d = (x) => document.getElementById(x).value.trim();
-  const y = { ad: d('y_ad'), tur: d('y_tur') || null, kategori: d('y_kategori'), tarih: d('y_tarih') || null, metin: d('y_metin'),
+  const sec = document.getElementById('y_tur_sec');
+  const y = { ad: d('y_ad'), tur: d('y_tur') || null, tur_id: (sec && sec.value) || null, kategori: d('y_kategori'), tarih: d('y_tarih') || null, metin: d('y_metin'),
               gorsel: d('y_gorsel') || null, izin: document.getElementById('y_izin').checked, yayinda: document.getElementById('y_yayinda').checked };
   if (!y.ad) { toast('❌ İsim gerekli', 'error'); return; }
   if (!y.metin) { toast('❌ Mesaj boş olamaz', 'error'); return; }

@@ -165,6 +165,9 @@ with sync_playwright() as p:
     kontrol(pg.locator('#y_tur_sec option').count() == pg.evaluate('window.__DB.turlar.length') + 1, 'Yorum: tanımlı turlar (pasifler dahil) listede seçilebiliyor')
     pg.select_option('#y_tur_sec', hedef_tur['id'])
     kontrol(pg.input_value('#y_tur') == hedef_tur['baslik'] and pg.input_value('#y_kategori') == 'kultur', 'Yorum: tur seçilince tur adı ve kategori (Kültür) kendiliğinden doluyor')
+    kontrol(pg.is_disabled('#y_kategori'), 'Yorum: listeden tur seçilince kategori değiştirilemiyor')
+    pg.select_option('#y_tur_sec', '')
+    kontrol(not pg.is_disabled('#y_kategori'), 'Yorum: tur seçimi kaldırılınca kategori yeniden seçilebiliyor')
     pg.select_option('#y_kategori', 'umre')
     pg.fill('#y_ad', "Ayşe K."); pg.fill('#y_tur', 'Kasım 2026 Umre'); pg.fill('#y_metin', "Allah razı olsun,\nher şey çok güzeldi.")
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
@@ -183,6 +186,13 @@ with sync_playwright() as p:
     kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': False} and 'Gizli' in pg.inner_text('.yorum-item'), 'Yorum: "Gizle" siteden kaldırıyor, kayıt duruyor')
     pg.locator('.yorum-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol(pg.input_value('#y_ad') == 'Ayşe K.' and pg.is_checked('#y_izin') and not pg.is_checked('#y_yayinda'), 'Yorum: düzenleme formu kayıtlı bilgilerle açılıyor')
+    pg.select_option('#y_tur_sec', hedef_tur['id']); pg.fill('#y_tur', 'Balkan Turu 2027'); pg.check('#y_yayinda'); pg.evaluate("window.__islem = []")
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri']['kategori'] == 'kultur' and g[0]['veri']['tur_id'] == hedef_tur['id'], 'Yorum: kilitli kategori ve seçilen tur kaydediliyor')
+    pg.locator('.yorum-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
+    kontrol(pg.input_value('#y_tur_sec') == hedef_tur['id'] and pg.is_disabled('#y_kategori') and pg.input_value('#y_tur') == 'Balkan Turu 2027',
+            'Yorum: tur adı kısaltılsa da düzenlemede seçili tur ve kilitli kategoriyle açılıyor')
     pg.get_by_role('button', name='İptal').click(); pg.wait_for_timeout(300)
     pg.evaluate("window.__islem = []"); pg.locator('.yorum-item').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
