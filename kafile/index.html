@@ -278,7 +278,7 @@ details.tum[open] summary::after{content:'▴'}
   // ── durum ──
   var S = {
     kod: oku('kafile-kod', ''), veri: null, sekme: 'bugun', guncelleme: null, cevrimdisi: false,
-    sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}),
+    sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}), gecmis: oku('kafile-gecmis', []),
     sehir: oku('kafile-sehir', 'mekke'), kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
   };
 
@@ -571,9 +571,11 @@ details.tum[open] summary::after{content:'▴'}
       '<circle cx="92" cy="92" r="78" fill="none" stroke="#C9972B" stroke-width="12" stroke-linecap="round" stroke-dasharray="490.1" stroke-dashoffset="' + ofset + '" transform="rotate(-90 92 92)"/></svg>' +
       '<div class="ortada" aria-live="polite"><div class="sayi" id="sayacSayi">' + n + '</div><div style="font-size:14px;color:var(--soluk);margin-top:4px">/ 7 ' + (mod === 'tavaf' ? 'şavt' : 'tur') + '</div></div></div>';
     h += '<div class="ipucu">' + esc(ipucu) + '</div>';
-    h += '<button type="button" class="btn-sayac" data-eylem="arttir"' + (bitti ? ' disabled' : '') + '>' + (bitti ? 'Tamamlandı' : (mod === 'tavaf' ? 'Şavt tamamlandı +1' : 'Tur tamamlandı +1')) + '</button>';
+    h += bitti ? '<button type="button" class="btn-sayac" data-eylem="yeni" style="background:var(--gold);color:var(--navy)">' + (mod === 'tavaf' ? 'Yeni tavafa başla' : 'Yeni sa\'ye başla') + '</button>'
+      : '<button type="button" class="btn-sayac" data-eylem="arttir">' + (mod === 'tavaf' ? 'Şavt tamamlandı +1' : 'Tur tamamlandı +1') + '</button>';
     h += '<div class="ikili"><button type="button" class="btn-ince" data-eylem="azalt">Geri al</button><button type="button" class="btn-ince" data-eylem="sifirla">Sıfırla</button></div>';
-    h += '<p class="kucuk-not" style="text-align:center">Sayaç telefonda saklanır; uygulama kapansa da kaldığınız yerden devam eder.</p>';
+    h += '<p class="kucuk-not" style="text-align:center">Sayaç telefonda saklanır; uygulama kapansa da kaldığınız yerden devam eder. 7\'yi tamamlayınca geçmişinize kaydedilir.</p>';
+    h += gecmisBolumu();
     h += valizListesi(VALIZ);
     h += '<p class="kucuk-not">Zemzem: Her yolcumuz için 5 litre zemzem tarafımızdan alınıp dönüşte teslim edilir; ayrıca almanıza gerek yok.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
@@ -581,6 +583,31 @@ details.tum[open] summary::after{content:'▴'}
       '<a href="' + SITE + 'rehber-umre-valiz-listesi.html" target="_blank" rel="noopener">Umre valiz listesi (ayrıntılı)<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a></div>';
     return h + '</div>';
+  }
+
+  // ── Tavaf / sa'y geçmişi (yalnızca bu telefonda) ──
+  function simdiIso() { return (window.__SIMDI ? new Date(window.__SIMDI) : new Date()).toISOString(); }
+  function gunAnahtari(iso) { return new Intl.DateTimeFormat('en-CA', { timeZone: saatDilimi(), year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso)); }
+  function saatAl(iso) { return new Date(iso).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: saatDilimi() }); }
+  function sayiMetni(t, s) { return [t ? t + ' tavaf' : '', s ? s + ' sa\'y' : ''].filter(Boolean).join(', '); }
+  function gecmisBolumu() {
+    var g = S.gecmis || [];
+    var h = '<h2 class="bolum-baslik">Geçmişim</h2>';
+    if (!g.length) return h + '<p class="bos" id="gecmisBos">Tamamladığınız tavaf ve sa\'yler burada gün gün listelenir.</p>';
+    var gunler = [], grup = {}, bugun = simdi().tarih, tt = 0, ts = 0;
+    g.slice().sort(function (a, b) { return String(b.zaman).localeCompare(String(a.zaman)); }).forEach(function (x) {
+      var k = gunAnahtari(x.zaman); if (!grup[k]) { grup[k] = []; gunler.push(k); } grup[k].push(x);
+      if (x.tur === 'say') ts++; else tt++;
+    });
+    h += '<div class="liste" id="gecmisListe">';
+    gunler.slice(0, 14).forEach(function (k) {
+      var l = grup[k], t = l.filter(function (x) { return x.tur !== 'say'; }).length, s = l.length - t;
+      var saatler = l.slice().reverse().map(function (x) { return saatAl(x.zaman) + ' ' + (x.tur === 'say' ? 'sa\'y' : 'tavaf'); }).join(' · ');
+      h += '<div class="gecmis-gun" style="padding:12px 14px;border-bottom:1px solid #f0ebde"><div style="display:flex;justify-content:space-between;gap:10px;font-size:15px"><b>' + esc(gunEtiketi(k, bugun)) + '</b><span style="color:var(--altin-yazi);font-weight:600">' + esc(sayiMetni(t, s)) + '</span></div>' +
+        '<div class="kucuk-not" style="margin-top:3px">' + esc(saatler) + '</div></div>';
+    });
+    h += '</div><p class="kucuk-not" id="gecmisToplam">Toplam: ' + esc(sayiMetni(tt, ts)) + '. Geçmiş yalnızca bu telefonda tutulur. <button type="button" class="cikis" style="padding:0;min-height:0;display:inline" data-eylem="gecmis-temizle">Geçmişi temizle</button></p>';
+    return h;
   }
 
   function valizListesi(liste) {
@@ -745,9 +772,27 @@ details.tum[open] summary::after{content:'▴'}
     if (sek) { S.sekme = sek; ciz(); window.scrollTo(0, 0); return; }
     var ey = t.getAttribute('data-eylem'), sc = S.sayac, mod = sc.mod === 'say' ? 'say' : 'tavaf';
     if (ey === 'mod-tavaf' || ey === 'mod-say') { sc.mod = ey.slice(4); yaz('kafile-sayac', sc); ciz(); }
-    else if (ey === 'arttir') { sc[mod] = Math.min(7, (sc[mod] || 0) + 1); titret(); yaz('kafile-sayac', sc); ciz(); }
-    else if (ey === 'azalt') { sc[mod] = Math.max(0, (sc[mod] || 0) - 1); yaz('kafile-sayac', sc); ciz(); }
-    else if (ey === 'sifirla') { if ((sc[mod] || 0) && !confirm('Sayaç sıfırlansın mı?')) return; sc[mod] = 0; yaz('kafile-sayac', sc); ciz(); }
+    else if (ey === 'arttir') {
+      if ((sc[mod] || 0) >= 7) return;
+      sc[mod] = (sc[mod] || 0) + 1; titret();
+      if (sc[mod] === 7) { // tamamlandı: geçmişe yaz (geri alınabilsin diye kimliğini sakla)
+        var kayit = { tur: mod, zaman: simdiIso() }; sc['kayit_' + mod] = kayit.zaman;
+        S.gecmis.push(kayit); if (S.gecmis.length > 300) S.gecmis = S.gecmis.slice(-300); yaz('kafile-gecmis', S.gecmis);
+        try { if (navigator.vibrate) navigator.vibrate([60, 60, 120]); } catch (x) {}
+      }
+      yaz('kafile-sayac', sc); ciz();
+    }
+    else if (ey === 'yeni') { sc[mod] = 0; delete sc['kayit_' + mod]; yaz('kafile-sayac', sc); ciz(); }
+    else if (ey === 'azalt') {
+      if ((sc[mod] || 0) === 7 && sc['kayit_' + mod]) { // tamamlanmayı geri al: geçmişten de düş
+        var z = sc['kayit_' + mod];
+        for (var gi = S.gecmis.length - 1; gi >= 0; gi--) { if (S.gecmis[gi].tur === mod && S.gecmis[gi].zaman === z) { S.gecmis.splice(gi, 1); break; } } // yalnızca son kaydı geri al
+        yaz('kafile-gecmis', S.gecmis); delete sc['kayit_' + mod];
+      }
+      sc[mod] = Math.max(0, (sc[mod] || 0) - 1); yaz('kafile-sayac', sc); ciz();
+    }
+    else if (ey === 'sifirla') { if ((sc[mod] || 0) && (sc[mod] || 0) < 7 && !confirm('Sayaç sıfırlansın mı?')) return; sc[mod] = 0; delete sc['kayit_' + mod]; yaz('kafile-sayac', sc); ciz(); }
+    else if (ey === 'gecmis-temizle') { if (!confirm('Tavaf ve sa\'y geçmişiniz bu telefondan silinsin mi?')) return; S.gecmis = []; yaz('kafile-gecmis', S.gecmis); ciz(); }
     else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehir = ey.slice(6); yaz('kafile-sehir', S.sehir); ciz(); }
     else if (ey === 'kible') kibleBaslat();
     else if (ey === 'konum-vakit') konumVakitAl();
