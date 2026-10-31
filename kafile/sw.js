@@ -1,8 +1,8 @@
 /* Coşar Kafile – çevrimdışı çalışma için önbellek.
    Yalnızca /kafile/ klasörünü kapsar; sitenin geri kalanına karışmaz.
    Kafile verisi (Supabase) önbelleğe alınmaz; uygulama son veriyi kendi saklar. */
-var SURUM = 'kafile-v3';
-var KABUK = ['./', './index.html', './manifest.webmanifest', './ikon-192.png', './ikon-512.png'];
+var SURUM = 'kafile-v4';
+var KABUK = ['./', './index.html', './manifest.webmanifest', './ikon-192.png', './ikon-512.png', './logo.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(SURUM).then(function (c) { return c.addAll(KABUK); }).then(function () { return self.skipWaiting(); }));

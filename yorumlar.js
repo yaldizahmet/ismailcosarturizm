@@ -53,7 +53,7 @@
   }
 
   function serit(l) {
-    return '<div class="ym-baslik">Yolcularımızdan gelen mesajlar <span>' + (l.length > 1 ? 'Kaydırın →' : '') + '</span></div>' +
+    return '<div class="ym-baslik">Misafirlerimizden gelen mesajlar <span>' + (l.length > 1 ? 'Kaydırın →' : '') + '</span></div>' +
       '<div class="ym-serit" role="list">' + l.map(kart).join('') + '</div>';
   }
 

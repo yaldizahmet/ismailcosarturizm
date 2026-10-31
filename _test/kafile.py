@@ -1,6 +1,7 @@
 """Kafile uygulamasını (kafile/) telefon boyutunda uçtan uca test eder; gerçek veritabanına dokunmaz.
 Kafile verisi sahte bir RPC yanıtıyla verilir; saat window.__SIMDI ile sabitlenir.
 Kullanım: önce repo kökünde `python3 -m http.server 8765`, sonra `python3 _test/kafile.py`."""
+from urllib.parse import unquote
 import json, os, re, subprocess, sys
 from playwright.sync_api import sync_playwright
 
@@ -63,6 +64,7 @@ with sync_playwright() as p:
     # ── Giriş ──
     c = baglam(b); errs = []; pg = sayfa(c, errs)
     kontrol(pg.is_visible('#giris') and not pg.is_visible('#uygulama'), 'Giriş: kod ekranı açılıyor', errs)
+    kontrol(pg.evaluate("(()=>{const i=document.querySelector('#giris .giris-marka img');return !!i&&i.complete&&i.naturalWidth>0})()"), 'Giriş: şirket logosu görünüyor')
     pg.click('#girisBtn'); pg.wait_for_timeout(200)
     kontrol(pg.is_visible('#girisHata') and 'kodunuzu girin' in pg.inner_text('#girisHata'), 'Giriş: boş kodla uyarı veriyor')
     pg.fill('#kodKutu', 'YANLIS-KOD'); pg.click('#girisBtn'); pg.wait_for_timeout(400)
@@ -93,8 +95,14 @@ with sync_playwright() as p:
     kontrol(pg.evaluate('!window.__xss') and '<img' in d.nth(0).inner_text(), 'Güvenlik: duyurudaki HTML çalışmıyor, düz yazı gösteriliyor')
     kontrol(not pg.is_visible('#menuNokta'), 'Duyurular: açılınca okunmamış işareti kalkıyor')
 
+    # ── Logo: her ekranın üstünde ──
+    for sk in ['bugun', 'duyurular', 'rehber', 'vakitler', 'acil']:
+        pg.click(f'.alt-menu [data-sekme="{sk}"]'); pg.wait_for_timeout(250)
+        kontrol(pg.evaluate("(()=>{const i=document.querySelector('#ekran header.bas .marka img');return !!i&&i.complete&&i.naturalWidth>0})()"), f'Logo: {sk} ekranında şirket logosu var')
+
     # ── Rehber: sayaç ve valiz ──
     pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#gecmisBos').count() == 1 and pg.locator('#gecmisPaylas').count() == 0, 'Geçmiş: hiç sayım yokken paylaş butonu yok, açıklama var')
     for _ in range(3): pg.click('[data-eylem="arttir"]')
     kontrol(pg.inner_text('#sayacSayi') == '3', 'Sayaç: tavaf 3 oldu')
     pg.check('input[data-valiz="Pasaport"]'); pg.wait_for_timeout(100)
@@ -104,7 +112,9 @@ with sync_playwright() as p:
     kontrol(pg.inner_text('#sayacSayi') == '3' and pg.is_checked('input[data-valiz="Pasaport"]'), 'Kayıt: sayaç ve valiz işaretleri kapanıp açılınca korunuyor')
     pg.click('[data-eylem="mod-say"]'); pg.wait_for_timeout(100)
     kontrol(pg.inner_text('#sayacSayi') == '0' and 'tur' in pg.inner_text('.halka'), "Sayaç: Sa'y ayrı sayılıyor")
-    kontrol(pg.locator('#gecmisBos').count() == 1, 'Geçmiş: başta boş, açıklama var')
+    wa0 = unquote((pg.get_attribute('#gecmisPaylas', 'href') or '').split('text=', 1)[-1]) if pg.locator('#gecmisPaylas').count() else ''
+    kontrol('tavaf 3/7' in (pg.inner_text('#gecmisDevam') if pg.locator('#gecmisDevam').count() else '') and 'Devam eden: tavaf 3/7 şavt' in wa0 and 'Henüz tamamlanan' in wa0,
+            'Paylaş: 7 tamamlanmadan da paylaşılabiliyor (devam eden 3/7 şavt)', wa0.replace('\n', ' | ')[:140])
     for _ in range(7): pg.click('[data-eylem="arttir"]')
     kontrol(pg.inner_text('#sayacSayi') == '7' and pg.locator('[data-eylem="arttir"]').count() == 0 and 'Yeni' in pg.inner_text('[data-eylem="yeni"]'),
             "Sayaç: 7'de tamamlanıyor, büyük buton 'Yeni sa'ye başla' oluyor")
@@ -122,7 +132,6 @@ with sync_playwright() as p:
     pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(400); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(200)
     kontrol(pg.inner_text('#sayacSayi') == '7' and "1 tavaf, 1 sa'y" in pg.inner_text('#gecmisListe') and "Toplam: 1 tavaf, 1 sa'y" in pg.inner_text('#gecmisToplam'),
             'Geçmiş: tavaf da kaydediliyor, sayfa yenilenince geçmiş ve özet korunuyor')
-    from urllib.parse import unquote
     wa = unquote((pg.get_attribute('#gecmisPaylas', 'href') or '').split('text=', 1)[-1])
     kontrol(wa and (pg.get_attribute('#gecmisPaylas', 'href') or '').startswith('https://wa.me/?text=') and 'Umre geçmişim – Kasım 2026 Umre Kafilesi' in wa
             and "12 Kasım Perşembe: 1 tavaf (11:00), 1 sa'y (11:00)" in wa and "Toplam: 1 tavaf, 1 sa'y" in wa,
@@ -132,7 +141,7 @@ with sync_playwright() as p:
     pg.click('[data-eylem="mod-tavaf"]')
     kontrol(pg.inner_text('#sayacSayi') == '3', 'Sayaç: tavaf sayısı sa\'y\'dan etkilenmiyor')
     pg.click('[data-eylem="gecmis-temizle"]'); pg.wait_for_timeout(100)
-    kontrol(pg.locator('#gecmisBos').count() == 1, 'Geçmiş: "Geçmişi temizle" çalışıyor')
+    kontrol(pg.locator('#gecmisListe').count() == 0 and 'tavaf 3/7' in pg.inner_text('#gecmisDevam') and pg.locator('#gecmisPaylas').count() == 1, 'Geçmiş: "Geçmişi temizle" çalışıyor, devam eden sayaç paylaşılabilir kalıyor')
     kontrol(not tasma(pg), 'Rehber: telefonda yatay taşma yok')
 
     # ── Vakitler ──
