@@ -505,7 +505,7 @@ async function duyuruGuncelle(id) {
   renderDuyuru();
 }
 
-// ── KAFİLELER (yolcu uygulaması: ismailcosarturizm.com.tr/kafile/) ──
+// ── KAFİLELER (misafir uygulaması: ismailcosarturizm.com.tr/kafile/) ──
 const KAFILE_URL = 'https://ismailcosarturizm.com.tr/kafile/';
 const KOD_HARF = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // karışan 0/O, 1/I yok
 const TUR_TURLERI = { umre: 'Umre', hac: 'Hac', kultur: 'Kültür turu' };
@@ -521,7 +521,7 @@ function kafileKodUret(ad) {
 function kafileTarih(t) { return t ? new Date(t + 'T12:00:00').toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '—'; }
 
 function kafilePaylasMetni(k) {
-  return `${k.ad} – Yolcu uygulamanız:\n${KAFILE_URL}#${k.kod}\n\nBağlantıyı açın; telefonunuza "Ana ekrana ekle" ile uygulama olarak kurabilirsiniz. Grup kodu: ${k.kod}`;
+  return `${k.ad} – Misafir uygulamanız:\n${KAFILE_URL}#${k.kod}\n\nBağlantıyı açın; telefonunuza "Ana ekrana ekle" ile uygulama olarak kurabilirsiniz. Grup kodu: ${k.kod}`;
 }
 
 async function renderKafileler() {
@@ -534,7 +534,7 @@ async function renderKafileler() {
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
   let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
-  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Yolcular <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
   if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz kafile yok. “Yeni Kafile” ile ekleyin.</p>';
   html += (data || []).map(k => `
@@ -601,7 +601,7 @@ function kafileFormu(k) {
     <div class="card"><h3>Kafile bilgileri</h3>
       <div class="form-row">
         <div class="form-group"><label>Kafile adı</label><input id="k_ad" value="${esc(k.ad)}" placeholder="Kasım 2026 Umre Kafilesi"></div>
-        <div class="form-group"><label>Grup kodu (yolcular bununla girer)</label>
+        <div class="form-group"><label>Grup kodu (misafirler bununla girer)</label>
           <div style="display:flex;gap:6px"><input id="k_kod" value="${esc(k.kod)}" style="text-transform:uppercase;letter-spacing:1px"><button type="button" class="btn btn-navy" onclick="document.getElementById('k_kod').value=kafileKodUret(document.getElementById('k_ad').value)">Yeni kod</button></div></div>
       </div>
       <div class="form-row">

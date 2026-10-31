@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Coşar Turizm">
-<title>Yolcu Uygulaması – İsmail Coşar Turizm</title>
+<title>Misafir Uygulaması – İsmail Coşar Turizm</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="ikon-192.png">
 <link rel="apple-touch-icon" href="ikon-180.png">
@@ -159,7 +159,7 @@ details.tum[open] summary::after{content:'▴'}
   <div class="giris-logo">
     <div class="giris-ikon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V9l8-5 8 5v12"/><path d="M4 21h16"/><path d="M9 21v-6h6v6"/><path d="M12 4V2"/></svg></div>
     <h1>İsmail Coşar Turizm</h1>
-    <div class="ust-etiket">Yolcu Uygulaması</div>
+    <div class="ust-etiket">Misafir Uygulaması</div>
   </div>
   <form id="girisForm" novalidate>
     <label for="kodKutu">Grup kodunuz</label>
@@ -577,7 +577,7 @@ details.tum[open] summary::after{content:'▴'}
     h += '<p class="kucuk-not" style="text-align:center">Sayaç telefonda saklanır; uygulama kapansa da kaldığınız yerden devam eder. 7\'yi tamamlayınca geçmişinize kaydedilir.</p>';
     h += gecmisBolumu();
     h += valizListesi(VALIZ);
-    h += '<p class="kucuk-not">Zemzem: Her yolcumuz için 5 litre zemzem tarafımızdan alınıp dönüşte teslim edilir; ayrıca almanıza gerek yok.</p>';
+    h += '<p class="kucuk-not">Zemzem: Her misafirimiz için 5 litre zemzem tarafımızdan alınıp dönüşte teslim edilir; ayrıca almanıza gerek yok.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
       '<a href="' + SITE + 'rehber-ilk-umre.html" target="_blank" rel="noopener">İlk kez umreye gideceklere rehber<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'rehber-umre-valiz-listesi.html" target="_blank" rel="noopener">Umre valiz listesi (ayrıntılı)<span class="ok" aria-hidden="true">›</span></a>' +
@@ -626,7 +626,7 @@ details.tum[open] summary::after{content:'▴'}
     });
     var bas = (S.veri && S.veri.tur_turu === 'hac') ? 'Hac' : 'Umre';
     return '🕋 ' + bas + ' geçmişim' + (S.veri && S.veri.ad ? ' – ' + S.veri.ad : '') + '\n\n' + satirlar.join('\n') +
-      '\n\nToplam: ' + sayiMetni(tt, ts) + '\n\nİsmail Coşar Turizm yolcu uygulaması · ismailcosarturizm.com.tr';
+      '\n\nToplam: ' + sayiMetni(tt, ts) + '\n\nİsmail Coşar Turizm misafir uygulaması · ismailcosarturizm.com.tr';
   }
   function gecmisWhatsapp() { return 'https://wa.me/?text=' + encodeURIComponent(gecmisMetni()); }
 

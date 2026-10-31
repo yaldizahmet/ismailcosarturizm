@@ -1,7 +1,7 @@
 {
-  "name": "İsmail Coşar Turizm – Yolcu Uygulaması",
+  "name": "İsmail Coşar Turizm – Misafir Uygulaması",
   "short_name": "Coşar Turizm",
-  "description": "İsmail Coşar Turizm yolcu uygulaması: günlük program, duyurular, tavaf sayacı, namaz vakitleri ve acil durum.",
+  "description": "İsmail Coşar Turizm misafir uygulaması: günlük program, duyurular, tavaf sayacı, namaz vakitleri ve acil durum.",
   "lang": "tr",
   "id": "/kafile/",
   "start_url": "/kafile/",
