@@ -104,6 +104,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Kafileler (Uygulama)</button>
+    <button class="nav-item" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
@@ -112,6 +113,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <div id="sayfa-ekle" style="display:none"></div>
   <div id="sayfa-duyuru" style="display:none"></div>
     <div id="sayfa-kafile" style="display:none"></div>
+    <div id="sayfa-yorum" style="display:none"></div>
   </div>
 </div>
 
@@ -160,7 +162,7 @@ async function cikisYap() {
 }
 
 function sekmeAc(ad) {
-  ['basvuru','turlar','ekle','duyuru','kafile'].forEach(s => {
+  ['basvuru','turlar','ekle','duyuru','kafile','yorum'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -171,6 +173,7 @@ function sekmeAc(ad) {
   if (ad === 'ekle') renderEkle();
   if (ad === 'duyuru') renderDuyuru();
   if (ad === 'kafile') renderKafileler();
+  if (ad === 'yorum') renderYorumlar();
 }
 
 // ── TUR LİSTESİ ──
@@ -744,6 +747,108 @@ async function kafileDuyuruSil(kafileId, id) {
   kafileDuyurular(kafileId);
 }
 
+// ── YORUMLAR (yolculardan WhatsApp vb. ile gelen mesajlar; sitede "Misafirlerimiz Ne Diyor?" bölümünde) ──
+const YORUM_KATEGORI = { umre: 'Umre', hac: 'Hac', kultur: 'Kültür turu', genel: 'Genel' };
+
+async function renderYorumlar() {
+  const el = document.getElementById('sayfa-yorum');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data, error } = await sb.from('yorumlar').select('*').order('olusturma', { ascending: false });
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  let html = '<div class="header"><h2>💬 Yorumlar</h2><button class="btn btn-gold" onclick="yorumYeni()">➕ Yeni Yorum</button></div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">WhatsApp\'tan gelen teşekkür mesajlarını buraya ekleyin; ana sayfada ve (Umre ise) Umre sayfasında <b>yana kaydırılan tek satırlık bir şerit</b> olarak görünür. ' +
+    'Eklemeden önce <b>yolcunun iznini alın</b>. İsim olarak “Ayşe K.” gibi kısaltma önerilir. Ekran görüntüsü eklerseniz telefon numarası ve profil fotoğrafı görünmesin.</div>';
+  html += '<div class="card"><div class="tur-list">';
+  if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz yorum yok. “Yeni Yorum” ile ekleyin.</p>';
+  html += (data || []).map(y => `
+    <div class="tur-item yorum-item">
+      <div class="tur-item-info" style="min-width:0;flex:1">
+        <h4>${esc(y.ad)}${y.tur ? ' · <span style="font-weight:400">' + esc(y.tur) + '</span>' : ''} ${y.gorsel ? '📷' : ''}</h4>
+        <p>${YORUM_KATEGORI[y.kategori] || 'Genel'}${y.tarih ? ' · ' + kafileTarih(y.tarih) : ''}</p>
+        <p style="margin-top:4px;color:#444;font-style:italic;white-space:pre-line;overflow-wrap:anywhere">${esc(String(y.metin).length > 220 ? String(y.metin).slice(0, 219) + '…' : y.metin)}</p>
+      </div>
+      <div class="tur-item-actions" style="flex-wrap:wrap">
+        <span class="badge ${y.yayinda ? 'badge-green' : 'badge-red'}">${y.yayinda ? 'Yayında' : 'Gizli'}</span>
+        <button class="btn btn-navy" onclick="yorumDuzenle(${y.id})">Düzenle</button>
+        <button class="btn btn-gold" onclick="yorumYayin(${y.id}, ${!y.yayinda})">${y.yayinda ? 'Gizle' : 'Yayınla'}</button>
+        <button class="btn btn-red" onclick="yorumSil(${y.id})">Sil</button>
+      </div>
+    </div>`).join('');
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function yorumFormu(y) {
+  const yeni = !y.id;
+  document.getElementById('sayfa-yorum').innerHTML = `
+    <div class="header"><h2>${yeni ? '➕ Yeni Yorum' : '✏️ Yorum Düzenle'}</h2></div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>İsim (sitede görünür)</label><input id="y_ad" value="${esc(y.ad)}" maxlength="80" placeholder="Ayşe K."></div>
+        <div class="form-group"><label>Tur (isteğe bağlı)</label><input id="y_tur" value="${esc(y.tur)}" maxlength="80" placeholder="Kasım 2026 Umre"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Kategori</label>
+          <select id="y_kategori">${Object.entries(YORUM_KATEGORI).map(([d, a]) => `<option value="${d}" ${(y.kategori || 'umre') === d ? 'selected' : ''}>${a}</option>`).join('')}</select>
+          <div style="font-size:11.5px;color:#888;margin-top:4px">“Umre” olanlar Umre sayfasında da görünür.</div></div>
+        <div class="form-group"><label>Mesaj tarihi (isteğe bağlı)</label><input id="y_tarih" type="date" value="${esc(y.tarih)}"></div>
+      </div>
+      <div class="form-group"><label>Mesaj (WhatsApp'tan kopyalayıp yapıştırın)</label><textarea id="y_metin" rows="6" maxlength="3000">${esc(y.metin)}</textarea></div>
+      <div class="form-group"><label>Fotoğraf / ekran görüntüsü (isteğe bağlı)</label>
+        <input type="hidden" id="y_gorsel" value="${esc(y.gorsel || '')}">
+        <div id="y_gorselOnizleme" style="margin-bottom:8px">${y.gorsel ? `<img src="${esc(y.gorsel)}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;display:block">` : '<div style="color:#999;font-size:13px">Henüz fotoğraf yok</div>'}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="btn btn-navy" style="cursor:pointer;margin:0">📷 Fotoğraf Seç<input type="file" accept="image/*" style="display:none" onchange="gorselYukle(this,'y')"></label>
+          <button type="button" class="btn btn-red" style="padding:8px 12px" onclick="gorselKaldir('y')">Kaldır</button>
+          <span id="y_gorselDurum" style="font-size:12px;color:#666"></span>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0"><input type="checkbox" id="y_izin" ${y.izin ? 'checked' : ''}> <b>Yolcudan sitede yayınlama izni alındı</b></label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0 14px"><input type="checkbox" id="y_yayinda" ${y.yayinda !== false ? 'checked' : ''}> Sitede yayınla</label>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-gold" onclick="yorumKaydet(${yeni ? 'null' : y.id})">💾 Kaydet</button>
+        <button class="btn btn-navy" onclick="renderYorumlar()">İptal</button>
+      </div>
+    </div>`;
+  window.scrollTo(0, 0);
+}
+
+function yorumYeni() { yorumFormu({ kategori: 'umre', yayinda: true }); }
+
+async function yorumDuzenle(id) {
+  const { data, error } = await sb.from('yorumlar').select('*').eq('id', id).single();
+  if (error || !data) { toast('❌ Yorum okunamadı', 'error'); return; }
+  yorumFormu(data);
+}
+
+async function yorumKaydet(id) {
+  const d = (x) => document.getElementById(x).value.trim();
+  const y = { ad: d('y_ad'), tur: d('y_tur') || null, kategori: d('y_kategori'), tarih: d('y_tarih') || null, metin: d('y_metin'),
+              gorsel: d('y_gorsel') || null, izin: document.getElementById('y_izin').checked, yayinda: document.getElementById('y_yayinda').checked };
+  if (!y.ad) { toast('❌ İsim gerekli', 'error'); return; }
+  if (!y.metin) { toast('❌ Mesaj boş olamaz', 'error'); return; }
+  if (!y.izin) { toast('❌ Yolcunun izni alınmadan yorum eklenemez', 'error'); return; }
+  const { error } = id ? await sb.from('yorumlar').update(y).eq('id', id) : await sb.from('yorumlar').insert(y);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Yorum kaydedildi', 'success');
+  renderYorumlar();
+}
+
+async function yorumYayin(id, yayinda) {
+  const { error } = await sb.from('yorumlar').update({ yayinda }).eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast(yayinda ? '✅ Yayınlandı' : '✅ Gizlendi', 'success');
+  renderYorumlar();
+}
+
+async function yorumSil(id) {
+  if (!confirm('Yorum silinsin mi?')) return;
+  const { error } = await sb.from('yorumlar').delete().eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Silindi', 'success');
+  renderYorumlar();
+}
+
 // ── TOAST ──
 // ── BAŞVURULAR ──
 const DURUMLAR = {yeni:'🆕 Yeni', arandi:'📞 Arandı', kayit:'✅ Kayıt Oldu', iptal:'✖️ İlgilenmiyor'};
@@ -840,13 +945,13 @@ async function gorselYukle(input, p) {
   const durum = document.getElementById(p + '_gorselDurum');
   durum.textContent = '⏳ Yükleniyor...';
   try {
-    const blob = await gorselKucult(dosya, 1600);
-    const yol = 'tur-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
+    const blob = await gorselKucult(dosya, p === 'y' ? 1000 : 1600);
+    const yol = (p === 'y' ? 'yorum-' : 'tur-') + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
     const { error } = await sb.storage.from('tur-gorselleri').upload(yol, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
     if (error) throw error;
     const url = sb.storage.from('tur-gorselleri').getPublicUrl(yol).data.publicUrl;
     document.getElementById(p + '_gorsel').value = url;
-    document.getElementById(p + '_gorselOnizleme').innerHTML = `<img src="${url}" style="width:100%;max-width:360px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">`;
+    document.getElementById(p + '_gorselOnizleme').innerHTML = p === 'y' ? `<img src="${url}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;display:block">` : `<img src="${url}" style="width:100%;max-width:360px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">`;
     durum.textContent = '✅ Yüklendi – kaydetmeyi unutmayın';
   } catch (e) {
     durum.textContent = '❌ ' + (e.message || 'Yükleme başarısız');

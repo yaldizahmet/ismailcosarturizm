@@ -22,7 +22,7 @@ window.__islem = [];
       update: function(v){ mod = 'update'; yuk = v; return q; },
       delete: function(){ mod = 'delete'; return q; },
       then: function(ok, hata){
-        if (mod === 'insert') { var liste = Array.isArray(yuk) ? yuk : [yuk]; liste.forEach(function(x){ var y = JSON.parse(JSON.stringify(x)); if (y.id == null) { window.__sayac = (window.__sayac || 1000) + 1; y.id = t === 'kafile_duyurular' ? window.__sayac : 'uuid-' + window.__sayac; } /* gerçek DB: kafile uuid (metin), duyuru bigint */ if (!y.olusturma) y.olusturma = new Date().toISOString(); tum.push(y); }); window.__islem.push({tablo: t, tur: 'insert', veri: yuk}); }
+        if (mod === 'insert') { var liste = Array.isArray(yuk) ? yuk : [yuk]; liste.forEach(function(x){ var y = JSON.parse(JSON.stringify(x)); if (y.id == null) { window.__sayac = (window.__sayac || 1000) + 1; y.id = t === 'kafileler' ? 'uuid-' + window.__sayac : window.__sayac; } /* gerçek DB: kafileler uuid (metin), diğerleri sayı */ if (!y.olusturma) y.olusturma = new Date().toISOString(); tum.push(y); }); window.__islem.push({tablo: t, tur: 'insert', veri: yuk}); }
         if (mod === 'update') { tum.forEach(function(r){ if (filtre.every(function(f){ return r[f[0]] === f[1]; })) Object.assign(r, yuk); }); window.__islem.push({tablo: t, tur: 'update', veri: yuk, filtre: filtre}); }
         if (mod === 'delete') { window.__DB[t] = tum.filter(function(r){ return !filtre.every(function(f){ return r[f[0]] === f[1]; }); }); window.__islem.push({tablo: t, tur: 'delete', filtre: filtre}); }
         var d = mod === 'select' ? (tek ? (satir[0] || null) : satir) : null;
@@ -58,7 +58,7 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#appDiv'), 'Oturum açıkken panel açılıyor', errs)
 
     # Bütün sekmeler hatasız açılıyor
-    for sekme in ['basvuru', 'turlar', 'ekle', 'duyuru', 'kafile']:
+    for sekme in ['basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum']:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(400)
         kontrol(pg.is_visible(f'#sayfa-{sekme}') and not errs, f'Sekme açılıyor: {sekme}', errs)
 
@@ -158,9 +158,34 @@ with sync_playwright() as p:
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s_) == 1 and s_[0]['tablo'] == 'kafileler' and pg.locator('.kafile-item').count() == 0, 'Kafile: siliniyor', errs)
 
+    # ── Yorumlar (WhatsApp mesajları) ──
+    pg.evaluate("sekmeAc('yorum')"); pg.wait_for_timeout(400); pg.evaluate("window.__islem = []"); errs.clear()
+    pg.get_by_role('button', name=re.compile('Yeni Yorum')).click(); pg.wait_for_timeout(200)
+    pg.fill('#y_ad', "Ayşe K."); pg.fill('#y_tur', 'Kasım 2026 Umre'); pg.fill('#y_metin', "Allah razı olsun,\nher şey çok güzeldi.")
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
+    kontrol(not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Yorum: yolcu izni işaretlenmeden kaydedilmiyor')
+    pg.set_input_files('#sayfa-yorum input[type=file]', files=[{'name': 'm.png', 'mimeType': 'image/png', 'buffer': bytes.fromhex('89504e470d0a1a0a0000000d4948445200000001000000010806000000'
+        '1f15c4890000000d49444154789c6360f80f0000010101005b0b3b3c0000000049454e44ae426082')}]); pg.wait_for_timeout(800)
+    kontrol('Yüklendi' in pg.inner_text('#y_gorselDurum'), 'Yorum: fotoğraf seçilince küçültülüp yükleniyor', pg.inner_text('#y_gorselDurum'))
+    pg.check('#y_izin'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'yorumlar']
+    v = ek[0]['veri'] if ek else {}
+    kontrol(len(ek) == 1 and v.get('ad') == 'Ayşe K.' and v.get('kategori') == 'umre' and v.get('izin') is True and v.get('yayinda') is True and 'güzeldi' in v.get('metin', ''),
+            'Yorum: izinle kaydediliyor (varsayılan Umre, yayında)', errs)
+    kontrol(pg.locator('.yorum-item').count() == 1 and 'Yayında' in pg.inner_text('.yorum-item'), 'Yorum: listede "Yayında" görünüyor')
+    pg.evaluate("window.__islem = []"); pg.locator('.yorum-item').get_by_role('button', name='Gizle').click(); pg.wait_for_timeout(400)
+    g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': False} and 'Gizli' in pg.inner_text('.yorum-item'), 'Yorum: "Gizle" siteden kaldırıyor, kayıt duruyor')
+    pg.locator('.yorum-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
+    kontrol(pg.input_value('#y_ad') == 'Ayşe K.' and pg.is_checked('#y_izin') and not pg.is_checked('#y_yayinda'), 'Yorum: düzenleme formu kayıtlı bilgilerle açılıyor')
+    pg.get_by_role('button', name='İptal').click(); pg.wait_for_timeout(300)
+    pg.evaluate("window.__islem = []"); pg.locator('.yorum-item').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
+    s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
+    kontrol(len(s_) == 1 and s_[0]['tablo'] == 'yorumlar' and pg.locator('.yorum-item').count() == 0 and not errs, 'Yorum: siliniyor', errs)
+
     # Telefon görünümü: her sekmede yatay taşma yok, seçili sekme üst şeritte görünür
     pg.set_viewport_size({'width': 390, 'height': 844})
-    for sekme, ek in [('basvuru', ''), ('turlar', ''), ('ekle', ''), ('duyuru', ''), ('kafile', ''), ('kafile', 'kafileYeni()'), ('turlar', f"turDuzenle('{VERI['turlar'][1]['id']}')")]:
+    for sekme, ek in [('basvuru', ''), ('turlar', ''), ('ekle', ''), ('duyuru', ''), ('kafile', ''), ('yorum', ''), ('yorum', 'yorumYeni()'), ('kafile', 'kafileYeni()'), ('turlar', f"turDuzenle('{VERI['turlar'][1]['id']}')")]:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(250)
         if ek: pg.evaluate(ek); pg.wait_for_timeout(250)
         genis = pg.evaluate('document.documentElement.scrollWidth')

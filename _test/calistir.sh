@@ -46,5 +46,9 @@ echo "▶ Kafile uygulaması (kafile/)"
 python3 _test/kafile.py 2>&1 | grep -E "^(✓|✗|===)"
 KAFILE=${PIPESTATUS[0]}
 
+echo "▶ Yolcu mesajları (yorumlar)"
+python3 _test/yorumlar.py 2>&1 | grep -E "^(✓|✗|===)"
+YORUM=${PIPESTATUS[0]}
+
 echo
-if [ -z "$SORUN" ] && [ "$FORM" = 0 ] && [ "$ADMIN" = 0 ] && [ "$KAFILE" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi
+if [ -z "$SORUN" ] && [ "$FORM" = 0 ] && [ "$ADMIN" = 0 ] && [ "$KAFILE" = 0 ] && [ "$YORUM" = 0 ]; then echo "=== SONUÇ: TEMİZ — yayına alınabilir"; exit 0; else echo "=== SONUÇ: SORUN VAR — yayına almadan önce düzelt"; exit 1; fi
