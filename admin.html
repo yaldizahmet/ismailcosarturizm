@@ -524,8 +524,12 @@ function kafilePaylasMetni(k) {
 async function renderKafileler() {
   const el = document.getElementById('sayfa-kafile');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
-  const { data, error } = await sb.from('kafileler').select('*').order('baslangic', { ascending: false });
+  const [{ data, error }, { data: aboneler }] = await Promise.all([
+    sb.from('kafileler').select('*').order('baslangic', { ascending: false }),
+    sb.from('bildirim_abonelikleri').select('kafile_id')
+  ]);
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
   let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
   html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Yolcular <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
@@ -534,7 +538,7 @@ async function renderKafileler() {
     <div class="tur-item kafile-item">
       <div class="tur-item-info">
         <h4>${esc(k.ad)}</h4>
-        <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır</p>
+        <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır · 🔔 <span class="abone-sayisi">${aboneSay[k.id] || 0}</span> telefonda bildirim açık</p>
       </div>
       <div class="tur-item-actions" style="flex-wrap:wrap">
         <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
@@ -677,10 +681,12 @@ async function kafileSil(id) {
 async function kafileDuyurular(id) {
   const el = document.getElementById('sayfa-kafile');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
-  const [{ data: k }, { data: liste }] = await Promise.all([
+  const [{ data: k }, { data: liste }, { data: aboneler }] = await Promise.all([
     sb.from('kafileler').select('*').eq('id', id).single(),
-    sb.from('kafile_duyurular').select('*').eq('kafile_id', id).order('olusturma', { ascending: false })
+    sb.from('kafile_duyurular').select('*').eq('kafile_id', id).order('olusturma', { ascending: false }),
+    sb.from('bildirim_abonelikleri').select('id').eq('kafile_id', id)
   ]);
+  const aboneSayisi = (aboneler || []).length;
   if (!k) { toast('❌ Kafile okunamadı', 'error'); renderKafileler(); return; }
   el.innerHTML = `
     <div class="header"><h2>📢 ${esc(k.ad)} – Duyurular</h2><button class="btn btn-navy" onclick="renderKafileler()">← Kafileler</button></div>
@@ -690,14 +696,15 @@ async function kafileDuyurular(id) {
         <div class="form-group"><label>Yazan</label><input id="kd_yazan" value="${esc(k.rehber_ad || '')}" placeholder="Rehber / Ofis"></div>
       </div>
       <div class="form-group"><label>Duyuru metni</label><textarea id="kd_metin" rows="4" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px"></textarea></div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px"><input type="checkbox" id="kd_onemli"> Önemli (en üstte sabitlenir)</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px"><input type="checkbox" id="kd_onemli"> Önemli (en üstte sabitlenir)</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px"><input type="checkbox" id="kd_bildirim" checked> Telefonlara bildirim gönder${aboneSayisi ? ` (${aboneSayisi} telefon)` : ' (henüz bildirimi açan telefon yok)'}</label>
       <button class="btn btn-gold" onclick="kafileDuyuruEkle('${k.id}')">📢 Yayınla</button>
     </div>
     <div class="card"><h3>Yayındaki duyurular (${(liste || []).length})</h3><div class="tur-list">
       ${(liste || []).map(d => `
         <div class="tur-item kafile-duyuru">
           <div class="tur-item-info"><h4>${d.onemli ? '📌 ' : ''}${esc(d.baslik || 'Duyuru')}</h4><p style="white-space:pre-wrap">${esc(d.metin)}</p>
-            <p style="margin-top:4px">${esc(d.yazan || '')} · ${new Date(d.olusturma).toLocaleString('tr-TR', {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'})}</p></div>
+            <p style="margin-top:4px">${esc(d.yazan || '')} · ${new Date(d.olusturma).toLocaleString('tr-TR', {day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'})} · <span class="bildirim-sonuc">${bildirimSonucYazi(d)}</span></p></div>
           <div class="tur-item-actions"><button class="btn btn-red" onclick="kafileDuyuruSil('${k.id}', ${d.id})">Sil</button></div>
         </div>`).join('') || '<p style="color:#666;font-size:14px">Henüz duyuru yok.</p>'}
     </div></div>`;
@@ -711,11 +718,22 @@ async function kafileDuyuruEkle(kafileId) {
     kafile_id: kafileId, metin,
     baslik: document.getElementById('kd_baslik').value.trim() || null,
     yazan: document.getElementById('kd_yazan').value.trim() || null,
-    onemli: document.getElementById('kd_onemli').checked
+    onemli: document.getElementById('kd_onemli').checked,
+    bildirim: document.getElementById('kd_bildirim').checked
   });
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Duyuru yayınlandı', 'success');
-  kafileDuyurular(kafileId);
+  await kafileDuyurular(kafileId);
+  // Bildirim sonucu birkaç saniye içinde yazılır; ekranı bir kez daha tazele
+  setTimeout(() => { if (document.querySelector('#sayfa-kafile .kafile-duyuru')) kafileDuyurular(kafileId); }, 6000);
+}
+
+function bildirimSonucYazi(d) {
+  if (d.bildirim === false) return 'bildirim gönderilmedi';
+  const r = d.bildirim_sonuc;
+  if (!r) return '🔔 bildirim gönderiliyor…';
+  if (!r.toplam) return '🔔 bildirimi açan telefon yoktu';
+  return '🔔 ' + r.gonderilen + ' telefona bildirim gitti' + (r.hatali ? ` (${r.hatali} başarısız)` : '');
 }
 
 async function kafileDuyuruSil(kafileId, id) {

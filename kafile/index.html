@@ -197,6 +197,7 @@ details.tum[open] summary::after{content:'▴'}
   var SB_KEY = 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
   var SITE = 'https://ismailcosarturizm.com.tr/';
   var OFIS_TEL = '+905331980781';
+  var VAPID_ACIK = 'BJ58Opl4TDN6Trdatt453hQdKT7MRK4ONeFlbhKzlx8VnH8uJFinngO5yJ2EGs1IoMCDgOcn6gnl2_cwzN30AUM'; // bildirim (Web Push) genel anahtarı; gizli olanı yalnızca sunucuda
   var KABE = { enlem: 21.4225, boylam: 39.8262 };
   var SEHIRLER = { mekke: { ad: 'Mekke', enlem: 21.4225, boylam: 39.8262 }, medine: { ad: 'Medine', enlem: 24.4672, boylam: 39.6111 } };
 
@@ -278,7 +279,7 @@ details.tum[open] summary::after{content:'▴'}
   var S = {
     kod: oku('kafile-kod', ''), veri: null, sekme: 'bugun', guncelleme: null, cevrimdisi: false,
     sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}),
-    sehir: oku('kafile-sehir', 'mekke'), kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
+    sehir: oku('kafile-sehir', 'mekke'), kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
   };
 
   // ── veri ──
@@ -288,6 +289,66 @@ details.tum[open] summary::after{content:'▴'}
       body: JSON.stringify({ p_kod: kod }), cache: 'no-store'
     }).then(function (r) { if (!r.ok) throw new Error('sunucu ' + r.status); return r.json(); });
   }
+  function rpc(ad, govde) {
+    return fetch(SB_URL + '/rest/v1/rpc/' + ad, {
+      method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(govde), cache: 'no-store'
+    }).then(function (r) { if (!r.ok) throw new Error('sunucu ' + r.status); return r.json(); });
+  }
+
+  // ── Duyuru bildirimleri (Web Push) ──
+  var swKayit = null;
+  function iosMu() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function ekranaKurulu() { return navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches); }
+  function b64Dizi(b) { var p = '='.repeat((4 - b.length % 4) % 4), s = atob((b + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function kayitAl() { return swKayit ? swKayit.then(function (r) { return r || Promise.reject(new Error('kayıt yok')); }) : Promise.reject(new Error('kayıt yok')); }
+  function bildirimDurumu() {
+    var eski = S.bildirim;
+    var bitir = function (d) { S.bildirim = d; if (d !== eski && S.veri) ciz(); return d; };
+    if (!('Notification' in window) || !('PushManager' in window) || !swKayit) return Promise.resolve(bitir(iosMu() && !ekranaKurulu() ? 'ios-kur' : 'desteksiz'));
+    if (Notification.permission === 'denied') return Promise.resolve(bitir('reddedildi'));
+    return kayitAl().then(function (r) { return r.pushManager.getSubscription(); }).then(function (abone) {
+      if (abone && Notification.permission === 'granted') {
+        var j = abone.toJSON();
+        if (S.kod) rpc('bildirim_abone_ol', { p_kod: S.kod, p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth }).catch(function () {}); // tazele / gruba bağla
+        return bitir('acik');
+      }
+      return bitir('kapali');
+    }).catch(function () { return bitir(iosMu() && !ekranaKurulu() ? 'ios-kur' : 'desteksiz'); });
+  }
+  function bildirimAc() {
+    if (S.bildirim === 'bekliyor') return;
+    S.bildirim = 'bekliyor'; ciz();
+    Promise.resolve(Notification.requestPermission()).then(function (izin) {
+      if (izin !== 'granted') { S.bildirim = izin === 'denied' ? 'reddedildi' : 'kapali'; ciz(); return; }
+      return kayitAl().then(function (r) {
+        return r.pushManager.getSubscription().then(function (a) { return a || r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64Dizi(VAPID_ACIK) }); });
+      }).then(function (abone) {
+        var j = abone.toJSON();
+        return rpc('bildirim_abone_ol', { p_kod: S.kod, p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+      }).then(function (tamam) {
+        if (!tamam) throw new Error('kabul edilmedi');
+        S.bildirim = 'acik'; ciz(); bildir('Bildirimler açıldı. Yeni duyurular telefonunuza gelecek.');
+      });
+    }).catch(function () { S.bildirim = 'kapali'; ciz(); bildir('Bildirimler açılamadı. İnternetinizi kontrol edip tekrar deneyin.'); });
+  }
+  function bildirimKapat(sessiz) {
+    return kayitAl().then(function (r) { return r.pushManager.getSubscription(); }).then(function (a) {
+      if (!a) return;
+      var uc = a.toJSON().endpoint;
+      return a.unsubscribe().catch(function () {}).then(function () { return rpc('bildirim_abonelik_sil', { p_endpoint: uc }).catch(function () {}); });
+    }).catch(function () {}).then(function () { S.bildirim = 'kapali'; if (!sessiz) { ciz(); bildir('Bildirimler kapatıldı.'); } });
+  }
+  function bildirimKarti(yer) {
+    var b = S.bildirim;
+    if (b === 'kapali' || b === 'bekliyor') return '<div class="yukle-kart"><p><b>Duyuruları kaçırmayın.</b> Yeni duyuru gelince telefonunuza bildirim gelsin.</p><button type="button" data-eylem="bildirim-ac"' + (b === 'bekliyor' ? ' disabled' : '') + '>' + (b === 'bekliyor' ? 'Açılıyor…' : 'Bildirimleri aç') + '</button></div>';
+    if (yer !== 'duyurular') return '';
+    if (b === 'acik') return '<p class="kucuk-not" id="bildirimDurum">🔔 Bildirimler açık; yeni duyurular telefonunuza gelir. <button type="button" class="cikis" style="padding:0;min-height:0;display:inline" data-eylem="bildirim-kapat">Kapat</button></p>';
+    if (b === 'ios-kur') return '<div class="uyari-serit">Bildirim almak için uygulamayı önce ana ekrana ekleyin: alttaki <b>Paylaş</b> simgesi → <b>Ana Ekrana Ekle</b>. Sonra uygulamayı ana ekrandan açıp buradan bildirimleri açın.</div>';
+    if (b === 'reddedildi') return '<div class="uyari-serit">Bildirimlere izin verilmemiş. Açmak isterseniz telefonunuzun ayarlarından bu uygulamaya (ya da tarayıcıya) bildirim izni verin.</div>';
+    return '';
+  }
+
   function yenile(sessiz) {
     if (!S.kod) return Promise.resolve();
     return kafileGetir(S.kod).then(function (v) {
@@ -323,9 +384,10 @@ details.tum[open] summary::after{content:'▴'}
       uygulamaGoster();
     }).catch(function () { btn.disabled = false; girisGoster('Bağlantı kurulamadı. İnternetinizi kontrol edip tekrar deneyin.'); });
   });
-  function uygulamaGoster() { $('giris').hidden = true; $('uygulama').hidden = false; ciz(); window.scrollTo(0, 0); }
+  function uygulamaGoster() { $('giris').hidden = true; $('uygulama').hidden = false; ciz(); window.scrollTo(0, 0); bildirimDurumu(); }
   function kafiledenCik() {
     if (!confirm('Bu telefondan gruptan çıkılsın mı? Tekrar girmek için kodu yeniden girmeniz gerekir.')) return;
+    bildirimKapat(true);
     sil('kafile-veri-' + S.kod); sil('kafile-kod'); S.kod = ''; S.veri = null; $('kodKutu').value = ''; girisGoster();
   }
 
@@ -385,6 +447,7 @@ details.tum[open] summary::after{content:'▴'}
     if (S.yukleIstemi) h += '<div class="yukle-kart"><p>Uygulamayı telefonunuza yükleyin; internet olmasa da açılsın.</p><button type="button" data-eylem="yukle">Yükle</button></div>';
     else if (S.iosIpucu && /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone) h += '<div class="yukle-kart"><p>Uygulama olarak kurmak için alttaki <b>Paylaş</b> simgesine, sonra <b>Ana Ekrana Ekle</b>\'ye dokunun.</p><button type="button" class="kapat" data-eylem="ios-kapat" aria-label="Kapat">×</button></div>';
 
+    h += bildirimKarti('bugun');
     var prog = programListesi();
     // Sıradaki buluşma
     var sonraki = null;
@@ -457,7 +520,7 @@ details.tum[open] summary::after{content:'▴'}
 
   function duyurularEkrani() {
     var v = S.veri, liste = v.duyurular || [];
-    var h = '<header class="bas"><div class="bas-etiket">' + esc(v.ad) + '</div><h1>Duyurular</h1><div class="bas-alt">Rehberinizden ve ofisimizden gelen bilgiler</div></header><div class="icerik">' + cevrimdisiSerit();
+    var h = '<header class="bas"><div class="bas-etiket">' + esc(v.ad) + '</div><h1>Duyurular</h1><div class="bas-alt">Rehberinizden ve ofisimizden gelen bilgiler</div></header><div class="icerik">' + cevrimdisiSerit() + bildirimKarti('duyurular');
     if (!liste.length) return h + '<p class="bos">Henüz duyuru yok. Yeni duyurular burada görünecek.</p></div>';
     var onemli = liste.filter(function (d) { return d.onemli; });
     var diger = liste.filter(function (d) { return !d.onemli; }).sort(function (a, b) { return String(b.olusturma).localeCompare(String(a.olusturma)); });
@@ -688,6 +751,8 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehir = ey.slice(6); yaz('kafile-sehir', S.sehir); ciz(); }
     else if (ey === 'kible') kibleBaslat();
     else if (ey === 'konum-vakit') konumVakitAl();
+    else if (ey === 'bildirim-ac') bildirimAc();
+    else if (ey === 'bildirim-kapat') bildirimKapat();
     else if (ey === 'konum-gonder') konumGonder();
     else if (ey === 'cikis') kafiledenCik();
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }
@@ -707,7 +772,16 @@ details.tum[open] summary::after{content:'▴'}
   setInterval(function () { if (document.visibilityState === 'visible' && S.kod) yenile(true); }, 120000);
 
   // ── açılış ──
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () {});
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    swKayit = navigator.serviceWorker.register('sw.js').catch(function () { return null; });
+    navigator.serviceWorker.addEventListener('message', function (e) { // bildirime dokunulunca açık uygulamada Duyurular'a geç
+      if (e.data && e.data.tur === 'sekme' && S.veri) { S.sekme = e.data.sekme; ciz(); yenile(true); }
+    });
+  }
+  try { // bildirimden açılış: ?sekme=duyurular
+    var ilkSekme = new URLSearchParams(location.search).get('sekme');
+    if (ilkSekme && /^(bugun|duyurular|rehber|vakitler|acil)$/.test(ilkSekme)) { S.sekme = ilkSekme; history.replaceState(null, '', location.pathname + location.hash); }
+  } catch (e) {}
   function normalAcilis() {
     if (!S.kod) { girisGoster(); return; }
     var kayit = oku('kafile-veri-' + S.kod, null);

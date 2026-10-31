@@ -1,7 +1,7 @@
 /* Coşar Kafile – çevrimdışı çalışma için önbellek.
    Yalnızca /kafile/ klasörünü kapsar; sitenin geri kalanına karışmaz.
    Kafile verisi (Supabase) önbelleğe alınmaz; uygulama son veriyi kendi saklar. */
-var SURUM = 'kafile-v1';
+var SURUM = 'kafile-v2';
 var KABUK = ['./', './index.html', './manifest.webmanifest', './ikon-192.png', './ikon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -36,5 +36,36 @@ self.addEventListener('fetch', function (e) {
       var ag = fetch(r).then(function (yanit) { if (yanit && (yanit.ok || yanit.type === 'opaque')) c.put(r, yanit.clone()); return yanit; }).catch(function () { return eski; });
       return eski || ag;
     });
+  }));
+});
+
+// ── Duyuru bildirimleri (Web Push) ──
+self.addEventListener('push', function (e) {
+  var v = {};
+  try { v = e.data ? e.data.json() : {}; } catch (x) { v = { metin: e.data ? e.data.text() : '' }; }
+  var baslik = v.baslik || 'Yeni duyuru';
+  e.waitUntil(self.registration.showNotification(baslik, {
+    body: v.metin || '',
+    icon: 'ikon-192.png',
+    badge: 'ikon-192.png',
+    tag: v.etiket || 'duyuru',
+    renotify: true,
+    lang: 'tr',
+    data: { url: v.url || './?sekme=duyurular' }
+  }));
+});
+
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  var hedef = new URL((e.notification.data && e.notification.data.url) || './?sekme=duyurular', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (pencereler) {
+    for (var i = 0; i < pencereler.length; i++) {
+      var p = pencereler[i];
+      if (p.url.indexOf(self.registration.scope) === 0 && 'focus' in p) {
+        p.postMessage({ tur: 'sekme', sekme: 'duyurular' });
+        return p.focus();
+      }
+    }
+    return self.clients.openWindow(hedef);
   }));
 });

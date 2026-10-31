@@ -185,6 +185,80 @@ with sync_playwright() as p:
     kontrol(not tasma(pg) and not errs, 'Kültür turu: taşma ve JavaScript hatası yok', errs)
     c.close()
 
+    # ── Duyuru bildirimleri (Web Push) — tarayıcının bildirim/servis-çalışanı arayüzü taklit edilir ──
+    PUSH_TAKLIT = """
+      window.__olaylar = [];
+      const kayitli = () => { try { return JSON.parse(localStorage.getItem('test-abone')); } catch (e) { return null; } };
+      const abone = (j) => j && ({ toJSON: () => j, unsubscribe: () => { localStorage.removeItem('test-abone'); window.__olaylar.push('unsubscribe'); return Promise.resolve(true); } });
+      const kayit = { pushManager: {
+        getSubscription: () => Promise.resolve(abone(kayitli())),
+        subscribe: (o) => { window.__olaylar.push('subscribe:' + o.userVisibleOnly + ':' + o.applicationServerKey.length);
+          const j = { endpoint: 'https://fcm.googleapis.com/fcm/send/TEST', keys: { p256dh: 'B' + 'x'.repeat(86), auth: 'a'.repeat(22) } };
+          localStorage.setItem('test-abone', JSON.stringify(j)); return Promise.resolve(abone(j)); } } };
+      Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: { register: () => Promise.resolve(kayit), ready: Promise.resolve(kayit), addEventListener() {} } });
+      window.PushManager = function () {};
+      const izin = { deger: localStorage.getItem('test-izin') || 'default' };
+      window.Notification = { get permission() { return izin.deger; },
+        requestPermission: () => { izin.deger = window.__IZIN_YANIT || 'granted'; localStorage.setItem('test-izin', izin.deger); return Promise.resolve(izin.deger); } };
+    """
+    def push_baglam(izin_yanit='granted', ua=None, push_var=True):
+        c = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', locale='tr-TR', **({'user_agent': ua} if ua else {}))
+        c.add_init_script(f"window.__SIMDI = '{SIMDI}'; window.confirm = function(){{ return true; }}; window.__IZIN_YANIT = '{izin_yanit}';")
+        if push_var: c.add_init_script(PUSH_TAKLIT)
+        c.__rpc = []
+        def rpc(route, req):
+            ad = req.url.split('/rpc/')[1]; govde = json.loads(req.post_data or '{}'); c.__rpc.append((ad, govde))
+            body = json.dumps(KAFILE) if ad == 'kafile_getir' else 'true'
+            route.fulfill(status=200, body=body, headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
+        c.route('**/rest/v1/rpc/**', rpc)
+        c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+        return c
+    c = push_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 1, 'Bildirim: Bugün ekranında "Bildirimleri aç" kartı var', errs)
+    pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(500)
+    ab = [g for a_, g in c.__rpc if a_ == 'bildirim_abone_ol']
+    kontrol(ab and ab[-1]['p_kod'] == 'TEST-ABCDE' and ab[-1]['p_endpoint'].startswith('https://fcm.googleapis.com/') and ab[-1]['p_p256dh'] and ab[-1]['p_auth']
+            and 'subscribe:true:65' in pg.evaluate('window.__olaylar'), 'Bildirim: izin → abonelik (65 baytlık anahtarla) → grup koduyla sunucuya kaydediliyor', str(ab[-1:])[:120])
+    kontrol(pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: açıldıktan sonra kart kayboluyor')
+    pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    kontrol('Bildirimler açık' in pg.inner_text('#ekran'), 'Bildirim: Duyurular ekranında "Bildirimler açık" yazıyor')
+    pg.goto(URL + '?sekme=duyurular', wait_until='domcontentloaded'); pg.wait_for_timeout(500)
+    kontrol(pg.locator('.alt-menu [data-sekme="duyurular"][aria-current="page"]').count() == 1 and 'sekme=' not in pg.url and 'Bildirimler açık' in pg.inner_text('#ekran'),
+            'Bildirim: bildirime dokununca (?sekme=duyurular) uygulama Duyurular\'da açılıyor, abonelik hatırlanıyor')
+    pg.click('[data-eylem="bildirim-kapat"]'); pg.wait_for_timeout(400)
+    kontrol([g for a_, g in c.__rpc if a_ == 'bildirim_abonelik_sil'] and 'unsubscribe' in pg.evaluate('window.__olaylar') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 1,
+            'Bildirim: "Kapat" aboneliği telefondan ve sunucudan siliyor')
+    pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(400); n_sil = len([1 for a_, _ in c.__rpc if a_ == 'bildirim_abonelik_sil'])
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.click('[data-eylem="cikis"]'); pg.wait_for_timeout(400)
+    kontrol(len([1 for a_, _ in c.__rpc if a_ == 'bildirim_abonelik_sil']) == n_sil + 1, 'Bildirim: "Gruptan çık" aboneliği de siliyor')
+    kontrol(not errs, 'Bildirim akışında JavaScript hatası yok', errs)
+    c.close()
+    c = push_baglam(izin_yanit='denied'); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300)
+    pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(300); pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    kontrol('izin verilmemiş' in pg.inner_text('#ekran') and not [1 for a_, _ in c.__rpc if a_ == 'bildirim_abone_ol'], 'Bildirim: izin reddedilince açıklama çıkıyor, sunucuya kayıt yapılmıyor', errs)
+    c.close()
+    c = push_baglam(ua='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1', push_var=False)
+    c.add_init_script("delete window.PushManager;")
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300); pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    kontrol('Ana Ekrana Ekle' in pg.inner_text('#ekran') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: ana ekrana kurulmamış iPhone\'da önce kurulum anlatılıyor', errs)
+    c.close()
+    # Servis çalışanı: gelen bildirimi gösterme ve dokununca uygulamayı açma (node ile)
+    sw_test = r"""
+      const fs = require('fs'), vm = require('vm'); const dinle = {}; const kayit = [];
+      const self = { addEventListener: (a, f) => dinle[a] = f, registration: { scope: 'https://ismailcosarturizm.com.tr/kafile/', showNotification: (b, o) => { kayit.push(['goster', b, o]); return Promise.resolve(); } },
+        clients: { matchAll: () => Promise.resolve([]), openWindow: (u) => { kayit.push(['ac', u]); return Promise.resolve(); } }, skipWaiting() {} };
+      vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), { self, caches: {}, fetch() {}, URL, location: { origin: 'https://ismailcosarturizm.com.tr' }, console });
+      const bekle = []; const olay = (o) => Object.assign(o, { waitUntil: (p) => bekle.push(p) });
+      dinle.push(olay({ data: { json: () => ({ baslik: "Medine'ye hareket", metin: 'Yarın 08:00', etiket: 'duyuru-5', url: '/kafile/?sekme=duyurular' }) } }));
+      dinle.notificationclick(olay({ notification: { close() {}, data: { url: '/kafile/?sekme=duyurular' } } }));
+      Promise.all(bekle).then(() => console.log(JSON.stringify(kayit)));
+    """
+    r = subprocess.run(['node', '-e', sw_test, os.path.join(KOK, 'kafile', 'sw.js')], capture_output=True, text=True)
+    try: k_ = json.loads(r.stdout.strip().splitlines()[-1])
+    except Exception: k_ = []
+    kontrol(len(k_) == 2 and k_[0][1] == "Medine'ye hareket" and k_[0][2]['body'] == 'Yarın 08:00' and k_[0][2]['tag'] == 'duyuru-5'
+            and k_[1] == ['ac', 'https://ismailcosarturizm.com.tr/kafile/?sekme=duyurular'], 'Servis çalışanı: bildirimi başlık/metinle gösteriyor, dokununca Duyurular\'ı açıyor', (r.stderr or r.stdout)[-160:])
+
     # ── Kafile pasife alınmış ──
     c = baglam(b); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
     c.__rpc = 'yok'; pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(700)

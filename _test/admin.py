@@ -123,7 +123,7 @@ with sync_playwright() as p:
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
             and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112',
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
-    kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile'), 'Kafile: listede görünüyor')
+    kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile') and pg.inner_text('.kafile-item .abone-sayisi') == '0', 'Kafile: listede görünüyor (bildirim açık telefon sayısıyla)')
     href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''
     kontrol('kafile%2F%23' + kod in href, 'Kafile: Paylaş bağlantısı kodlu uygulama adresini içeriyor')
     pg.evaluate("window.__islem = []")
@@ -139,8 +139,15 @@ with sync_playwright() as p:
     pg.fill('#kd_baslik', 'Medine\'ye hareket'); pg.fill('#kd_metin', 'Yarın 08:00\'de hareket.'); pg.check('#kd_onemli')
     pg.get_by_role('button', name=re.compile('Yayınla')).click(); pg.wait_for_timeout(500)
     ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'kafile_duyurular']
-    kontrol(len(ek) == 1 and ek[0]['veri']['onemli'] is True and ek[0]['veri']['kafile_id'] is not None and pg.locator('.kafile-duyuru').count() == 1,
+    kontrol(len(ek) == 1 and ek[0]['veri']['onemli'] is True and ek[0]['veri']['bildirim'] is True and ek[0]['veri']['kafile_id'] is not None and pg.locator('.kafile-duyuru').count() == 1
+            and 'gönderiliyor' in pg.inner_text('.kafile-duyuru .bildirim-sonuc'),
             'Kafile duyurusu: yayınlanıyor ve listede görünüyor', errs)
+    pg.evaluate("window.__islem = []")
+    pg.fill('#kd_metin', 'Sadece bilgi, bildirimsiz.'); pg.uncheck('#kd_bildirim'); pg.get_by_role('button', name=re.compile('Yayınla')).click(); pg.wait_for_timeout(500)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'kafile_duyurular']
+    kontrol(len(ek) == 1 and ek[0]['veri']['bildirim'] is False and 'gönderilmedi' in pg.inner_text('#sayfa-kafile'), 'Kafile duyurusu: "bildirim gönder" kapatılabiliyor')
+    pg.evaluate("window.__islem = []")
+    pg.locator('.kafile-duyuru', has_text='bildirimsiz').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-duyuru').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
