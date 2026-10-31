@@ -161,6 +161,11 @@ with sync_playwright() as p:
     # ── Yorumlar (WhatsApp mesajları) ──
     pg.evaluate("sekmeAc('yorum')"); pg.wait_for_timeout(400); pg.evaluate("window.__islem = []"); errs.clear()
     pg.get_by_role('button', name=re.compile('Yeni Yorum')).click(); pg.wait_for_timeout(200)
+    hedef_tur = next(t for t in VERI['turlar'] if t['kategori'] == 'diger')
+    kontrol(pg.locator('#y_tur_sec option').count() == pg.evaluate('window.__DB.turlar.length') + 1, 'Yorum: tanımlı turlar (pasifler dahil) listede seçilebiliyor')
+    pg.select_option('#y_tur_sec', hedef_tur['id'])
+    kontrol(pg.input_value('#y_tur') == hedef_tur['baslik'] and pg.input_value('#y_kategori') == 'kultur', 'Yorum: tur seçilince tur adı ve kategori (Kültür) kendiliğinden doluyor')
+    pg.select_option('#y_kategori', 'umre')
     pg.fill('#y_ad', "Ayşe K."); pg.fill('#y_tur', 'Kasım 2026 Umre'); pg.fill('#y_metin', "Allah razı olsun,\nher şey çok güzeldi.")
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
     kontrol(not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Yorum: yolcu izni işaretlenmeden kaydedilmiyor')

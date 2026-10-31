@@ -778,14 +778,18 @@ async function renderYorumlar() {
   el.innerHTML = html;
 }
 
-function yorumFormu(y) {
+function yorumFormu(y, turlar) {
   const yeni = !y.id;
+  const KAT = { umre: 'umre', hac: 'hac', diger: 'kultur' };
+  const turSecenek = (turlar || []).map(t => `<option value="${esc(t.id)}" data-baslik="${esc(t.baslik)}" data-kategori="${KAT[t.kategori] || 'genel'}" ${y.tur && y.tur === t.baslik ? 'selected' : ''}>${esc(t.baslik)}${t.tarih ? ' (' + esc(String(t.tarih).slice(0, 7)) + ')' : ''}${t.aktif === false ? ' – pasif' : ''}</option>`).join('');
   document.getElementById('sayfa-yorum').innerHTML = `
     <div class="header"><h2>${yeni ? '➕ Yeni Yorum' : '✏️ Yorum Düzenle'}</h2></div>
     <div class="card">
       <div class="form-row">
         <div class="form-group"><label>İsim (sitede görünür)</label><input id="y_ad" value="${esc(y.ad)}" maxlength="80" placeholder="Ayşe K."></div>
-        <div class="form-group"><label>Tur (isteğe bağlı)</label><input id="y_tur" value="${esc(y.tur)}" maxlength="80" placeholder="Kasım 2026 Umre"></div>
+        <div class="form-group"><label>Tur (isteğe bağlı)</label>
+          ${turSecenek ? `<select id="y_tur_sec" onchange="yorumTurSec(this)" style="margin-bottom:6px"><option value="">— Tanımlı turlardan seç (isteğe bağlı) —</option>${turSecenek}</select>` : ''}
+          <input id="y_tur" value="${esc(y.tur)}" maxlength="120" placeholder="Kasım 2026 Umre"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Kategori</label>
@@ -813,12 +817,24 @@ function yorumFormu(y) {
   window.scrollTo(0, 0);
 }
 
-function yorumYeni() { yorumFormu({ kategori: 'umre', yayinda: true }); }
+async function yorumTurlari() {
+  const { data } = await sb.from('turlar').select('id,baslik,kategori,tarih,aktif').order('tarih', { ascending: false });
+  return data || [];
+}
+
+function yorumTurSec(sel) {
+  const o = sel.options[sel.selectedIndex];
+  if (!o || !o.value) return;
+  document.getElementById('y_tur').value = o.getAttribute('data-baslik');
+  document.getElementById('y_kategori').value = o.getAttribute('data-kategori');
+}
+
+async function yorumYeni() { yorumFormu({ kategori: 'umre', yayinda: true }, await yorumTurlari()); }
 
 async function yorumDuzenle(id) {
-  const { data, error } = await sb.from('yorumlar').select('*').eq('id', id).single();
+  const [{ data, error }, turlar] = await Promise.all([sb.from('yorumlar').select('*').eq('id', id).single(), yorumTurlari()]);
   if (error || !data) { toast('❌ Yorum okunamadı', 'error'); return; }
-  yorumFormu(data);
+  yorumFormu(data, turlar);
 }
 
 async function yorumKaydet(id) {
