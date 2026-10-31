@@ -1,4 +1,5 @@
 /* Yolculardan gelen mesajlar (admin panelindeki "Yorumlar" sekmesinden eklenir).
+   İsim veritabanında maskelenir (ad_gorunen: "Ayşe K***"); ziyaretçi tam ismi hiç okuyamaz.
    Az yer kaplasın diye tek satırlık, yana kaydırılan bir şerit olarak gösterilir:
      #yorumGrid           (ana sayfa: Google yorumlarının hemen üstüne şerit eklenir)
      #yolcuMesajlari      (Umre sayfası: data-kategori="umre" ile süzülür; yorum yoksa gizli kalır)
@@ -32,7 +33,7 @@
   }
 
   function kart(y, i) {
-    var ad = String(y.ad || '').trim(), harf = (ad[0] || '?').toLocaleUpperCase('tr');
+    var ad = String(y.ad_gorunen || '').trim(), harf = (ad[0] || '?').toLocaleUpperCase('tr');
     var tarih = '';
     if (y.tarih) { try { tarih = new Date(y.tarih + 'T12:00:00').toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }); } catch (e) {} }
     var metin = String(y.metin || '').trim(), uzun = metin.length > 170 || metin.split('\n').length > 4;
@@ -55,7 +56,7 @@
   }
 
   function getir(kategori) {
-    var url = SB + '/rest/v1/yorumlar?select=id,ad,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20' + (kategori ? '&kategori=eq.' + encodeURIComponent(kategori) : '');
+    var url = SB + '/rest/v1/yorumlar?select=id,ad_gorunen,tur,kategori,metin,tarih,gorsel&yayinda=eq.true&order=sira.desc,olusturma.desc&limit=20' + (kategori ? '&kategori=eq.' + encodeURIComponent(kategori) : '');
     return fetch(url, { headers: { apikey: K, Authorization: 'Bearer ' + K } }).then(function (r) { return r.ok ? r.json() : []; });
   }
 

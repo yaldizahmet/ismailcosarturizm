@@ -169,7 +169,9 @@ with sync_playwright() as p:
     pg.select_option('#y_tur_sec', '')
     kontrol(not pg.is_disabled('#y_kategori'), 'Yorum: tur seçimi kaldırılınca kategori yeniden seçilebiliyor')
     pg.select_option('#y_kategori', 'umre')
-    pg.fill('#y_ad', "Ayşe K."); pg.fill('#y_tur', 'Kasım 2026 Umre'); pg.fill('#y_metin', "Allah razı olsun,\nher şey çok güzeldi.")
+    pg.fill('#y_ad', "Zeynep Ela  Çalışkan")
+    kontrol(pg.inner_text('#y_adOnizleme') == 'Zeynep Ela Ç*******', 'Yorum: formda sitede görünecek maskeli isim önizleniyor', pg.inner_text('#y_adOnizleme'))
+    pg.fill('#y_ad', "Ayşe Kaya"); pg.fill('#y_tur', 'Kasım 2026 Umre'); pg.fill('#y_metin', "Allah razı olsun,\nher şey çok güzeldi.")
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
     kontrol(not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Yorum: yolcu izni işaretlenmeden kaydedilmiyor')
     pg.set_input_files('#sayfa-yorum input[type=file]', files=[{'name': 'm.png', 'mimeType': 'image/png', 'buffer': bytes.fromhex('89504e470d0a1a0a0000000d4948445200000001000000010806000000'
@@ -178,14 +180,15 @@ with sync_playwright() as p:
     pg.check('#y_izin'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
     ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'yorumlar']
     v = ek[0]['veri'] if ek else {}
-    kontrol(len(ek) == 1 and v.get('ad') == 'Ayşe K.' and v.get('kategori') == 'umre' and v.get('izin') is True and v.get('yayinda') is True and 'güzeldi' in v.get('metin', ''),
+    kontrol(len(ek) == 1 and v.get('ad') == 'Ayşe Kaya' and 'ad_gorunen' not in v and v.get('kategori') == 'umre' and v.get('izin') is True and v.get('yayinda') is True and 'güzeldi' in v.get('metin', ''),
             'Yorum: izinle kaydediliyor (varsayılan Umre, yayında)', errs)
-    kontrol(pg.locator('.yorum-item').count() == 1 and 'Yayında' in pg.inner_text('.yorum-item'), 'Yorum: listede "Yayında" görünüyor')
+    kontrol(pg.locator('.yorum-item').count() == 1 and 'Yayında' in pg.inner_text('.yorum-item') and 'Ayşe Kaya' in pg.inner_text('.yorum-item h4')
+            and pg.inner_text('.yorum-item .ad-gorunen') == 'Ayşe K***', 'Yorum: listede tam isim ve sitede görünecek hali (Ayşe K***)')
     pg.evaluate("window.__islem = []"); pg.locator('.yorum-item').get_by_role('button', name='Gizle').click(); pg.wait_for_timeout(400)
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
     kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': False} and 'Gizli' in pg.inner_text('.yorum-item'), 'Yorum: "Gizle" siteden kaldırıyor, kayıt duruyor')
     pg.locator('.yorum-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
-    kontrol(pg.input_value('#y_ad') == 'Ayşe K.' and pg.is_checked('#y_izin') and not pg.is_checked('#y_yayinda'), 'Yorum: düzenleme formu kayıtlı bilgilerle açılıyor')
+    kontrol(pg.input_value('#y_ad') == 'Ayşe Kaya' and pg.is_checked('#y_izin') and not pg.is_checked('#y_yayinda'), 'Yorum: düzenleme formu kayıtlı bilgilerle açılıyor')
     pg.select_option('#y_tur_sec', hedef_tur['id']); pg.fill('#y_tur', 'Balkan Turu 2027'); pg.check('#y_yayinda'); pg.evaluate("window.__islem = []")
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']

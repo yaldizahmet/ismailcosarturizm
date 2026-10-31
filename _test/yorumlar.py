@@ -12,9 +12,9 @@ GORSEL = 'https://wpkjxwbvewwgdclbsdya.supabase.co/storage/v1/object/public/tur-
 PNG = bytes.fromhex('89504e470d0a1a0a0000000d4948445200000001000000010806000000'
                     '1f15c4890000000d49444154789c6360f80f0000010101005b0b3b3c0000000049454e44ae426082')
 YORUMLAR = [
-  {'id': 2, 'ad': 'Ayşe K.', 'tur': 'Kasım 2026 Umre', 'kategori': 'umre', 'tarih': '2026-11-20', 'gorsel': GORSEL,
+  {'id': 2, 'ad_gorunen': 'Ayşe K***', 'tur': 'Kasım 2026 Umre', 'kategori': 'umre', 'tarih': '2026-11-20', 'gorsel': GORSEL,
    'metin': 'Allah razı olsun, her şey çok güzeldi.\nOtel Harem\'e çok yakındı, rehberimiz her an yanımızdaydı. ' * 4},
-  {'id': 1, 'ad': '<img src=x onerror=window.__xss=1>', 'tur': None, 'kategori': 'kultur', 'tarih': None,
+  {'id': 1, 'ad_gorunen': '<img src=x onerror=window.__xss=1>', 'tur': None, 'kategori': 'kultur', 'tarih': None,
    'gorsel': 'https://kotu.example/x.jpg', 'metin': 'Balkan turu harikaydı <script>window.__xss=1</script>'},
 ]
 hata = 0
@@ -47,6 +47,8 @@ with sync_playwright() as p:
             'Ana sayfa: yolcu mesajları şeridi Google yorumlarının hemen üstünde', errs)
     kontrol(pg.locator('#yolcuSerit .yolcu-mesaji').count() == 2 and pg.locator('#yorumGrid > .yorum-card').count() == 20, 'Ana sayfa: 2 mesaj eklendi, 20 Google yorumu yerinde')
     kontrol(pg.evaluate('!window.__xss') and '<img src=x' in pg.inner_text('#yolcuSerit'), 'Güvenlik: isim/metindeki HTML çalışmıyor, düz yazı')
+    kontrol(ist and all('select=id,ad_gorunen,' in u and ',ad,' not in u for u in ist) and 'Ayşe K***' in pg.inner_text('#yolcuSerit'),
+            'Gizlilik: site yalnızca maskeli ismi istiyor ve gösteriyor (Ayşe K***)')
     kontrol(pg.locator('#yolcuSerit img[src*="kotu.example"]').count() == 0 and pg.locator('#yolcuSerit .ym-resim').count() == 1, 'Güvenlik: yalnızca kendi depomuzdaki fotoğraf gösteriliyor')
     h = pg.evaluate("getComputedStyle(document.querySelector('.ym-serit')).overflowX")
     yuk = pg.evaluate("document.getElementById('yolcuSerit').getBoundingClientRect().height")
