@@ -617,8 +617,12 @@ details.tum[open] summary::after{content:'▴'}
     var g = (S.gecmis || []).slice().sort(function (a, b) { return String(a.zaman).localeCompare(String(b.zaman)); });
     var gunler = [], grup = {}, tt = 0, ts = 0;
     g.forEach(function (x) { var k = gunAnahtari(x.zaman); if (!grup[k]) { grup[k] = []; gunler.push(k); } grup[k].push(x); if (x.tur === 'say') ts++; else tt++; });
-    var satirlar = gunler.map(function (k) {
-      return '• ' + tarihYaz(k, true) + ': ' + grup[k].map(function (x) { return (x.tur === 'say' ? 'sa\'y' : 'tavaf') + ' ' + saatAl(x.zaman); }).join(', ');
+    var satirlar = gunler.map(function (k) { // ör. "• 11 Kasım Çarşamba: 2 tavaf (08:40, 22:20), 1 sa'y (17:05)"
+      var parca = [['tavaf', 'tavaf'], ['say', 'sa\'y']].map(function (t) {
+        var l = grup[k].filter(function (x) { return (x.tur === 'say' ? 'say' : 'tavaf') === t[0]; });
+        return l.length ? l.length + ' ' + t[1] + ' (' + l.map(function (x) { return saatAl(x.zaman); }).join(', ') + ')' : '';
+      }).filter(Boolean);
+      return '• ' + tarihYaz(k, true) + ': ' + parca.join(', ');
     });
     var bas = (S.veri && S.veri.tur_turu === 'hac') ? 'Hac' : 'Umre';
     return '🕋 ' + bas + ' geçmişim' + (S.veri && S.veri.ad ? ' – ' + S.veri.ad : '') + '\n\n' + satirlar.join('\n') +
