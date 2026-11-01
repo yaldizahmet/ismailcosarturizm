@@ -563,8 +563,9 @@ async function renderKafileler() {
   const katSay = {}; (katlar || []).forEach(a => { katSay[a.kafile_id] = (katSay[a.kafile_id] || 0) + 1; });
   if (ROL === 'rehber') {
     el.innerHTML = '<div class="header"><h2>👥 Kafilelerim</h2></div><div class="card"><div class="tur-list">' +
-      ((data || []).map(k => `<div class="tur-item kafile-item"><div class="tur-item-info"><h4>${esc(k.ad)}</h4><p>${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · ${katSay[k.id] || 0} kişi</p></div>
-        <div class="tur-item-actions"><button class="btn btn-gold" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar ve odalar</button></div></div>`).join('') ||
+      ((data || []).map(k => `<div class="tur-item kafile-item"><div class="tur-item-info"><h4>${esc(k.ad)}</h4><p>${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · ${katSay[k.id] || 0} kişi · Misafir kodu: <b style="letter-spacing:1px">${esc(k.kod)}</b></p></div>
+        <div class="tur-item-actions" style="flex-wrap:wrap"><button class="btn btn-gold" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar ve odalar</button>
+          <a class="btn rehber-paylas" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">📲 Misafir kodunu paylaş</a></div></div>`).join('') ||
         '<p style="color:#666;font-size:14px">Size atanmış kafile yok. Ofisten kafileye atanmanızı isteyin.</p>') + '</div></div>';
     return;
   }

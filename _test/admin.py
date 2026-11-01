@@ -328,7 +328,9 @@ with sync_playwright() as p:
         kontrol(rp.is_visible('#appDiv') and not gorunen and 'Kafilelerim' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Kafilelerim" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')
-        kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1 and rp.locator('.kafile-item a').count() == 0, 'Rehber: kafilede yalnızca "Katılımcılar ve odalar" butonu')
+        kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1, 'Rehber: kafilede düzenle/sil/duyuru yok, yalnızca "Katılımcılar ve odalar"')
+        h = rp.get_attribute('.kafile-item a.rehber-paylas', 'href') or ''
+        kontrol('KASIM-AAAAA' in rp.inner_text('.kafile-item') and h.startswith('https://wa.me/?text=') and 'kafile%2F%23KASIM-AAAAA' in h, 'Rehber: misafir kodu görünüyor, "Misafir kodunu paylaş" WhatsApp bağlantısı kodlu')
         rp.locator('.kafile-item button').click(); rp.wait_for_timeout(400)
         kontrol(rp.locator('#kt_kart').count() == 0 and rp.locator('summary', has_text='Excel').count() == 0 and rp.locator('.katilimci-satir button', has_text='Çıkar').count() == 0
                 and rp.locator('.katilimci-satir').count() == 1, 'Rehber: listeyi görüyor; ekleme, Excel ve çıkarma yok', errs)
