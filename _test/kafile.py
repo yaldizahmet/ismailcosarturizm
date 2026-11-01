@@ -231,19 +231,23 @@ with sync_playwright() as p:
     h1 = pg.get_attribute('.mekan[data-mekan="1"] a', 'href'); h2 = pg.get_attribute('.mekan[data-mekan="2"] a', 'href')
     kontrol(h1.endswith('Zuta%20Tabija') and h2.startswith('https://www.google.com/maps/search/?api=1&query=') and 'Saraybosna' in unquote(h2), 'Şehir rehberi: "Haritada aç" Google Haritalar bağlantısı (yoksa ad+şehirle arama)')
     kontrol(pg.evaluate('!window.__xss') and '<img' in pg.inner_text('.mekan[data-mekan="2"]'), 'Güvenlik: mekan açıklamasındaki HTML çalışmıyor')
-    pg.click('.mekan[data-mekan="2"] [data-eylem="mekan-paylas"]'); pg.wait_for_timeout(200)
-    kontrol(pg.is_visible('#paylasPerde') and 'Željo' in pg.inner_text('#paylasPerde'), 'Paylaş: "Buradayım, paylaş" paneli açılıyor')
-    pg.click('#paylasPerde [data-eylem="yazi-paylas"]'); pg.wait_for_timeout(200)
-    py = pg.evaluate('window.__paylas')
-    kontrol(py and '📍 Ćevabdžinica Željo, Saraybosna' in py[-1]['text'] and 'İsmail Coşar Turizm' in py[-1]['text'] and not py[-1]['files'], 'Paylaş: yazıyla paylaşım (mekan, şehir, firma adı)', str(py)[:120])
-    from PIL import Image as _I; import io as _io
-    _b = _io.BytesIO(); _I.new('RGB', (800, 600), (40, 120, 200)).save(_b, 'JPEG')
-    pg.set_input_files('#paylasFoto', files=[{'name': 'f.jpg', 'mimeType': 'image/jpeg', 'buffer': _b.getvalue()}]); pg.wait_for_timeout(1200)
+    pg.click('.mekan[data-mekan="2"] [data-eylem="mekan-paylas"]'); pg.wait_for_timeout(1200)
+    kontrol(pg.is_visible('#paylasPerde') and 'Željo' in pg.inner_text('#paylasPerde') and pg.locator('#paylasPerde [data-eylem="yazi-paylas"]').count() == 0, 'Paylaş: panel açılıyor, "Yazıyla paylaş" yok')
     kontrol(pg.locator('#paylasOnizleme img').count() == 1 and pg.evaluate("(() => { const i = document.querySelector('#paylasOnizleme img'); return i.naturalWidth === 1080 && i.naturalHeight === 1350; })()"),
-            'Paylaş: seçilen fotoğraftan 1080×1350 paylaşım görseli hazırlanıyor', errs)
+            'Paylaş: fotoğraf seçmeden logolu hazır görsel (1080×1350) hemen hazırlanıyor', errs)
     pg.click('#paylasPerde [data-eylem="foto-gonder"]'); pg.wait_for_timeout(300)
     py = pg.evaluate('window.__paylas')
-    kontrol(len(py) == 2 and len(py[-1]['files']) == 1 and py[-1]['files'][0].startswith('image/jpeg:') and 'Željo' in py[-1]['text'], 'Paylaş: fotoğraflı görsel paylaşıma gönderiliyor', str(py[-1])[:120])
+    kontrol(len(py) == 1 and len(py[-1]['files']) == 1 and py[-1]['files'][0].startswith('image/jpeg:') and '📍 Ćevabdžinica Željo, Saraybosna' in py[-1]['text'] and 'İsmail Coşar Turizm' in py[-1]['text'],
+            'Paylaş: hazır görsel, mekan ve firma adıyla paylaşıma gidiyor', str(py)[:140])
+    from PIL import Image as _I; import io as _io
+    _b = _io.BytesIO(); _I.new('RGB', (800, 600), (40, 120, 200)).save(_b, 'JPEG')
+    ilk = pg.get_attribute('#paylasOnizleme img', 'src')
+    pg.set_input_files('#paylasFoto', files=[{'name': 'f.jpg', 'mimeType': 'image/jpeg', 'buffer': _b.getvalue()}]); pg.wait_for_timeout(1200)
+    kontrol(pg.locator('#paylasOnizleme img').count() == 1 and pg.get_attribute('#paylasOnizleme img', 'src') != ilk and pg.evaluate("document.querySelector('#paylasOnizleme img').naturalWidth") == 1080,
+            'Paylaş: "Kendi fotoğrafımı kullan" ile görsel misafirin fotoğrafıyla yenileniyor', errs)
+    pg.click('#paylasPerde [data-eylem="foto-gonder"]'); pg.wait_for_timeout(300)
+    py = pg.evaluate('window.__paylas')
+    kontrol(len(py) == 2 and len(py[-1]['files']) == 1 and py[-1]['files'][0].startswith('image/jpeg:'), 'Paylaş: fotoğraflı görsel paylaşıma gidiyor', str(py[-1])[:120])
     pg.click('#paylasPerde [data-eylem="paylas-kapat"]'); pg.wait_for_timeout(100)
     kontrol(pg.locator('#paylasPerde').count() == 0 and not tasma(pg), 'Paylaş: panel kapanıyor, taşma yok')
     pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
