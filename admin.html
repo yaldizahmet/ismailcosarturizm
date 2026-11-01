@@ -48,6 +48,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 .badge-red{background:#ffebee;color:#c62828}
 .fiyat-tablo{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
 .fiyat-tablo th,.fiyat-tablo td{padding:8px 12px;border:1px solid #eee;text-align:left}
+.katilimci-tablo td,.katilimci-tablo th,.musteri-tablo td,.onizleme-tablo td{white-space:nowrap}
 .fiyat-tablo th{background:#f8f9fa;font-weight:600;color:#0B1F3A}
 .fiyat-tablo input{border:none;background:transparent;width:100%;font-size:13px;outline:none;text-align:center}
 .fiyat-tablo input:focus{background:#fff3e0;border-radius:4px}
@@ -105,6 +106,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <button class="nav-item" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Kafileler (Uygulama)</button>
     <button class="nav-item" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
+    <button class="nav-item" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
@@ -114,6 +116,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
   <div id="sayfa-duyuru" style="display:none"></div>
     <div id="sayfa-kafile" style="display:none"></div>
     <div id="sayfa-yorum" style="display:none"></div>
+    <div id="sayfa-musteri" style="display:none"></div>
   </div>
 </div>
 
@@ -162,7 +165,7 @@ async function cikisYap() {
 }
 
 function sekmeAc(ad) {
-  ['basvuru','turlar','ekle','duyuru','kafile','yorum'].forEach(s => {
+  ['basvuru','turlar','ekle','duyuru','kafile','yorum','musteri'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -174,6 +177,7 @@ function sekmeAc(ad) {
   if (ad === 'duyuru') renderDuyuru();
   if (ad === 'kafile') renderKafileler();
   if (ad === 'yorum') renderYorumlar();
+  if (ad === 'musteri') renderMusteriler();
 }
 
 // ── TUR LİSTESİ ──
@@ -527,12 +531,14 @@ function kafilePaylasMetni(k) {
 async function renderKafileler() {
   const el = document.getElementById('sayfa-kafile');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
-  const [{ data, error }, { data: aboneler }] = await Promise.all([
+  const [{ data, error }, { data: aboneler }, { data: katlar }] = await Promise.all([
     sb.from('kafileler').select('*').order('baslangic', { ascending: false }),
-    sb.from('bildirim_abonelikleri').select('kafile_id')
+    sb.from('bildirim_abonelikleri').select('kafile_id'),
+    sb.from('kafile_katilimcilar').select('kafile_id')
   ]);
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
+  const katSay = {}; (katlar || []).forEach(a => { katSay[a.kafile_id] = (katSay[a.kafile_id] || 0) + 1; });
   let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
   html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
@@ -547,6 +553,7 @@ async function renderKafileler() {
         <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
         <button class="btn btn-navy" onclick="kafileDuzenle('${k.id}')">Düzenle</button>
         <button class="btn btn-gold" onclick="kafileDuyurular('${k.id}')">📢 Duyurular</button>
+        <button class="btn btn-navy" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar (<span class="katilimci-sayisi">${katSay[k.id] || 0}</span>)</button>
         <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">Paylaş</a>
         <button class="btn btn-red" onclick="kafileSil('${k.id}')">Sil</button>
       </div>
@@ -674,7 +681,7 @@ async function kafileKaydet(id) {
 }
 
 async function kafileSil(id) {
-  if (!confirm('Kafile ve tüm duyuruları silinsin mi? Bu geri alınamaz.')) return;
+  if (!confirm('Kafile, tüm duyuruları ve katılımcı/oda listesi silinsin mi? (Müşteri kayıtları silinmez.) Bu geri alınamaz.')) return;
   const { error } = await sb.from('kafileler').delete().eq('id', id);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Silindi', 'success');
@@ -745,6 +752,287 @@ async function kafileDuyuruSil(kafileId, id) {
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Silindi', 'success');
   kafileDuyurular(kafileId);
+}
+
+// ── KATILIMCILAR (kafiledeki misafirler ve oda numaraları; yalnızca admin, uygulamada görünmez) ──
+const KT = { kafile: null, liste: [], musteriler: [], duzenlenen: null, onizleme: [] };
+function telNorm(t) { const d = String(t || '').replace(/\D/g, ''); return d.length >= 10 ? d.slice(-10) : d; }
+function adNorm(a) { return String(a || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('tr'); }
+function adDuzelt(a) { return String(a || '').trim().replace(/\s+/g, ' '); }
+// "12.03.1955", "12/3/55", "1955-03-12" → "1955-03-12"; boş → ''; okunamazsa null
+function tarihOku(s) {
+  s = String(s || '').trim(); if (!s) return '';
+  let g, a, y, m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) { y = +m[1]; a = +m[2]; g = +m[3]; }
+  else if ((m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2}|\d{4})$/))) {
+    g = +m[1]; a = +m[2]; y = +m[3];
+    if (m[3].length === 2) y += (y > new Date().getFullYear() % 100 ? 1900 : 2000);
+  } else return null;
+  const t = new Date(Date.UTC(y, a - 1, g));
+  if (t.getUTCFullYear() !== y || t.getUTCMonth() !== a - 1 || t.getUTCDate() !== g || y < 1900 || t > new Date()) return null;
+  return `${y}-${String(a).padStart(2, '0')}-${String(g).padStart(2, '0')}`;
+}
+function tarihGoster(t) { return t ? t.split('-').reverse().join('.') : ''; }
+function odaAnahtarlari(k) {
+  const l = []; ((k && k.oteller) || []).filter(o => o && o.ad).forEach(o => { const a = o.sehir || o.ad; if (!l.includes(a)) l.push(a); });
+  return l.length ? l : ['Oda'];
+}
+function yeniKimlik() { return (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => (Math.random() * 16 | 0).toString(16))); }
+// Aynı kişi mi? Ad aynı + (telefon ya da doğum tarihi aynı). Aynı telefonu aile paylaşabilir; bu yüzden ad da şart.
+function musteriBul(ad, tel, dogum) {
+  const a = adNorm(ad), t = telNorm(tel);
+  return KT.musteriler.find(m => adNorm(m.ad) === a && ((t && telNorm(m.telefon) === t) || (dogum && m.dogum_tarihi === dogum))) || null;
+}
+
+async function kafileKatilimcilar(id) {
+  const el = document.getElementById('sayfa-kafile');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const [{ data: k }, { data: kat, error }, { data: mus }] = await Promise.all([
+    sb.from('kafileler').select('*').eq('id', id).single(),
+    sb.from('kafile_katilimcilar').select('*').eq('kafile_id', id),
+    sb.from('musteriler').select('*')
+  ]);
+  if (!k || error) { toast('❌ ' + (error ? error.message : 'Kafile okunamadı'), 'error'); renderKafileler(); return; }
+  KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = [];
+  const mm = {}; KT.musteriler.forEach(m => mm[m.id] = m);
+  const anah = odaAnahtarlari(k);
+  KT.liste = (kat || []).filter(x => mm[x.musteri_id]).map(x => ({ kat: x, m: mm[x.musteri_id] }))
+    .sort((a, b) => String((a.kat.odalar || {})[anah[0]] || '~').localeCompare(String((b.kat.odalar || {})[anah[0]] || '~'), 'tr', { numeric: true }) || adNorm(a.m.ad).localeCompare(adNorm(b.m.ad), 'tr'));
+  katilimciCiz();
+}
+
+function katilimciFormHtml(x) {
+  const anah = odaAnahtarlari(KT.kafile), m = (x && x.m) || {}, od = (x && x.kat.odalar) || {};
+  return `<div class="form-row">
+      <div class="form-group"><label>Ad soyad</label><input id="kt_ad" value="${esc(m.ad)}"></div>
+      <div class="form-group"><label>Telefon</label><input id="kt_tel" value="${esc(m.telefon)}" placeholder="05.. (isteğe bağlı)"></div>
+      <div class="form-group"><label>Doğum tarihi</label><input id="kt_dogum" type="date" value="${esc(m.dogum_tarihi)}"></div>
+    </div>
+    <div class="form-row">${anah.map(a => `<div class="form-group"><label>Oda no – ${esc(a)}</label><input class="kt_oda" data-otel="${esc(a)}" value="${esc(od[a])}"></div>`).join('')}</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="kt_izin" ${m.ileti_izni ? 'checked' : ''}> Doğum günü / kampanya mesajı göndermemize izin verdi</label>`;
+}
+
+function katilimciCiz() {
+  const k = KT.kafile, anah = odaAnahtarlari(k), d = KT.duzenlenen;
+  const odaSay = new Set(KT.liste.map(x => (x.kat.odalar || {})[anah[0]]).filter(Boolean)).size;
+  document.getElementById('sayfa-kafile').innerHTML = `
+    <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← Kafileler</button></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Bu liste yalnızca admin panelinde görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (kafile silinse bile).</div>
+    <div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : ''}</div>
+      ${d ? '' : `<details style="margin-top:16px" ${KT.onizleme.length ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Excel'den toplu yapıştır</summary>
+        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'de satırları seçip kopyalayın, aşağıya yapıştırın. Sütun sırası: <b>Ad Soyad · Telefon · Doğum tarihi${anah.map(a => ' · Oda (' + esc(a) + ')').join('')}</b>. Boş sütun olabilir; başlık satırı varsa atlanır. Tarih 12.03.1955 gibi yazılabilir.</p>
+        <textarea id="kt_yapistir" rows="6" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px" placeholder="Ayşe Kaya	0532 111 22 33	12.03.1955	512	304"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-navy" onclick="katilimciOnizle()">👀 Önizle</button></div>
+        <div id="kt_onizleme">${katilimciOnizlemeHtml()}</div></details>`}
+    </div>
+    <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
+        ${KT.liste.length ? '<button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button>' : ''}</div>
+      ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(a) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
+        ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => '<td><b>' + esc((x.kat.odalar || {})[a] || '') + '</b></td>').join('')}
+          <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
+          <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> <button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p style="color:#666;font-size:14px">Henüz kimse eklenmedi.</p>'}
+    </div>`;
+}
+
+function katilimciDuzenle(katId) {
+  KT.duzenlenen = KT.liste.find(x => x.kat.id === katId) || null; katilimciCiz();
+  const f = document.getElementById('kt_kart'); if (f && f.scrollIntoView) f.scrollIntoView({ block: 'start' });
+}
+
+function katilimciFormOku() {
+  const odalar = {}; document.querySelectorAll('#kt_kart .kt_oda').forEach(i => { const v = i.value.trim(); if (v) odalar[i.getAttribute('data-otel')] = v; });
+  return { ad: adDuzelt(document.getElementById('kt_ad').value), telefon: document.getElementById('kt_tel').value.trim(),
+    dogum: document.getElementById('kt_dogum').value || '', izin: document.getElementById('kt_izin').checked, odalar };
+}
+
+// Bir kişiyi müşteri tablosuna (yoksa) ekler; müşteri kimliğini döner. Eksik bilgileri tamamlar, var olanı ezmez.
+async function musteriHazirla(v) {
+  const var_ = musteriBul(v.ad, v.telefon, v.dogum);
+  if (var_) {
+    const ek = {};
+    if (!var_.telefon && v.telefon) ek.telefon = v.telefon;
+    if (!var_.dogum_tarihi && v.dogum) ek.dogum_tarihi = v.dogum;
+    if (v.izin && !var_.ileti_izni) { ek.ileti_izni = true; ek.ileti_izni_tarih = new Date().toISOString(); }
+    if (Object.keys(ek).length) { const { error } = await sb.from('musteriler').update(ek).eq('id', var_.id); if (error) throw error; Object.assign(var_, ek); }
+    return var_.id;
+  }
+  const m = { id: yeniKimlik(), ad: v.ad, telefon: v.telefon || null, dogum_tarihi: v.dogum || null, ileti_izni: !!v.izin, ileti_izni_tarih: v.izin ? new Date().toISOString() : null };
+  const { error } = await sb.from('musteriler').insert(m); if (error) throw error;
+  KT.musteriler.push(m); return m.id;
+}
+
+async function katilimciKaydet() {
+  const v = katilimciFormOku(), d = KT.duzenlenen;
+  if (v.ad.length < 2) { toast('❌ Ad soyad gerekli', 'error'); return; }
+  try {
+    if (d) {
+      const ek = { ad: v.ad, telefon: v.telefon || null, dogum_tarihi: v.dogum || null };
+      if (v.izin !== !!d.m.ileti_izni) { ek.ileti_izni = v.izin; ek.ileti_izni_tarih = v.izin ? new Date().toISOString() : null; }
+      let r = await sb.from('musteriler').update(ek).eq('id', d.m.id); if (r.error) throw r.error;
+      r = await sb.from('kafile_katilimcilar').update({ odalar: v.odalar }).eq('id', d.kat.id); if (r.error) throw r.error;
+      toast('✅ Kaydedildi', 'success');
+    } else {
+      const mid = await musteriHazirla(v);
+      if (KT.liste.some(x => x.m.id === mid)) { toast('❌ Bu kişi listede zaten var', 'error'); return; }
+      const { error } = await sb.from('kafile_katilimcilar').insert({ kafile_id: KT.kafile.id, musteri_id: mid, odalar: v.odalar }); if (error) throw error;
+      toast('✅ Eklendi', 'success');
+    }
+  } catch (e) { toast('❌ ' + (e.message || e), 'error'); return; }
+  kafileKatilimcilar(KT.kafile.id);
+}
+
+async function katilimciCikar(katId) {
+  const x = KT.liste.find(y => y.kat.id === katId);
+  if (!x || !confirm(`${x.m.ad} bu kafileden çıkarılsın mı? (Müşteri kaydı silinmez.)`)) return;
+  const { error } = await sb.from('kafile_katilimcilar').delete().eq('id', katId);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Çıkarıldı', 'success'); kafileKatilimcilar(KT.kafile.id);
+}
+
+function katilimciOnizle() {
+  const anah = odaAnahtarlari(KT.kafile), metin = (document.getElementById('kt_yapistir') || {}).value || '';
+  KT.onizleme = metin.split(/\r?\n/).map(s => s.replace(/\s+$/, '')).filter(s => s.trim()).map(s => {
+    const h = (s.includes('\t') ? s.split('\t') : s.split(';')).map(x => x.trim());
+    const v = { ad: adDuzelt(h[0]), telefon: h[1] || '', dogumHam: h[2] || '', odalar: {}, sorun: '' };
+    anah.forEach((a, i) => { if (h[3 + i]) v.odalar[a] = h[3 + i]; });
+    if (!/\d/.test(s) && /^ad\b|ad[ıi]? ?soyad|isim/i.test(v.ad)) v.baslik = true;
+    v.dogum = tarihOku(v.dogumHam);
+    if (v.ad.length < 2) v.sorun = 'Ad yok';
+    else if (v.dogum === null) { v.sorun = 'Tarih okunamadı, boş bırakılacak'; v.dogum = ''; v.uyari = true; }
+    const m = musteriBul(v.ad, v.telefon, v.dogum);
+    if (m && KT.liste.some(x => x.m.id === m.id)) v.sorun = 'Zaten listede';
+    else if (m) v.bilgi = 'Kayıtlı müşteri';
+    return v;
+  }).filter(v => !v.baslik);
+  document.getElementById('kt_onizleme').innerHTML = katilimciOnizlemeHtml();
+}
+
+function katilimciOnizlemeHtml() {
+  const l = KT.onizleme; if (!l.length) return '';
+  const anah = odaAnahtarlari(KT.kafile), eklenecek = l.filter(v => !v.sorun || v.uyari).length;
+  return `<div style="overflow-x:auto;margin-top:10px"><table class="fiyat-tablo onizleme-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th>${anah.map(a => '<th>Oda – ' + esc(a) + '</th>').join('')}<th>Durum</th></tr></thead><tbody>
+    ${l.map(v => `<tr style="${v.sorun && !v.uyari ? 'opacity:.5' : ''}"><td>${esc(v.ad)}</td><td>${esc(v.telefon)}</td><td>${v.dogum ? tarihGoster(v.dogum) : esc(v.dogumHam)}</td>${anah.map(a => '<td>' + esc(v.odalar[a] || '') + '</td>').join('')}
+      <td style="font-size:12px;color:${v.sorun ? '#c62828' : '#2e7d32'}">${esc(v.sorun || v.bilgi || 'Yeni')}</td></tr>`).join('')}
+  </tbody></table></div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0"><input type="checkbox" id="kt_toplu_izin"> Bu kişilerin hepsi doğum günü / kampanya mesajına izin verdi</label>
+  <button class="btn btn-gold" onclick="katilimciTopluEkle()" ${eklenecek ? '' : 'disabled'}>✅ ${eklenecek} kişiyi ekle</button>`;
+}
+
+async function katilimciTopluEkle() {
+  const izin = !!(document.getElementById('kt_toplu_izin') || {}).checked;
+  const l = KT.onizleme.filter(v => !v.sorun || v.uyari);
+  if (!l.length) return;
+  const yeniM = [], kat = [], gorulen = new Set(KT.liste.map(x => x.m.id));
+  try {
+    for (const v of l) {
+      let m = musteriBul(v.ad, v.telefon, v.dogum);
+      if (m) {
+        const ek = {};
+        if (!m.telefon && v.telefon) ek.telefon = v.telefon;
+        if (!m.dogum_tarihi && v.dogum) ek.dogum_tarihi = v.dogum;
+        if (izin && !m.ileti_izni) { ek.ileti_izni = true; ek.ileti_izni_tarih = new Date().toISOString(); }
+        if (Object.keys(ek).length && !yeniM.includes(m)) { const { error } = await sb.from('musteriler').update(ek).eq('id', m.id); if (error) throw error; Object.assign(m, ek); }
+      } else {
+        m = { id: yeniKimlik(), ad: v.ad, telefon: v.telefon || null, dogum_tarihi: v.dogum || null, ileti_izni: izin, ileti_izni_tarih: izin ? new Date().toISOString() : null };
+        yeniM.push(m); KT.musteriler.push(m);
+      }
+      if (gorulen.has(m.id)) continue; // aynı kişi iki kez yapıştırılmışsa bir kez ekle
+      gorulen.add(m.id); kat.push({ kafile_id: KT.kafile.id, musteri_id: m.id, odalar: v.odalar });
+    }
+    if (yeniM.length) { const { error } = await sb.from('musteriler').insert(yeniM); if (error) throw error; }
+    if (kat.length) { const { error } = await sb.from('kafile_katilimcilar').insert(kat); if (error) throw error; }
+  } catch (e) { toast('❌ ' + (e.message || e), 'error'); return; }
+  toast(`✅ ${kat.length} kişi eklendi`, 'success');
+  kafileKatilimcilar(KT.kafile.id);
+}
+
+function odaListesiMetni() {
+  const k = KT.kafile, anah = odaAnahtarlari(k), satirlar = [k.ad + ' – oda listesi'];
+  anah.forEach(a => {
+    const otel = (k.oteller || []).find(o => (o.sehir || o.ad) === a);
+    satirlar.push('', '🏨 ' + a + (otel && otel.ad && otel.ad !== a ? ' – ' + otel.ad : ''));
+    const grup = {}, odasiz = [];
+    KT.liste.forEach(x => { const o = (x.kat.odalar || {})[a]; if (o) (grup[o] = grup[o] || []).push(x.m.ad); else odasiz.push(x.m.ad); });
+    Object.keys(grup).sort((p, q) => p.localeCompare(q, 'tr', { numeric: true })).forEach(o => satirlar.push('Oda ' + o + ': ' + grup[o].join(', ')));
+    if (odasiz.length) satirlar.push('Odası girilmemiş: ' + odasiz.join(', '));
+  });
+  return satirlar.join('\n');
+}
+function odaListesiKopyala() {
+  const t = odaListesiMetni();
+  const yedek = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t).catch(yedek) : Promise.resolve(yedek())).then(() => toast('✅ Oda listesi kopyalandı; WhatsApp\'a yapıştırabilirsiniz', 'success'));
+  window.__sonKopya = t;
+}
+
+// ── MÜŞTERİLER (tüm turlara katılanlar; silinmez) ──
+const MU = { liste: [], kat: [], kafileler: {}, ara: '', sira: 'ad', duzenlenen: null };
+async function renderMusteriler() {
+  const el = document.getElementById('sayfa-musteri');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const [{ data: m, error }, { data: kat }, { data: kaf }] = await Promise.all([
+    sb.from('musteriler').select('*'), sb.from('kafile_katilimcilar').select('*'), sb.from('kafileler').select('*')
+  ]);
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  MU.liste = m || []; MU.kat = kat || []; MU.kafileler = {}; (kaf || []).forEach(k => MU.kafileler[k.id] = k); MU.duzenlenen = null;
+  musteriCiz();
+}
+function dogumGunuKalan(t) {
+  if (!t) return 9999;
+  const b = new Date(); b.setHours(0, 0, 0, 0);
+  const [, a, g] = t.split('-').map(Number);
+  let d = new Date(b.getFullYear(), a - 1, g); if (d < b) d = new Date(b.getFullYear() + 1, a - 1, g);
+  return Math.round((d - b) / 86400000);
+}
+function musteriCiz() {
+  const ara = adNorm(MU.ara), araTel = telNorm(MU.ara);
+  let l = MU.liste.filter(m => !ara || adNorm(m.ad).includes(ara) || (araTel.length >= 3 && telNorm(m.telefon).includes(araTel)));
+  if (MU.sira === 'dogum') l = l.slice().sort((a, b) => dogumGunuKalan(a.dogum_tarihi) - dogumGunuKalan(b.dogum_tarihi));
+  else l = l.slice().sort((a, b) => adNorm(a.ad).localeCompare(adNorm(b.ad), 'tr'));
+  const turlari = (id) => MU.kat.filter(k => k.musteri_id === id).map(k => MU.kafileler[k.kafile_id]).filter(Boolean).map(k => k.ad);
+  const d = MU.duzenlenen;
+  document.getElementById('sayfa-musteri').innerHTML = `
+    <div class="header"><h2>🧑‍🤝‍🧑 Müşteriler (${MU.liste.length})</h2></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Kafilelerin “Katılımcılar” bölümünden eklenen herkes burada birikir. Doğum günü ya da kampanya mesajını yalnızca <b>izni olanlara</b> gönderin (İYS kaydı ve KVKK için gerekli).</div>
+    ${d ? `<div class="card" id="mu_kart"><h3>✏️ ${esc(d.ad)}</h3>
+      <div class="form-row"><div class="form-group"><label>Ad soyad</label><input id="mu_ad" value="${esc(d.ad)}"></div>
+        <div class="form-group"><label>Telefon</label><input id="mu_tel" value="${esc(d.telefon)}"></div>
+        <div class="form-group"><label>Doğum tarihi</label><input id="mu_dogum" type="date" value="${esc(d.dogum_tarihi)}"></div></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="mu_izin" ${d.ileti_izni ? 'checked' : ''}> Doğum günü / kampanya mesajı göndermemize izin verdi${d.ileti_izni_tarih ? ' (' + new Date(d.ileti_izni_tarih).toLocaleDateString('tr-TR') + ')' : ''}</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="musteriKaydet()">💾 Kaydet</button><button class="btn btn-navy" onclick="MU.duzenlenen=null;musteriCiz()">Vazgeç</button>
+        <button class="btn btn-red" style="margin-left:auto" onclick="musteriSil()">Müşteriyi tamamen sil</button></div></div>` : ''}
+    <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input id="mu_ara" placeholder="İsim ya da telefon ara" value="${esc(MU.ara)}" oninput="MU.ara=this.value;musteriCiz();var i=document.getElementById('mu_ara');i.focus();i.setSelectionRange(i.value.length,i.value.length)" style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px">
+        <select id="mu_sira" onchange="MU.sira=this.value;musteriCiz()" style="padding:9px;border:1.5px solid #ddd;border-radius:6px"><option value="ad" ${MU.sira === 'ad' ? 'selected' : ''}>A → Z</option><option value="dogum" ${MU.sira === 'dogum' ? 'selected' : ''}>Yaklaşan doğum günü</option></select></div>
+      ${l.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo musteri-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th><th>İzin</th><th>Katıldığı turlar</th><th></th></tr></thead><tbody>
+        ${l.map(m => { const kalan = dogumGunuKalan(m.dogum_tarihi); return `<tr class="musteri-satir"><td>${esc(m.ad)}</td><td>${esc(m.telefon || '')}</td>
+          <td>${tarihGoster(m.dogum_tarihi)}${kalan === 0 ? ' 🎂 bugün' : kalan <= 30 ? ' <span style="color:#C9972B">(' + kalan + ' gün)</span>' : ''}</td>
+          <td>${m.ileti_izni ? '✅' : '—'}</td><td style="font-size:12px">${esc(turlari(m.id).join(', '))}</td>
+          <td><button class="btn btn-navy" style="padding:5px 10px" onclick="musteriDuzenle('${m.id}')">Düzenle</button></td></tr>`; }).join('')}
+      </tbody></table></div>` : '<p style="color:#666;font-size:14px">' + (MU.liste.length ? 'Aramaya uyan kişi yok.' : 'Henüz müşteri yok. Kafileler → Katılımcılar\'dan ekleyin.') + '</p>'}
+    </div>`;
+}
+function musteriDuzenle(id) { MU.duzenlenen = MU.liste.find(m => m.id === id) || null; musteriCiz(); window.scrollTo(0, 0); }
+async function musteriKaydet() {
+  const d = MU.duzenlenen; if (!d) return;
+  const ad = adDuzelt(document.getElementById('mu_ad').value);
+  if (ad.length < 2) { toast('❌ Ad soyad gerekli', 'error'); return; }
+  const izin = document.getElementById('mu_izin').checked;
+  const ek = { ad, telefon: document.getElementById('mu_tel').value.trim() || null, dogum_tarihi: document.getElementById('mu_dogum').value || null };
+  if (izin !== !!d.ileti_izni) { ek.ileti_izni = izin; ek.ileti_izni_tarih = izin ? new Date().toISOString() : null; }
+  const { error } = await sb.from('musteriler').update(ek).eq('id', d.id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Kaydedildi', 'success'); renderMusteriler();
+}
+async function musteriSil() {
+  const d = MU.duzenlenen; if (!d) return;
+  if (!confirm(`${d.ad} tamamen silinsin mi? Tüm kafile listelerinden de çıkar. Bu geri alınamaz.`)) return;
+  const { error } = await sb.from('musteriler').delete().eq('id', d.id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Silindi', 'success'); renderMusteriler();
 }
 
 // ── YORUMLAR (yolculardan WhatsApp vb. ile gelen mesajlar; sitede "Misafirlerimiz Ne Diyor?" bölümünde) ──
