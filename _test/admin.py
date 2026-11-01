@@ -213,6 +213,31 @@ with sync_playwright() as p:
     pg.fill('#kt_kart .kt_oda', '516'); pg.locator('#kt_kart').get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(500)
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update' and i['tablo'] == 'kafile_katilimcilar']
     kontrol(len(g) == 1 and g[0]['veri'] == {'odalar': {'Mekke': {'no': '516', 'tip': '3 kişilik'}}} and '516' in pg.inner_text('.katilimci-tablo'), 'Katılımcılar: oda numarası değiştiriliyor', errs)
+    # Oda doluluğu: 3 kişilik 512'de 2 kişi var; 3 kişilik odaya 4. kişi → uyarı ve onay
+    kontrol(pg.locator('.oda-uyarilari').count() == 0, 'Oda doluluğu: kapasite aşılmamışken uyarı yok')
+    pg.evaluate("window.__islem = []; window.confirm = function(m){ window.__onay = m; return false; }")
+    pg.fill('#kt_ad', 'Ali Veli'); pg.fill('#kt_kart .kt_oda', '512'); pg.select_option('#kt_kart .kt_tip', '3 kişilik')
+    pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(300)
+    pg.fill('#kt_ad', 'Bora Ak'); pg.fill('#kt_kart .kt_oda', '512'); pg.select_option('#kt_kart .kt_tip', '3 kişilik')
+    pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(300)
+    kontrol(pg.evaluate('window.__onay') is None and pg.locator('.katilimci-satir').count() == 5, 'Oda doluluğu: 3 kişilik odaya 3. kişi uyarısız ekleniyor')
+    pg.fill('#kt_ad', 'Zehra Can'); pg.fill('#kt_kart .kt_oda', '512'); pg.select_option('#kt_kart .kt_tip', '3 kişilik')
+    pg.evaluate("window.__islem = []; window.__onay = null")
+    pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(300)
+    onay = pg.evaluate('window.__onay') or ''
+    kontrol('Oda 512' in onay and '4 kişi' in onay and not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Oda doluluğu: 3 kişilik odaya 4. kişi eklenirken uyarı çıkıyor, "Hayır" denirse eklenmiyor', onay[:120])
+    pg.evaluate("window.confirm = function(){ return true; }")
+    pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(500)
+    kontrol(len([i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']) == 1 and '4 kişi' in pg.inner_text('.oda-uyarilari') and pg.locator('td.oda-dolu').count() == 4,
+            'Oda doluluğu: onaylanırsa ekleniyor; listede uyarı kutusu ve dolu oda kırmızı', errs)
+    pg.locator('summary', has_text='Excel').click()
+    pg.fill('#kt_yapistir', "Can Er\t\t\t514\t2"); pg.get_by_role('button', name=re.compile('Önizle')).click(); pg.wait_for_timeout(200)
+    kontrol('Oda 514 dolu' not in pg.inner_text('#kt_onizleme'), 'Oda doluluğu: Excel önizlemesinde boş yer varsa uyarı yok')
+    pg.fill('#kt_yapistir', "Can Er\t\t\t514\t2\nNur Er\t\t\t514\t2"); pg.get_by_role('button', name=re.compile('Önizle')).click(); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#kt_onizleme .oda-uyari').count() == 2 and 'Oda 514 dolu: 3 kişi' in pg.inner_text('#kt_onizleme'), 'Oda doluluğu: Excel önizlemesinde 2 kişilik odaya 3. kişi uyarısı')
+    pg.fill('#kt_yapistir', ''); pg.get_by_role('button', name=re.compile('Önizle')).click(); pg.wait_for_timeout(100)
+    for ad in ['Zehra Can', 'Ali Veli', 'Bora Ak']:
+        pg.locator('.katilimci-satir', has_text=ad).get_by_role('button', name='Çıkar').click(); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []")
     pg.locator('.katilimci-satir', has_text='Hasan').get_by_role('button', name='Çıkar').click(); pg.wait_for_timeout(500)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
@@ -222,13 +247,13 @@ with sync_playwright() as p:
 
     # ── Müşteriler ──
     pg.evaluate("sekmeAc('musteri')"); pg.wait_for_timeout(400); errs.clear()
-    kontrol(pg.locator('.musteri-satir').count() == 3 and 'Kasım 2026' in pg.inner_text('.musteri-satir:has-text("Ayşe")'), 'Müşteriler: kafileden çıkarılan dahil herkes, katıldığı turla listede', errs)
+    kontrol(pg.locator('.musteri-satir').count() == 6 and 'Kasım 2026' in pg.inner_text('.musteri-satir:has-text("Ayşe")'), 'Müşteriler: kafileden çıkarılan dahil herkes, katıldığı turla listede', errs)
     pg.fill('#mu_ara', 'mehm'); pg.wait_for_timeout(200)
     kontrol(pg.locator('.musteri-satir').count() == 1, 'Müşteriler: isimle arama')
     pg.fill('#mu_ara', '4445566'); pg.wait_for_timeout(200)
     kontrol(pg.locator('.musteri-satir').count() == 1 and 'Ayşe' in pg.inner_text('.musteri-tablo'), 'Müşteriler: telefonla arama')
     pg.fill('#mu_ara', ''); pg.select_option('#mu_sira', 'dogum'); pg.wait_for_timeout(200)
-    kontrol(pg.locator('.musteri-satir').count() == 3 and not errs, 'Müşteriler: yaklaşan doğum gününe göre sıralama', errs)
+    kontrol(pg.locator('.musteri-satir').count() == 6 and not errs, 'Müşteriler: yaklaşan doğum gününe göre sıralama', errs)
     pg.evaluate("window.__islem = []")
     pg.locator('.musteri-satir', has_text='Mehmet').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
     pg.check('#mu_izin'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
@@ -238,7 +263,7 @@ with sync_playwright() as p:
     pg.locator('.musteri-satir', has_text='Hasan').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
     pg.get_by_role('button', name=re.compile('tamamen sil')).click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
-    kontrol(len(s_) == 1 and s_[0]['tablo'] == 'musteriler' and pg.locator('.musteri-satir').count() == 2, 'Müşteriler: tamamen silinebiliyor', errs)
+    kontrol(len(s_) == 1 and s_[0]['tablo'] == 'musteriler' and pg.locator('.musteri-satir').count() == 5, 'Müşteriler: tamamen silinebiliyor', errs)
 
     # ── Rehber hesapları (admin) ──
     pg.evaluate("sekmeAc('rehber')"); pg.wait_for_timeout(400); errs.clear(); pg.evaluate("window.__fn = []; window.__islem = []")

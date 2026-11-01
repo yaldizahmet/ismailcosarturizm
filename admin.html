@@ -887,6 +887,22 @@ function odaOzet(b, tarihli) {
   const g = geceSayisi(b.giris, b.cikis);
   return tarihli && b.giris && b.cikis ? p + (p ? ' · ' : '') + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (g ? ' (' + g + ' gece)' : '') : p;
 }
+// Oda doluluğu: "2 kişilik" odaya 3. kişi girilirse uyarı. Suit ve tipi girilmemiş odalarda sınır yok.
+function odaKapasite(tip) { if (!tip) return null; if (/^tek/i.test(tip)) return 1; const n = String(tip).match(/(\d+)/); return n ? +n[1] : null; }
+function odaSorunlari(kisiler) { // kisiler: [{ ad, odalar }] → [{ otel, no, metin, adlar }]
+  const out = [];
+  odaAnahtarlari(KT.kafile).forEach(a => {
+    const grup = {};
+    kisiler.forEach(k => { const b = odaBilgi(k.odalar, a); if (b.no) (grup[b.no] = grup[b.no] || []).push({ ad: k.ad, tip: b.tip }); });
+    Object.keys(grup).forEach(no => {
+      const l = grup[no], tipler = [...new Set(l.map(x => x.tip).filter(Boolean))], kap = Math.min(...tipler.map(odaKapasite).filter(Boolean));
+      const yer = odaEtiket(a) + ' · Oda ' + no;
+      if (isFinite(kap) && l.length > kap) out.push({ otel: a, no, adlar: l.map(x => x.ad), metin: `${yer}: ${tipler.join(' / ')} odada ${l.length} kişi (${l.map(x => x.ad).join(', ')})` });
+      else if (tipler.length > 1) out.push({ otel: a, no, adlar: l.map(x => x.ad), metin: `${yer}: aynı odaya farklı oda tipleri girilmiş (${tipler.join(', ')})` });
+    });
+  });
+  return out;
+}
 function odaEtiket(a) { // "Mekke (Hilton Suites)"
   const o = ((KT.kafile && KT.kafile.oteller) || []).find(x => x && x.ad && (x.sehir || x.ad) === a);
   return o && o.ad && o.ad !== a ? a + ' (' + o.ad + ')' : a;
@@ -952,8 +968,9 @@ function katilimciCiz() {
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
         ${KT.liste.length ? '<button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button>' : ''}</div>
+      ${(() => { const o = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar }))); return o.length ? `<div class="oda-uyarilari" style="background:#fff4e0;border:1px solid #f0d9a8;color:#6b5413;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:10px;line-height:1.6">${o.map(x => '⚠️ ' + esc(x.metin)).join('<br>')}</div>` : ''; })()}
       ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
-        ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => { const b = odaBilgi(x.kat.odalar, a), gc = geceSayisi(b.giris, b.cikis); return '<td><b>' + esc(b.no || '') + '</b>' + (b.tip ? ' <span style="color:#555">· ' + esc(b.tip) + '</span>' : '') + (b.giris && b.cikis ? '<div style="font-size:11.5px;color:#777">' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (gc ? ' · ' + gc + ' gece' : '') + '</div>' : '') + '</td>'; }).join('')}
+        ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => { const b = odaBilgi(x.kat.odalar, a), gc = geceSayisi(b.giris, b.cikis); return '<td' + (odaSorunlari(KT.liste.map(y => ({ ad: y.m.ad, odalar: y.kat.odalar }))).some(o => o.otel === a && o.no === b.no) ? ' class="oda-dolu" style="background:#fdecea"' : '') + '><b>' + esc(b.no || '') + '</b>' + (b.tip ? ' <span style="color:#555">· ' + esc(b.tip) + '</span>' : '') + (b.giris && b.cikis ? '<div style="font-size:11.5px;color:#777">' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (gc ? ' · ' + gc + ' gece' : '') + '</div>' : '') + '</td>'; }).join('')}
           <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
           <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> ${rehber ? '' : `<button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button>`}</td></tr>`).join('')}
       </tbody></table></div>` : '<p style="color:#666;font-size:14px">Henüz kimse eklenmedi.</p>'}
@@ -998,6 +1015,9 @@ async function musteriHazirla(v) {
 async function katilimciKaydet() {
   const v = katilimciFormOku(), d = KT.duzenlenen;
   if (v.ad.length < 2) { toast('❌ Ad soyad gerekli', 'error'); return; }
+  const kisiler = KT.liste.filter(x => !d || x.kat.id !== d.kat.id).map(x => ({ ad: x.m.ad, odalar: x.kat.odalar })).concat([{ ad: v.ad, odalar: v.odalar }]);
+  const sorun = odaSorunlari(kisiler).filter(o => o.adlar.includes(v.ad));
+  if (sorun.length && !confirm('⚠️ ' + sorun.map(o => o.metin).join('\n⚠️ ') + '\n\nYine de kaydedilsin mi? (Ek yatak vb. durumlar için)')) return;
   try {
     if (d) {
       const ek = { ad: v.ad, telefon: v.telefon || null, dogum_tarihi: v.dogum || null };
@@ -1038,6 +1058,9 @@ function katilimciOnizle() {
     else if (m) v.bilgi = 'Kayıtlı müşteri';
     return v;
   }).filter(v => !v.baslik);
+  const eklenecek = KT.onizleme.filter(v => !v.sorun || v.uyari);
+  const sorunlar = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar })).concat(eklenecek.map(v => ({ ad: v.ad, odalar: v.odalar }))));
+  eklenecek.forEach(v => { const o = sorunlar.find(x => x.adlar.includes(v.ad)); if (o) v.odaUyari = 'Oda ' + o.no + ' dolu: ' + o.adlar.length + ' kişi'; });
   document.getElementById('kt_onizleme').innerHTML = katilimciOnizlemeHtml();
 }
 
@@ -1046,7 +1069,7 @@ function katilimciOnizlemeHtml() {
   const anah = odaAnahtarlari(KT.kafile), eklenecek = l.filter(v => !v.sorun || v.uyari).length;
   return `<div style="overflow-x:auto;margin-top:10px"><table class="fiyat-tablo onizleme-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Durum</th></tr></thead><tbody>
     ${l.map(v => `<tr style="${v.sorun && !v.uyari ? 'opacity:.5' : ''}"><td>${esc(v.ad)}</td><td>${esc(v.telefon)}</td><td>${v.dogum ? tarihGoster(v.dogum) : esc(v.dogumHam)}</td>${anah.map(a => '<td>' + esc(odaOzet(odaBilgi(v.odalar, a), false)) + '</td>').join('')}
-      <td style="font-size:12px;color:${v.sorun ? '#c62828' : '#2e7d32'}">${esc(v.sorun || v.bilgi || 'Yeni')}</td></tr>`).join('')}
+      <td style="font-size:12px;color:${v.sorun ? '#c62828' : '#2e7d32'}">${esc(v.sorun || v.bilgi || 'Yeni')}${v.odaUyari ? `<div class="oda-uyari" style="color:#b26a00">⚠️ ${esc(v.odaUyari)}</div>` : ''}</td></tr>`).join('')}
   </tbody></table></div>
   <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0"><input type="checkbox" id="kt_toplu_izin"> Bu kişilerin hepsi doğum günü / kampanya mesajına izin verdi</label>
   <button class="btn btn-gold" onclick="katilimciTopluEkle()" ${eklenecek ? '' : 'disabled'}>✅ ${eklenecek} kişiyi ekle</button>`;
