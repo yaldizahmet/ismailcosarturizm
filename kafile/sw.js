@@ -1,11 +1,11 @@
 /* Coşar Kafile – çevrimdışı çalışma için önbellek.
    Yalnızca /kafile/ klasörünü kapsar; sitenin geri kalanına karışmaz.
    Kafile verisi (Supabase) önbelleğe alınmaz; uygulama son veriyi kendi saklar. */
-var SURUM = 'kafile-v7';
+var SURUM = 'kafile-v8';
 var KABUK = ['./', './index.html', './manifest.webmanifest', './ikon-192.png', './ikon-512.png', './logo.png'];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(SURUM).then(function (c) { return c.addAll(KABUK); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(SURUM).then(function (c) { return c.addAll(KABUK.map(function (u) { return new Request(u, { cache: 'reload' }); })); }).then(function () { return self.skipWaiting(); }));
 });
 
 self.addEventListener('activate', function (e) {
@@ -31,6 +31,14 @@ self.addEventListener('fetch', function (e) {
   var yazitipi = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   var uygulama = url.origin === location.origin && url.pathname.indexOf('/kafile/') === 0;
   if (!yazitipi && !uygulama) return;
+  // Manifest (uygulama adı/ikonu): önce ağ — telefona kurarken eski ad/ikon gelmesin
+  if (uygulama && /\.webmanifest$/.test(url.pathname)) {
+    e.respondWith(fetch(r, { cache: 'no-cache' }).then(function (yanit) {
+      if (yanit && yanit.ok) { var k = yanit.clone(); caches.open(SURUM).then(function (c) { c.put(r, k); }); }
+      return yanit;
+    }).catch(function () { return caches.match(r); }));
+    return;
+  }
   e.respondWith(caches.open(SURUM).then(function (c) {
     return c.match(r).then(function (eski) {
       var ag = fetch(r).then(function (yanit) { if (yanit && (yanit.ok || yanit.type === 'opaque')) c.put(r, yanit.clone()); return yanit; }).catch(function () { return eski; });
