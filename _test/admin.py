@@ -117,7 +117,11 @@ with sync_playwright() as p:
     kod = pg.input_value('#k_kod')
     pg.fill('#k_baslangic', '2026-11-10'); pg.fill('#k_bitis', '2026-11-23')
     pg.fill('#k_rehber_ad', "Ali O'Hoca"); pg.fill('#k_rehber_tel', '0533 000 00 00')
-    pg.locator('.o_ad').first.fill('Test Otel Mekke')
+    pg.locator('.o_ad').first.fill('Test Otel Mekke'); pg.locator('.o_giris').first.fill('2026-11-10'); pg.locator('.o_cikis').first.fill('2026-11-15')
+    kontrol(pg.inner_text('.otel-blok .o_gece') == '5 gece', 'Grup: otel giriş-çıkışından gece sayısı gösteriliyor')
+    pg.get_by_role('button', name=re.compile('Otel ekle')).click()
+    kontrol(pg.locator('#k_oteller .otel-blok').count() == 3, 'Grup: "Otel ekle" ile üçüncü otel eklenebiliyor (kültür turları için)')
+    pg.fill('#k_inis_sehri', 'Cidde'); pg.fill('#k_donus_sehri', 'Medine')
     pg.select_option('#k_tur_turu', 'kultur'); pg.fill('#k_acil_tel', '112')
     satir = pg.locator('#k_program .prog-satir').first
     satir.locator('.p_tarih').fill('2026-11-11'); satir.locator('.p_saat').fill('14:30'); satir.locator('.p_baslik').fill('Mekke ziyaretleri'); satir.locator('.p_yer').fill('Otel lobisi')
@@ -129,7 +133,8 @@ with sync_playwright() as p:
     ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'kafileler']
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
-            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112',
+            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112'
+            and v.get('inis_sehri') == 'Cidde' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15',
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
     kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile') and pg.inner_text('.kafile-item .abone-sayisi') == '0', 'Kafile: listede görünüyor (bildirim açık telefon sayısıyla)')
     href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''
@@ -170,15 +175,18 @@ with sync_playwright() as p:
             'Katılımcılar: sayfa açılıyor, kafilenin oteline göre oda alanı (Mekke) var', errs)
     pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(200)
     kontrol(not pg.evaluate('window.__islem'), 'Katılımcılar: ad boşken eklemiyor')
-    pg.fill('#kt_ad', ' Ayşe   Kaya '); pg.fill('#kt_tel', '0533 444 55 66'); pg.fill('#kt_dogum', '1950-05-20'); pg.fill('#kt_kart .kt_oda', '512'); pg.check('#kt_izin')
+    pg.fill('#kt_ad', ' Ayşe   Kaya '); pg.fill('#kt_tel', '0533 444 55 66'); pg.fill('#kt_dogum', '1950-05-20'); pg.fill('#kt_kart .kt_oda', '512'); pg.select_option('#kt_kart .kt_tip', '3 kişilik'); kontrol(pg.input_value('#kt_kart .kt_giris') == '2026-11-10' and pg.input_value('#kt_kart .kt_cikis') == '2026-11-15' and pg.inner_text('#kt_kart .kt_gece') == '5 gece', 'Katılımcılar: giriş-çıkış grubun otel tarihleriyle dolu geliyor (5 gece)')
+    pg.fill('#kt_kart .kt_giris', '2026-11-11')
+    kontrol(pg.inner_text('#kt_kart .kt_gece') == '4 gece', 'Katılımcılar: kişiye özel giriş tarihiyle gece sayısı güncelleniyor (4 gece)')
+    pg.check('#kt_izin')
     pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(500)
     isl = pg.evaluate('window.__islem'); mi = [i for i in isl if i['tablo'] == 'musteriler' and i['tur'] == 'insert']; ki = [i for i in isl if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']
     mv = mi[0]['veri'] if mi else {}
-    kontrol(len(mi) == 1 and mv.get('ad') == 'Ayşe Kaya' and mv.get('dogum_tarihi') == '1950-05-20' and mv.get('ileti_izni') is True and len(ki) == 1 and ki[0]['veri']['odalar'] == {'Mekke': '512'}
-            and ki[0]['veri']['musteri_id'] == mv.get('id') and pg.locator('.katilimci-satir').count() == 1, 'Katılımcılar: kişi elle ekleniyor (müşteri + oda kaydı, izin tarihiyle)', errs)
+    kontrol(len(mi) == 1 and mv.get('ad') == 'Ayşe Kaya' and mv.get('dogum_tarihi') == '1950-05-20' and mv.get('ileti_izni') is True and len(ki) == 1 and ki[0]['veri']['odalar'] == {'Mekke': {'no': '512', 'tip': '3 kişilik', 'giris': '2026-11-11'}}
+            and ki[0]['veri']['musteri_id'] == mv.get('id') and pg.locator('.katilimci-satir').count() == 1, 'Katılımcılar: kişi elle ekleniyor (müşteri + oda no, tipi, giriş-çıkış; izin tarihiyle)', errs)
     pg.evaluate("window.__islem = []")
     pg.locator('summary', has_text='Excel').click()
-    pg.fill('#kt_yapistir', "Ad Soyad\tTelefon\tDoğum tarihi\tOda\nMehmet Kaya\t0532 111 22 33\t12.03.1955\t512\nAyşe Kaya\t0533 444 55 66\t\t512\nHasan <b>Ç</b>\t\t31.02.1950\t514\n\n")
+    pg.fill('#kt_yapistir', "Ad Soyad\tTelefon\tDoğum tarihi\tOda\nMehmet Kaya\t0532 111 22 33\t12.03.1955\t512\t3\nAyşe Kaya\t0533 444 55 66\t\t512\nHasan <b>Ç</b>\t\t31.02.1950\t514\t2 kişilik\n\n")
     pg.get_by_role('button', name=re.compile('Önizle')).click(); pg.wait_for_timeout(200)
     o = pg.inner_text('#kt_onizleme')
     kontrol(pg.locator('.onizleme-tablo tbody tr').count() == 3 and 'Zaten listede' in o and 'Tarih okunamadı' in o and '12.03.1955' in o and '2 kişiyi ekle' in o,
@@ -191,13 +199,13 @@ with sync_playwright() as p:
     kontrol(pg.locator('.katilimci-tablo b b').count() == 0 and '<b>Ç</b>' in pg.inner_text('.katilimci-tablo'), 'Güvenlik: isimdeki HTML düz yazı gösteriliyor')
     pg.get_by_role('button', name=re.compile('Oda listesini kopyala')).click(); pg.wait_for_timeout(200)
     t = pg.evaluate('window.__sonKopya') or ''
-    kontrol('🏨 Mekke – Test Otel Mekke' in t and 'Oda 512: Ayşe Kaya, Mehmet Kaya' in t and 'Oda 514: Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu metin kopyalanıyor', t.replace('\n', ' | ')[:160])
+    kontrol( '🏨 Mekke – Test Otel Mekke (10.11–15.11, 5 gece)' in t and 'Oda 512 (3 kişilik): Ayşe Kaya [11.11–15.11, 4 gece], Mehmet Kaya' in t and 'Oda 514 (2 kişilik): Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu metin kopyalanıyor', t.replace('\n', ' | ')[:160])
     pg.evaluate("window.__islem = []")
     pg.locator('.katilimci-satir', has_text='Mehmet').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
     kontrol(pg.input_value('#kt_ad') == 'Mehmet Kaya' and pg.input_value('#kt_kart .kt_oda') == '512', 'Katılımcılar: düzenleme formu kayıtlı bilgilerle açılıyor')
     pg.fill('#kt_kart .kt_oda', '516'); pg.locator('#kt_kart').get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(500)
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update' and i['tablo'] == 'kafile_katilimcilar']
-    kontrol(len(g) == 1 and g[0]['veri'] == {'odalar': {'Mekke': '516'}} and '516' in pg.inner_text('.katilimci-tablo'), 'Katılımcılar: oda numarası değiştiriliyor', errs)
+    kontrol(len(g) == 1 and g[0]['veri'] == {'odalar': {'Mekke': {'no': '516', 'tip': '3 kişilik'}}} and '516' in pg.inner_text('.katilimci-tablo'), 'Katılımcılar: oda numarası değiştiriliyor', errs)
     pg.evaluate("window.__islem = []")
     pg.locator('.katilimci-satir', has_text='Hasan').get_by_role('button', name='Çıkar').click(); pg.wait_for_timeout(500)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
@@ -342,7 +350,7 @@ with sync_playwright() as p:
         rp.fill('#kt_kart .kt_oda', '520'); rp.fill('#kt_tel', '0533 999 88 77'); rp.locator('#kt_kart').get_by_role('button', name=re.compile('Kaydet')).click(); rp.wait_for_timeout(500)
         isl = rp.evaluate('window.__islem')
         mu = [i for i in isl if i['tablo'] == 'musteriler' and i['tur'] == 'update']; ku = [i for i in isl if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'update']
-        kontrol(len(mu) == 1 and 'ileti_izni' not in mu[0]['veri'] and mu[0]['veri']['telefon'] == '0533 999 88 77' and len(ku) == 1 and ku[0]['veri'] == {'odalar': {'Mekke': '520'}}
+        kontrol(len(mu) == 1 and 'ileti_izni' not in mu[0]['veri'] and mu[0]['veri']['telefon'] == '0533 999 88 77' and len(ku) == 1 and ku[0]['veri'] == {'odalar': {'Mekke': {'no': '520'}}}
                 and not [i for i in isl if i['tur'] in ('insert', 'delete')] and not errs, 'Rehber: oda ve telefonu düzeltebiliyor (izin değişmiyor, ekleme/silme yok)', errs)
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
         rp.close()
