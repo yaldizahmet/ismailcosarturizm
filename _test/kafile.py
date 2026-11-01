@@ -207,6 +207,15 @@ with sync_playwright() as p:
     c.add_init_script("window.__SIMDI = '2026-11-12T11:00:00+01:00';")
     c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(KULTUR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
     c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+    MEKANLAR = [{'id': 1, 'sehir': 'Saraybosna', 'diger_adlar': ['Sarajevo', 'Bosna'], 'tur': 'gezi', 'ad': 'Sarı Tabya', 'aciklama': 'Gün batımı manzarası.', 'harita': 'https://www.google.com/maps/search/?api=1&query=Zuta%20Tabija', 'sira': 100},
+                {'id': 2, 'sehir': 'Saraybosna', 'diger_adlar': ['Sarajevo', 'Bosna'], 'tur': 'yemek', 'ad': 'Ćevabdžinica Željo', 'aciklama': '<img src=x onerror=window.__xss=1>', 'harita': None, 'sira': 90},
+                {'id': 3, 'sehir': 'Mostar', 'diger_adlar': [], 'tur': 'gezi', 'ad': 'Mostar Köprüsü', 'aciklama': '', 'harita': 'javascript:alert(1)', 'sira': 80}]
+    c.__mekan_istek = []
+    def mekan_yanit(route, req):
+        c.__mekan_istek.append(req.url); route.fulfill(status=200, body=json.dumps(MEKANLAR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
+    c.route('**/rest/v1/sehir_rehberi**', mekan_yanit)
+    c.add_init_script("""window.__paylas = []; navigator.share = function(d){ window.__paylas.push({ text: d.text, files: (d.files || []).map(function(f){ return f.type + ':' + f.size; }) }); return Promise.resolve(); };
+      navigator.canShare = function(d){ return true; };""")
     errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR')
     kart = pg.locator('section[aria-label="Sıradaki buluşma"]')
     kontrol(kart.count() == 1 and '12:30' in kart.inner_text() and pg.locator('.icerik > .zaman-cizelge .zc-satir.gecti', has_text='Kahvaltı').count() == 1,
@@ -215,6 +224,28 @@ with sync_playwright() as p:
     m = pg.inner_text('#ekran')
     kontrol(pg.locator('#sayacSayi').count() == 0 and 'Yolculuk Rehberi' in m and 'powerbank' in m and 'Zemzem' not in m and 'Riyali' not in m,
             'Kültür turu: tavaf sayacı ve umreye özel valiz maddeleri yok')
+    pg.wait_for_timeout(300); m = pg.inner_text('#ekran')
+    kontrol(c.__mekan_istek and 'yayinda=eq.true' in c.__mekan_istek[0] and 'Şehir rehberi' in m and 'Sarı Tabya' in m and 'Željo' in m and 'Mostar Köprüsü' not in m
+            and m.index('Sarı Tabya') < m.index('powerbank'), 'Şehir rehberi: kültür turunda en üstte; otel şehri (Saraybosna) mekanları, başka şehir yok', errs)
+    kontrol(pg.locator('.sehir-sec').count() == 0 and pg.locator('.mekan').count() == 2, 'Şehir rehberi: tek şehirde şehir seçici yok, 2 mekan')
+    h1 = pg.get_attribute('.mekan[data-mekan="1"] a', 'href'); h2 = pg.get_attribute('.mekan[data-mekan="2"] a', 'href')
+    kontrol(h1.endswith('Zuta%20Tabija') and h2.startswith('https://www.google.com/maps/search/?api=1&query=') and 'Saraybosna' in unquote(h2), 'Şehir rehberi: "Haritada aç" Google Haritalar bağlantısı (yoksa ad+şehirle arama)')
+    kontrol(pg.evaluate('!window.__xss') and '<img' in pg.inner_text('.mekan[data-mekan="2"]'), 'Güvenlik: mekan açıklamasındaki HTML çalışmıyor')
+    pg.click('.mekan[data-mekan="2"] [data-eylem="mekan-paylas"]'); pg.wait_for_timeout(200)
+    kontrol(pg.is_visible('#paylasPerde') and 'Željo' in pg.inner_text('#paylasPerde'), 'Paylaş: "Buradayım, paylaş" paneli açılıyor')
+    pg.click('#paylasPerde [data-eylem="yazi-paylas"]'); pg.wait_for_timeout(200)
+    py = pg.evaluate('window.__paylas')
+    kontrol(py and '📍 Ćevabdžinica Željo, Saraybosna' in py[-1]['text'] and 'İsmail Coşar Turizm' in py[-1]['text'] and not py[-1]['files'], 'Paylaş: yazıyla paylaşım (mekan, şehir, firma adı)', str(py)[:120])
+    from PIL import Image as _I; import io as _io
+    _b = _io.BytesIO(); _I.new('RGB', (800, 600), (40, 120, 200)).save(_b, 'JPEG')
+    pg.set_input_files('#paylasFoto', files=[{'name': 'f.jpg', 'mimeType': 'image/jpeg', 'buffer': _b.getvalue()}]); pg.wait_for_timeout(1200)
+    kontrol(pg.locator('#paylasOnizleme img').count() == 1 and pg.evaluate("(() => { const i = document.querySelector('#paylasOnizleme img'); return i.naturalWidth === 1080 && i.naturalHeight === 1350; })()"),
+            'Paylaş: seçilen fotoğraftan 1080×1350 paylaşım görseli hazırlanıyor', errs)
+    pg.click('#paylasPerde [data-eylem="foto-gonder"]'); pg.wait_for_timeout(300)
+    py = pg.evaluate('window.__paylas')
+    kontrol(len(py) == 2 and len(py[-1]['files']) == 1 and py[-1]['files'][0].startswith('image/jpeg:') and 'Željo' in py[-1]['text'], 'Paylaş: fotoğraflı görsel paylaşıma gönderiliyor', str(py[-1])[:120])
+    pg.click('#paylasPerde [data-eylem="paylas-kapat"]'); pg.wait_for_timeout(100)
+    kontrol(pg.locator('#paylasPerde').count() == 0 and not tasma(pg), 'Paylaş: panel kapanıyor, taşma yok')
     pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
     kontrol(pg.locator('[data-eylem="sehir-mekke"]').count() == 0 and pg.locator('#ekran [data-eylem="konum-vakit"]').count() >= 1, 'Kültür turu: Mekke/Medine yerine "Konumumu kullan" çıkıyor')
     pg.click('#ekran .btn-dolu[data-eylem="konum-vakit"]'); pg.wait_for_timeout(600)
@@ -228,6 +259,22 @@ with sync_playwright() as p:
     kontrol('tel:112' in hrefler and 'tel:911' not in hrefler and 'tel:997' not in hrefler and 'tel:+903122922929' in hrefler and 'tel:+38733000000' in hrefler,
             'Kültür turu: acil ekranında yerel 112 ve konsolosluk var, Suudi numaraları yok', str(hrefler))
     kontrol(not tasma(pg) and not errs, 'Kültür turu: taşma ve JavaScript hatası yok', errs)
+    c.close()
+    # Şehir rehberi: iki şehir (Bosna yazılmış otel → Saraybosna, Mostar), şehir seçici, çevrimdışı açılış
+    K2 = dict(KULTUR, oteller=[{'sehir': 'Bosna', 'ad': 'Otel A'}, {'sehir': 'Mostar', 'ad': 'Otel B'}])
+    c = b.new_context(viewport={'width': 360, 'height': 760}, service_workers='block', locale='tr-TR', timezone_id='Europe/Sarajevo')
+    c.add_init_script("window.__SIMDI = '2026-11-12T11:00:00+01:00';")
+    c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(K2), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+    c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+    c.route('**/rest/v1/sehir_rehberi**', lambda route, req: route.fulfill(status=200, body=json.dumps(MEKANLAR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR'); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(400)
+    kontrol(pg.locator('.sehir-sec button').all_inner_texts() == ['Saraybosna', 'Mostar'] and 'Sarı Tabya' in pg.inner_text('#ekran'), 'Şehir rehberi: "Bosna" yazılan otel Saraybosna ile eşleşiyor; iki şehir seçilebiliyor', errs)
+    pg.click('.sehir-sec button:has-text("Mostar")'); pg.wait_for_timeout(200)
+    m = pg.inner_text('#ekran'); hm = pg.get_attribute('.mekan[data-mekan="3"] a', 'href') or ''
+    kontrol('Mostar Köprüsü' in m and 'Sarı Tabya' not in m and hm.startswith('https://www.google.com/maps/'), 'Şehir rehberi: Mostar seçilince Mostar mekanları; "javascript:" bağlantısı yerine harita araması')
+    c.unroute('**/rest/v1/sehir_rehberi**'); c.route('**/rest/v1/**', lambda route, req: route.abort())
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(500); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
+    kontrol('Sarı Tabya' in pg.inner_text('#ekran') and not tasma(pg) and not errs, 'Şehir rehberi: internet yokken de son kaydedilen mekanlar görünüyor', errs)
     c.close()
 
     # ── Duyuru bildirimleri (Web Push) — tarayıcının bildirim/servis-çalışanı arayüzü taklit edilir ──

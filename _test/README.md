@@ -18,6 +18,7 @@ Ne kontrol edilir:
 - **Admin – Kafileler sekmesi:** kafile ekle/düzenle/sil, program satırları, otel bilgileri, duyuru yayınla/sil, paylaş bağlantısı.
 - **Yolcu mesajları (`yorumlar.js`):** ana sayfada Google yorumlarının üstünde kaydırılan şerit, Umre sayfasında yalnızca umre mesajları, HTML enjeksiyonu, yalnızca kendi depomuzdaki fotoğraflar, "Devamını oku", fotoğraf büyütme, telefonda taşma; admin "Yorumlar" sekmesi (izin zorunlu, gizle/yayınla, sil).
 - **Admin – Katılımcılar ve Müşteriler:** kafileye kişi ekleme (elle ve Excel'den yapıştırma; başlık satırı, tarih biçimleri, listede olan/hatalı tarih uyarısı), oda numarası düzenleme, kafileden çıkarma, oda listesini kopyalama, müşteri arama (isim/telefon), doğum gününe göre sıralama, ileti izni ve silme. Rehber hesapları (aç, kafile ata, şifre, sil) ve rehber rolüyle giriş: menüde yalnızca "Kafilelerim", yalnızca düzeltme (ekleme/çıkarma/ileti izni yok).
+- **Şehir rehberi:** uygulamada kültür turunda Rehber ekranının en üstünde otel şehirlerine göre mekanlar (diğer adlarla eşleşme, şehir seçici, çevrimdışı), "Haritada aç", "Buradayım, paylaş" (yazı ve 1080×1350 fotoğraflı görsel); admin "Şehir Rehberi" sekmesi (taslak/yayın, toplu yayın, ekle, sil, https dışı bağlantı engeli).
 - **Kesme işareti:** tur başlığında `'` ve `"` olsa da "Kayıt Ol" butonlarının çalıştığı.
 
 Veritabanı (`supabase-js`) testte `mock.js` + `db.json` ile taklit edilir; gerçek veritabanına hiçbir şey yazılmaz. `db.json` gerçek turlara benzer örnek veridir; yeni bir tur türü ya da alan eklenirse buraya da eklenmeli.

@@ -75,6 +75,20 @@ a{color:#8A6516}
 .btn-cizgi{border:1.5px solid var(--navy);color:var(--navy);background:#fff}
 .btn-dolu{background:var(--navy);color:#fff;border:0}
 .altin-kart{background:var(--goldp);border-radius:18px;padding:14px 18px;display:flex;flex-direction:column;gap:6px;color:var(--yazi);text-decoration:none;border:0;text-align:left;width:100%;font-size:inherit}
+.sehir-sec{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.sehir-sec button{flex:none;height:42px;padding:0 16px;border-radius:21px;border:1.5px solid var(--cizgi);background:#fff;color:var(--navy);font-size:15px;font-weight:600}
+.sehir-sec button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.mekan{background:#fff;border:1px solid var(--cizgi);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.mekan b{font-size:16.5px;color:var(--navy)}
+.mekan p{font-size:14.5px;color:var(--yazi2);line-height:1.5;margin:0}
+.mekan .ikili{margin-top:4px}
+.mekan .ikili a,.mekan .ikili button{min-height:44px;font-size:14px}
+.paylas-perde{position:fixed;inset:0;z-index:90;background:rgba(11,31,58,.6);display:flex;align-items:flex-end;justify-content:center}
+.paylas-kutu{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;max-height:92vh;overflow:auto}
+.paylas-kutu h3{font-size:18px;color:var(--navy);margin:0}
+.paylas-kutu .btn-dolu,.paylas-kutu .btn-cizgi,.paylas-kutu label{min-height:52px;font-size:16px;cursor:pointer}
+.paylas-kutu img{width:100%;border-radius:12px;display:block}
+#paylasOnizleme{display:flex;flex-direction:column}
 .bolum-baslik{font-family:var(--ff-b);font-size:20px;font-weight:700;margin-top:6px}
 .zaman-cizelge{display:flex;flex-direction:column}
 .zc-satir{display:grid;grid-template-columns:52px 18px 1fr;align-items:start;column-gap:10px;padding:8px 8px 12px;border-radius:12px}
@@ -286,7 +300,7 @@ details.tum[open] summary::after{content:'▴'}
   var S = {
     kod: oku('kafile-kod', ''), veri: null, sekme: 'bugun', guncelleme: null, cevrimdisi: false,
     sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}), gecmis: oku('kafile-gecmis', []),
-    sehir: oku('kafile-sehir', 'mekke'), kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
+    sehir: oku('kafile-sehir', 'mekke'), mekanlar: oku('kafile-mekanlar', []), rehberSehir: null, kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
   };
 
   // ── veri ──
@@ -691,13 +705,126 @@ details.tum[open] summary::after{content:'▴'}
   }
 
   function yolculukRehberi() {
-    var h = '<header class="bas"><h1>Yolculuk Rehberi</h1><div class="bas-alt">Valiz listesi ve faydalı bilgiler</div></header><div class="icerik">';
+    var h = '<header class="bas"><h1>Yolculuk Rehberi</h1><div class="bas-alt">Gezilecek yerler, yeme-içme, valiz listesi</div></header><div class="icerik">';
+    h += sehirRehberiBolumu();
     h += valizListesi(VALIZ_KULTUR);
     h += '<p class="kucuk-not">İşaretleriniz telefonda saklanır; uygulama kapansa da kaybolmaz.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
       '<a href="' + SITE + 'turlar.html" target="_blank" rel="noopener">Kültür turlarımız<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a></div>';
     return h + '</div>';
+  }
+
+  // ── Şehir rehberi (kültür turları): grubun otel şehirlerine göre gezilecek yerler ve yeme-içme ──
+  function normal(t) {
+    return String(t || '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function grupSehirleri() {
+    var l = []; ((S.veri && S.veri.oteller) || []).forEach(function (o) { var a = o && (o.sehir || '').trim(); if (a && l.indexOf(a) < 0) l.push(a); });
+    return l;
+  }
+  function sehirMekanlari() { // { 'Saraybosna': [mekanlar] } — grubun şehir sırasıyla
+    var tum = S.mekanlar || [], sonuc = [];
+    grupSehirleri().forEach(function (gs) {
+      var n = normal(gs); if (!n) return;
+      var es = tum.filter(function (m) {
+        return [m.sehir].concat(m.diger_adlar || []).some(function (a) { var x = normal(a); return x && (x === n || (x.length >= 4 && (n.indexOf(x) >= 0 || x.indexOf(n) >= 0))); });
+      });
+      if (!es.length) return;
+      var ad = es[0].sehir;
+      var var_ = sonuc.filter(function (s) { return s.ad === ad; })[0];
+      if (!var_) sonuc.push({ ad: ad, mekanlar: es });
+    });
+    return sonuc;
+  }
+  function mekanlariGetir() {
+    if (mekanlariGetir.yuk) return;
+    mekanlariGetir.yuk = true;
+    fetch(SB_URL + '/rest/v1/sehir_rehberi?select=id,sehir,diger_adlar,tur,ad,aciklama,harita,sira&yayinda=eq.true&order=sira.desc', { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }, cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (l) { if (!Array.isArray(l)) return; S.mekanlar = l; yaz('kafile-mekanlar', l); if (S.sekme === 'rehber') ciz(); })
+      .catch(function () {}).then(function () { setTimeout(function () { mekanlariGetir.yuk = false; }, 60000); });
+  }
+  function haritaLink(m) { return /^https:\/\//.test(m.harita || '') ? m.harita : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(m.ad + ' ' + m.sehir); }
+  function sehirRehberiBolumu() {
+    mekanlariGetir();
+    var l = sehirMekanlari();
+    if (!l.length) return '';
+    var sec = l.filter(function (x) { return x.ad === S.rehberSehir; })[0] || l[0];
+    var h = '<h2 class="bolum-baslik">Şehir rehberi</h2>';
+    if (l.length > 1) h += '<div class="sehir-sec" role="group" aria-label="Şehir">' + l.map(function (x) {
+      return '<button type="button" data-eylem="rehber-sehir" data-sehir="' + esc(x.ad) + '" aria-pressed="' + (x === sec) + '">' + esc(x.ad) + '</button>'; }).join('') + '</div>';
+    [['gezi', '📍 Gezilecek yerler'], ['yemek', '🍽️ Yeme-içme']].forEach(function (t) {
+      var k = sec.mekanlar.filter(function (m) { return m.tur === t[0]; });
+      if (!k.length) return;
+      h += '<div class="kart-etiket" style="margin-top:4px">' + t[1] + '</div>';
+      h += k.map(function (m) {
+        return '<div class="mekan" data-mekan="' + m.id + '"><b>' + esc(m.ad) + '</b>' + (m.aciklama ? '<p>' + esc(m.aciklama) + '</p>' : '') +
+          '<div class="ikili"><a class="btn-cizgi" href="' + esc(haritaLink(m)) + '" target="_blank" rel="noopener">🗺️ Haritada aç</a>' +
+          '<button type="button" class="btn-dolu" data-eylem="mekan-paylas" data-id="' + m.id + '">📸 Buradayım, paylaş</button></div></div>';
+      }).join('');
+      if (t[0] === 'yemek') h += '<p class="kucuk-not">Helal hassasiyetiniz varsa siparişten önce sormanızı öneririz. Güncel puan ve yorumlar “Haritada aç” ile görünür.</p>';
+    });
+    return h;
+  }
+
+  // ── "Buradayım" paylaşımı: fotoğraflı kart (fotoğraf + mekan + logo) ya da yazı ──
+  function paylasMetni(m) { return '📍 ' + m.ad + ', ' + m.sehir + '\nİsmail Coşar Turizm ile yolculuktayım ✈️\n' + SITE; }
+  function paylasimKapat() { var p = $('paylasPerde'); if (p) p.remove(); }
+  function paylasimAc(m) {
+    paylasimKapat();
+    var d = document.createElement('div'); d.className = 'paylas-perde'; d.id = 'paylasPerde';
+    d.innerHTML = '<div class="paylas-kutu" role="dialog" aria-label="Paylaş"><h3>📍 ' + esc(m.ad) + '</h3><div class="kucuk-not" style="margin-top:-6px">' + esc(m.sehir) + '</div>' +
+      '<label class="btn-dolu" for="paylasFoto">📷 Fotoğrafla paylaş</label><input id="paylasFoto" type="file" accept="image/*" hidden data-id="' + m.id + '">' +
+      '<button type="button" class="btn-cizgi" data-eylem="yazi-paylas" data-id="' + m.id + '">✍️ Yazıyla paylaş</button>' +
+      '<div id="paylasOnizleme"></div>' +
+      '<button type="button" class="cikis" data-eylem="paylas-kapat">Kapat</button></div>';
+    d.addEventListener('click', function (e) { if (e.target === d) paylasimKapat(); });
+    document.body.appendChild(d);
+  }
+  function mekanBul(id) { return (S.mekanlar || []).filter(function (m) { return String(m.id) === String(id); })[0]; }
+  function yaziPaylas(m) {
+    var t = paylasMetni(m);
+    if (navigator.share) { navigator.share({ text: t }).catch(function () {}); return; }
+    window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+  }
+  function resimYukle(src) { return new Promise(function (ok, hata) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = hata; i.src = src; }); }
+  function kartCiz(m, dosya) {
+    var W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+    var x = c.getContext('2d'), url = URL.createObjectURL(dosya);
+    return Promise.all([resimYukle(url), resimYukle('logo.png').catch(function () { return null; })]).then(function (r) {
+      var f = r[0], logo = r[1], o = Math.max(W / f.width, H / f.height), fw = f.width * o, fh = f.height * o;
+      x.fillStyle = '#0B1F3A'; x.fillRect(0, 0, W, H);
+      x.drawImage(f, (W - fw) / 2, (H - fh) / 2, fw, fh);
+      var g = x.createLinearGradient(0, H * 0.52, 0, H); g.addColorStop(0, 'rgba(11,31,58,0)'); g.addColorStop(1, 'rgba(11,31,58,.92)');
+      x.fillStyle = g; x.fillRect(0, H * 0.5, W, H * 0.5);
+      x.fillStyle = '#fff'; x.textBaseline = 'alphabetic';
+      var boy = 76; x.font = '700 ' + boy + 'px "DM Sans", Arial, sans-serif';
+      while (x.measureText('📍 ' + m.ad).width > W - 120 && boy > 40) { boy -= 4; x.font = '700 ' + boy + 'px "DM Sans", Arial, sans-serif'; }
+      x.fillText('📍 ' + m.ad, 60, H - 250);
+      x.font = '500 46px "DM Sans", Arial, sans-serif'; x.fillStyle = '#E4B84A'; x.fillText(m.sehir, 64, H - 180);
+      if (logo) { var lh = 84, lw = logo.width * lh / logo.height; x.fillStyle = '#fff';
+        if (x.roundRect) { x.beginPath(); x.roundRect(60, H - 140, lw + 36, lh + 24, 18); x.fill(); } else x.fillRect(60, H - 140, lw + 36, lh + 24);
+        x.drawImage(logo, 78, H - 128, lw, lh); }
+      URL.revokeObjectURL(url);
+      return new Promise(function (ok) { c.toBlob(function (b) { ok(b); }, 'image/jpeg', 0.9); });
+    });
+  }
+  function fotoPaylas(m, dosya) {
+    var on = $('paylasOnizleme'); if (on) on.innerHTML = '<p class="kucuk-not">Hazırlanıyor…</p>';
+    kartCiz(m, dosya).then(function (b) {
+      var ad = 'ismailcosar-' + normal(m.ad).replace(/ /g, '-').slice(0, 30) + '.jpg';
+      var f = new File([b], ad, { type: 'image/jpeg' }), u = URL.createObjectURL(b);
+      if (on) on.innerHTML = '<img src="' + u + '" alt="Paylaşım görseli">' +
+        '<button type="button" class="btn-dolu" data-eylem="foto-gonder" style="margin-top:10px">📤 Paylaş</button>' +
+        '<a class="btn-cizgi" href="' + u + '" download="' + esc(ad) + '" style="margin-top:8px">⬇️ Telefona kaydet</a>';
+      S.paylasDosya = f; S.paylasMekan = m;
+    }).catch(function () { if (on) on.innerHTML = '<p class="kucuk-not">Fotoğraf açılamadı. Başka bir fotoğraf deneyin.</p>'; });
+  }
+  function fotoGonder() {
+    var f = S.paylasDosya, m = S.paylasMekan; if (!f || !m) return;
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], text: paylasMetni(m) }).catch(function () {}); return; }
+    bildir('Bu telefon doğrudan paylaşımı desteklemiyor; “Telefona kaydet” ile kaydedip paylaşabilirsiniz.');
   }
 
   var VAKIT_ADLARI = [['imsak', 'İmsak'], ['gunes', 'Güneş'], ['ogle', 'Öğle'], ['ikindi', 'İkindi'], ['aksam', 'Akşam'], ['yatsi', 'Yatsı']];
@@ -869,11 +996,17 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'bildirim-kapat') bildirimKapat();
     else if (ey === 'konum-gonder') konumGonder();
     else if (ey === 'cikis') kafiledenCik();
+    else if (ey === 'rehber-sehir') { S.rehberSehir = t.getAttribute('data-sehir'); ciz(); }
+    else if (ey === 'mekan-paylas') { var mk = mekanBul(t.getAttribute('data-id')); if (mk) paylasimAc(mk); }
+    else if (ey === 'yazi-paylas') { var my = mekanBul(t.getAttribute('data-id')); if (my) yaziPaylas(my); }
+    else if (ey === 'foto-gonder') fotoGonder();
+    else if (ey === 'paylas-kapat') paylasimKapat();
     else if (ey === 'karsilama-bitti') { S.karsilama = false; yaz('kafile-karsilandi-' + S.kod, true); S.sekme = 'bugun'; ciz(); window.scrollTo(0, 0); }
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }
     else if (ey === 'yukle' && S.yukleIstemi) { S.yukleIstemi.prompt(); S.yukleIstemi.userChoice.finally(function () { S.yukleIstemi = null; ciz(); }); }
   });
   document.addEventListener('change', function (e) {
+    if (e.target.id === 'paylasFoto') { var mf = mekanBul(e.target.getAttribute('data-id')), df = e.target.files && e.target.files[0]; if (mf && df) fotoPaylas(mf, df); return; }
     var x = e.target.getAttribute && e.target.getAttribute('data-valiz');
     if (x == null) return;
     if (e.target.checked) S.valiz[x] = 1; else delete S.valiz[x];

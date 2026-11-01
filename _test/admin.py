@@ -67,11 +67,11 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#sayfa-ana') and not pg.is_visible('#sayfa-basvuru') and 'Grup Yönetimi' in pg.inner_text('#sayfa-ana') and 'Site Yönetimi' in pg.inner_text('#sayfa-ana'),
             'Girişte Ana Sayfa açılıyor (Başvurular değil); Grup Yönetimi ve Site Yönetimi bölümleri var', errs)
     basliklar = pg.locator('.sidebar .nav-baslik, .sidebar .nav-item').evaluate_all("l => l.map(e => e.id || e.textContent.trim())")
-    kontrol(basliklar[:5] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber'] and basliklar[5:11] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-ekle', 'btn-duyuru', 'btn-yorum'],
+    kontrol(basliklar[:6] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber', 'btn-sehir'] and basliklar[6:12] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-ekle', 'btn-duyuru', 'btn-yorum'],
             'Menü gruplu: Grup Yönetimi (Gruplar, Müşteriler, Rehber) ve Site Yönetimi (Başvurular, Turlar, Duyurular, Yorumlar)', basliklar)
     pg.locator('#sayfa-ana button', has_text='Müşteriler').click(); pg.wait_for_timeout(300)
     kontrol(pg.is_visible('#sayfa-musteri'), 'Ana Sayfa: kutucuğa basınca ilgili sekme açılıyor')
-    for sekme in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri', 'rehber']:
+    for sekme in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri', 'rehber', 'sehir']:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(400)
         kontrol(pg.is_visible(f'#sayfa-{sekme}') and not errs, f'Sekme açılıyor: {sekme}', errs)
 
@@ -265,6 +265,39 @@ with sync_playwright() as p:
     fn = pg.evaluate('window.__fn')
     kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sil', 'user_id': rid} and pg.locator('.rehber-item').count() == 0 and not errs, 'Rehber hesabı: siliniyor', errs)
 
+    # ── Şehir rehberi ──
+    pg.evaluate("""window.__DB.sehir_rehberi = [
+      { id: 501, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'gezi', ad: 'Sarı Tabya', aciklama: 'Manzara', harita: 'https://www.google.com/maps/search/?api=1&query=x', sira: 100, yayinda: false },
+      { id: 502, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'yemek', ad: '<b>Željo</b>', aciklama: '', harita: null, sira: 90, yayinda: false },
+      { id: 503, sehir: 'Mostar', diger_adlar: [], tur: 'gezi', ad: 'Mostar Köprüsü', aciklama: '', harita: null, sira: 80, yayinda: true }];""")
+    pg.evaluate("sekmeAc('sehir')"); pg.wait_for_timeout(400); errs.clear()
+    kontrol(pg.input_value('#sr_sehir') == 'Mostar' and pg.locator('#sr_sehir option').count() == 2 and pg.locator('.mekan-item').count() == 1, 'Şehir rehberi (admin): şehirler listede, seçili şehrin mekanları görünüyor', errs)
+    pg.select_option('#sr_sehir', 'Saraybosna'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('.mekan-item').count() == 2 and pg.locator('.mekan-item .badge-red').count() == 2 and '2 taslak' in pg.inner_text('#sr_sehir') and pg.locator('.mekan-item h4 b b').count() == 0,
+            'Şehir rehberi (admin): taslaklar işaretli, isimdeki HTML düz yazı')
+    pg.evaluate("window.__islem = []"); pg.locator('.mekan-item[data-id="501"]').get_by_role('button', name='Yayınla').click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': True} and g[0]['filtre'] == [['id', 501]] and pg.locator('.mekan-item[data-id="501"] .badge-green').count() == 1, 'Şehir rehberi (admin): tek mekan yayınlanıyor')
+    pg.evaluate("window.__islem = []"); pg.get_by_role('button', name=re.compile('tümünü yayınla')).click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['filtre'] == [['sehir', 'Saraybosna']] and pg.locator('.mekan-item .badge-red').count() == 0, 'Şehir rehberi (admin): şehrin tümü tek tuşla yayınlanıyor')
+    pg.evaluate("window.__islem = []"); pg.get_by_role('button', name=re.compile('Mekan ekle')).click(); pg.wait_for_timeout(200)
+    kontrol(pg.input_value('#sr_f_sehir') == 'Saraybosna' and pg.input_value('#sr_f_diger') == 'Sarajevo', 'Şehir rehberi (admin): yeni mekan formu seçili şehirle açılıyor')
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(200)
+    kontrol(not pg.evaluate('window.__islem'), 'Şehir rehberi (admin): mekan adı boşken kaydetmiyor')
+    pg.select_option('#sr_f_tur', 'yemek'); pg.fill('#sr_f_ad', 'Inat Kuća'); pg.fill('#sr_f_aciklama', 'Boşnak yemekleri'); pg.fill('#sr_f_harita', 'javascript:alert(1)')
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(200)
+    kontrol(not pg.evaluate('window.__islem'), 'Şehir rehberi (admin): https olmayan harita bağlantısı kabul edilmiyor')
+    pg.fill('#sr_f_harita', ''); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'insert']
+    v = ek[0]['veri'] if ek else {}
+    kontrol(len(ek) == 1 and v.get('sehir') == 'Saraybosna' and v.get('tur') == 'yemek' and v.get('yayinda') is False and v.get('harita', '').startswith('https://www.google.com/maps/search/') and v.get('sira') < 90 and v.get('diger_adlar') == ['Sarajevo'],
+            'Şehir rehberi (admin): yeni mekan taslak olarak, harita aramasıyla ve listenin sonuna ekleniyor', errs)
+    pg.evaluate("window.__islem = []"); pg.locator('.mekan-item[data-id="503"]').count()
+    pg.select_option('#sr_sehir', 'Mostar'); pg.wait_for_timeout(200); pg.locator('.mekan-item[data-id="503"]').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(300)
+    s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
+    kontrol(len(s_) == 1 and s_[0]['tablo'] == 'sehir_rehberi' and s_[0]['filtre'] == [['id', 503]] and not errs, 'Şehir rehberi (admin): mekan siliniyor', errs)
+
     pg.evaluate("sekmeAc('kafile')"); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-item').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
@@ -342,7 +375,7 @@ with sync_playwright() as p:
             window.__DB.musteriler = [{ id: 'm1', ad: 'Ayşe Kaya', telefon: '0533', dogum_tarihi: '1950-01-02', ileti_izni: true }];
             window.__DB.kafile_katilimcilar = [{ id: 7, kafile_id: 'k1', musteri_id: 'm1', odalar: { Mekke: '512' } }]; };""")
         rp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); rp.wait_for_timeout(300); rp.evaluate('window.__VERI_EK(); sekmeAc("kafile")'); rp.wait_for_timeout(500)
-        gorunen = [x for x in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber'] if rp.is_visible('#btn-' + x)] + (['başlık'] if rp.locator('.nav-baslik:visible').count() else [])
+        gorunen = [x for x in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber', 'sehir'] if rp.is_visible('#btn-' + x)] + (['başlık'] if rp.locator('.nav-baslik:visible').count() else [])
         kontrol(rp.is_visible('#appDiv') and not gorunen and 'Gruplarım' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Gruplarım" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')

@@ -113,6 +113,7 @@ body.rol-rehber .yonetici{display:none!important}
     <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Gruplar</button>
     <button class="nav-item yonetici" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
     <button class="nav-item yonetici" id="btn-rehber" onclick="sekmeAc('rehber')">🧭 Rehber Hesapları</button>
+    <button class="nav-item yonetici" id="btn-sehir" onclick="sekmeAc('sehir')">🗺️ Şehir Rehberi</button>
     <div class="nav-baslik yonetici">Site Yönetimi</div>
     <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
     <button class="nav-item yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
@@ -131,6 +132,7 @@ body.rol-rehber .yonetici{display:none!important}
     <div id="sayfa-yorum" style="display:none"></div>
     <div id="sayfa-musteri" style="display:none"></div>
     <div id="sayfa-rehber" style="display:none"></div>
+    <div id="sayfa-sehir" style="display:none"></div>
   </div>
 </div>
 
@@ -197,7 +199,7 @@ async function cikisYap() {
 
 function sekmeAc(ad) {
   if (ROL === 'rehber') ad = 'kafile';
-  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber'].forEach(s => {
+  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -212,6 +214,7 @@ function sekmeAc(ad) {
   if (ad === 'yorum') renderYorumlar();
   if (ad === 'musteri') renderMusteriler();
   if (ad === 'rehber') renderRehberler();
+  if (ad === 'sehir') renderSehirRehberi();
 }
 
 // ── ANA SAYFA (girişte açılır): iki bölüm, Grup Yönetimi ve Site Yönetimi ──
@@ -220,7 +223,7 @@ async function renderAna() {
   const b = (sekme, baslik, alt) => `<button type="button" onclick="sekmeAc('${sekme}')">${baslik}<small>${alt}</small></button>`;
   el.innerHTML = `<div class="header"><h2>Hoş geldiniz</h2></div>
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
-      ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}</div></div>
+      ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
       ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Tur Listesi', 'Turları düzenle, kopyala')}${b('ekle', '➕ Tur Ekle', 'Yeni tur programı')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>`;
   const [{ data: g }, { data: bv }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni')]);
@@ -1230,6 +1233,99 @@ async function rehberSifre(userId, btn) {
 async function rehberSil(userId) {
   if (!confirm('Rehber hesabı silinsin mi? Rehber artık giriş yapamaz.')) return;
   if (await rehberIslem({ islem: 'sil', user_id: userId })) { toast('✅ Hesap silindi', 'success'); renderRehberler(); }
+}
+
+// ── ŞEHİR REHBERİ (kültür turları: misafir uygulamasının Rehber ekranında gezilecek yerler ve yeme-içme) ──
+// Taslaklar uygulamada görünmez; "Yayınla" ile açılır. Uygulama, grubun otel şehirlerini şehir adı ya da "diğer adlar" ile eşleştirir.
+const SR = { liste: [], sehir: '', duzenlenen: null };
+const SR_TUR = { gezi: '📍 Gezilecek yerler', yemek: '🍽️ Yeme-içme' };
+function srHarita(ad, sehir) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ad + ' ' + sehir); }
+async function renderSehirRehberi() {
+  const el = document.getElementById('sayfa-sehir');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const { data, error } = await sb.from('sehir_rehberi').select('*').order('sira', { ascending: false });
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  SR.liste = data || [];
+  const sehirler = [...new Set(SR.liste.map(x => x.sehir))].sort((a, b) => a.localeCompare(b, 'tr'));
+  if (!sehirler.includes(SR.sehir)) SR.sehir = sehirler[0] || '';
+  SR.duzenlenen = null;
+  sehirCiz();
+}
+function sehirCiz() {
+  const sehirler = [...new Set(SR.liste.map(x => x.sehir))].sort((a, b) => a.localeCompare(b, 'tr'));
+  const l = SR.liste.filter(x => x.sehir === SR.sehir).sort((a, b) => b.sira - a.sira);
+  const taslak = l.filter(x => !x.yayinda).length, d = SR.duzenlenen;
+  const ornek = l[0] || {};
+  const sayi = s => { const k = SR.liste.filter(x => x.sehir === s); const t = k.filter(x => !x.yayinda).length; return `${s} (${k.length}${t ? ', ' + t + ' taslak' : ''})`; };
+  document.getElementById('sayfa-sehir').innerHTML = `
+    <div class="header"><h2>🗺️ Şehir Rehberi</h2><button class="btn btn-gold" onclick="sehirMekanYeni()">➕ Mekan ekle</button></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Kültür turlarında misafir uygulamasının <b>Rehber</b> ekranında, grubun otel şehirlerine göre gezilecek yerler ve yeme-içme mekanları çıkar. <b>Taslaklar uygulamada görünmez</b>; kontrol ettiklerinizi “Yayınla” ile açın. Her mekanda “Haritada aç” Google Haritalar'ı açar; güncel puan ve yorumlar oradan görülür.</div>
+    ${d ? sehirFormHtml(d) : ''}
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <select id="sr_sehir" onchange="SR.sehir=this.value;SR.duzenlenen=null;sehirCiz()" style="padding:9px;border:1.5px solid #ddd;border-radius:6px;font-size:14px">${sehirler.map(s => `<option value="${esc(s)}" ${s === SR.sehir ? 'selected' : ''}>${esc(sayi(s))}</option>`).join('')}</select>
+        ${l.length ? `<button class="btn btn-gold" onclick="sehirTopluYayin(true)" ${taslak ? '' : 'disabled'}>✅ Bu şehrin tümünü yayınla</button><button class="btn btn-navy" onclick="sehirTopluYayin(false)">Tümünü taslağa al</button>` : ''}
+      </div>
+      ${ornek.diger_adlar && ornek.diger_adlar.length ? `<p style="font-size:12px;color:#888;margin-bottom:10px">Eşleşen adlar: ${esc([SR.sehir].concat(ornek.diger_adlar).join(', '))}</p>` : ''}
+      ${['gezi', 'yemek'].map(t => { const k = l.filter(x => x.tur === t); return `<h3 style="margin:14px 0 8px">${SR_TUR[t]} (${k.length})</h3><div class="tur-list">${k.map(x => `
+        <div class="tur-item mekan-item" data-id="${x.id}"><div class="tur-item-info"><h4>${esc(x.ad)} <span class="badge ${x.yayinda ? 'badge-green' : 'badge-red'}">${x.yayinda ? 'Yayında' : 'Taslak'}</span></h4><p>${esc(x.aciklama || '')}</p>
+          <p><a href="${esc(x.harita || srHarita(x.ad, x.sehir))}" target="_blank" rel="noopener">Haritada aç ↗</a></p></div>
+          <div class="tur-item-actions"><button class="btn ${x.yayinda ? 'btn-navy' : 'btn-gold'}" onclick="sehirMekanYayin(${x.id}, ${!x.yayinda})">${x.yayinda ? 'Taslağa al' : 'Yayınla'}</button>
+            <button class="btn btn-navy" onclick="sehirMekanDuzenle(${x.id})">Düzenle</button><button class="btn btn-red" onclick="sehirMekanSil(${x.id})">Sil</button></div></div>`).join('') || '<p style="color:#888;font-size:13px">Yok</p>'}</div>`; }).join('')}
+      ${sehirler.length ? '' : '<p style="color:#666;font-size:14px">Henüz mekan yok. “Mekan ekle” ile başlayın.</p>'}
+    </div>`;
+}
+function sehirFormHtml(d) {
+  return `<div class="card" id="sr_kart"><h3>${d.id ? '✏️ Mekanı düzenle' : '➕ Yeni mekan'}</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Şehir</label><input id="sr_f_sehir" list="srSehirler" value="${esc(d.sehir || '')}" placeholder="Ör. Saraybosna"><datalist id="srSehirler">${[...new Set(SR.liste.map(x => x.sehir))].map(s => `<option value="${esc(s)}">`).join('')}</datalist></div>
+      <div class="form-group"><label>Şehrin diğer adları (virgülle)</label><input id="sr_f_diger" value="${esc((d.diger_adlar || []).join(', '))}" placeholder="Sarajevo, Bosna"><div style="font-size:11.5px;color:#888;margin-top:4px">Grupta otel şehri bu adlardan biriyle yazılmışsa da eşleşir.</div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tür</label><select id="sr_f_tur">${Object.entries(SR_TUR).map(([k, v]) => `<option value="${k}" ${d.tur === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Mekan adı</label><input id="sr_f_ad" value="${esc(d.ad || '')}"></div>
+    </div>
+    <div class="form-group"><label>Kısa açıklama</label><input id="sr_f_aciklama" value="${esc(d.aciklama || '')}" placeholder="Ne ile bilinir, ipucu"></div>
+    <div class="form-group"><label>Harita bağlantısı (boş bırakılırsa ad + şehirle Google Haritalar araması)</label><input id="sr_f_harita" value="${esc(d.harita || '')}" placeholder="https://maps.app.goo.gl/..."></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="sr_f_yayinda" ${d.yayinda ? 'checked' : ''}> Yayında (uygulamada görünsün)</label>
+    <div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="sehirMekanKaydet()">💾 Kaydet</button><button class="btn btn-navy" onclick="SR.duzenlenen=null;sehirCiz()">Vazgeç</button></div></div>`;
+}
+function sehirMekanYeni() {
+  const ornek = SR.liste.find(x => x.sehir === SR.sehir) || {};
+  SR.duzenlenen = { sehir: SR.sehir, diger_adlar: ornek.diger_adlar || [], tur: 'gezi', yayinda: false }; sehirCiz(); window.scrollTo(0, 0);
+}
+function sehirMekanDuzenle(id) { SR.duzenlenen = SR.liste.find(x => x.id === id) || null; sehirCiz(); window.scrollTo(0, 0); }
+async function sehirMekanKaydet() {
+  const d = SR.duzenlenen; if (!d) return;
+  const v = (i) => document.getElementById(i).value.trim();
+  const k = { sehir: v('sr_f_sehir'), diger_adlar: v('sr_f_diger').split(',').map(x => x.trim()).filter(Boolean), tur: v('sr_f_tur'), ad: v('sr_f_ad'),
+    aciklama: v('sr_f_aciklama') || null, harita: v('sr_f_harita') || null, yayinda: document.getElementById('sr_f_yayinda').checked };
+  if (k.sehir.length < 2 || k.ad.length < 2) { toast('❌ Şehir ve mekan adı gerekli', 'error'); return; }
+  if (k.harita && !/^https:\/\//.test(k.harita)) { toast('❌ Harita bağlantısı https:// ile başlamalı', 'error'); return; }
+  if (!k.harita) k.harita = srHarita(k.ad, k.sehir);
+  if (!d.id) k.sira = Math.min(0, ...SR.liste.filter(x => x.sehir === k.sehir).map(x => x.sira)) - 1;
+  const { error } = d.id ? await sb.from('sehir_rehberi').update(k).eq('id', d.id) : await sb.from('sehir_rehberi').insert(k);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  // Aynı şehrin diğer adları tüm mekanlarda aynı olsun
+  if (SR.liste.some(x => x.sehir === k.sehir && x.id !== d.id && JSON.stringify(x.diger_adlar || []) !== JSON.stringify(k.diger_adlar))) await sb.from('sehir_rehberi').update({ diger_adlar: k.diger_adlar }).eq('sehir', k.sehir);
+  toast('✅ Kaydedildi', 'success'); SR.sehir = k.sehir; renderSehirRehberi();
+}
+async function sehirMekanYayin(id, ac) {
+  const { error } = await sb.from('sehir_rehberi').update({ yayinda: ac }).eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  const x = SR.liste.find(y => y.id === id); if (x) x.yayinda = ac; sehirCiz();
+}
+async function sehirTopluYayin(ac) {
+  if (!confirm(`${SR.sehir} şehrindeki tüm mekanlar ${ac ? 'yayınlansın' : 'taslağa alınsın'} mı?`)) return;
+  const { error } = await sb.from('sehir_rehberi').update({ yayinda: ac }).eq('sehir', SR.sehir);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  SR.liste.forEach(x => { if (x.sehir === SR.sehir) x.yayinda = ac; }); toast('✅ Güncellendi', 'success'); sehirCiz();
+}
+async function sehirMekanSil(id) {
+  if (!confirm('Mekan silinsin mi?')) return;
+  const { error } = await sb.from('sehir_rehberi').delete().eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  SR.liste = SR.liste.filter(x => x.id !== id); toast('✅ Silindi', 'success'); sehirCiz();
 }
 
 // ── YORUMLAR (yolculardan WhatsApp vb. ile gelen mesajlar; sitede "Misafirlerimiz Ne Diyor?" bölümünde) ──
