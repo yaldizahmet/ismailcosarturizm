@@ -1,0 +1,1590 @@
+[
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Taş Köprü",
+"aciklama": "Vardar Nehri üzerindeki 15. yüzyıl Osmanlı köprüsü; Makedonya Meydanı'nı Eski Çarşı'ya bağlar.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Stone%20Bridge%20Skopje",
+"sira": 100
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Eski Çarşı (Türk Çarşısı)",
+"aciklama": "Balkanların en büyük Osmanlı çarşılarından; hanlar, camiler, kuyumcular sokağı ve kahvehaneler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Old%20Bazaar%20Skopje",
+"sira": 99
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Mustafa Paşa Camii",
+"aciklama": "1492'den kalma cami; çarşının üstündeki tepede, avlusundan şehir manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Mustafa%20Pasha%20Mosque%20Skopje",
+"sira": 98
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Üsküp Kalesi",
+"aciklama": "Çarşının hemen üstünde; surlarda yürüyüş ve Vardar manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Skopje%20Fortress%20Kale",
+"sira": 97
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Kurşunlu Han ve Suli Han",
+"aciklama": "Osmanlı kervansarayları; Suli Han'da Eski Çarşı Müzesi var.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Suli%20An%20Skopje",
+"sira": 96
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "gezi",
+"ad": "Çifte Hamam",
+"aciklama": "15. yüzyıl Osmanlı hamamı; bugün Ulusal Galeri olarak kullanılıyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Chifte%20Amam%20Skopje",
+"sira": 95
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "yemek",
+"ad": "Destan",
+"aciklama": "Eski Çarşı'nın bilinen kebapçılarından; Üsküp kebabı (küçük köfte) ve somun.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Destan%20kebapi%20Skopje%20Old%20Bazaar",
+"sira": 94
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "yemek",
+"ad": "Turist",
+"aciklama": "Eski Çarşı'da kebap salonu; Üsküp kebabı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Turist%20kebapi%20Skopje%20Old%20Bazaar",
+"sira": 93
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "yemek",
+"ad": "Pçela (Pcela)",
+"aciklama": "Eski Çarşı'da kebapçı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Pcela%20kebapi%20Skopje",
+"sira": 92
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "yemek",
+"ad": "Galerija7",
+"aciklama": "Eski Çarşı'da lahmacun ve pide.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Galerija%207%20Skopje%20Old%20Bazaar",
+"sira": 91
+},
+{
+"sehir": "Üsküp",
+"diger_adlar": [
+"Skopje",
+"Skopye",
+"Uskup"
+],
+"tur": "yemek",
+"ad": "Rigara",
+"aciklama": "1969'dan beri baklava, lokum ve trileçe.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Rigara%20Skopje%20Old%20Bazaar",
+"sira": 90
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Belgrad Kalesi ve Kalemegdan",
+"aciklama": "Sava ile Tuna'nın birleştiği tepede; İstanbul Kapısı ve Osmanlı izleri, gün batımı manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Belgrade%20Fortress%20Kalemegdan",
+"sira": 100
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Damat Ali Paşa Türbesi",
+"aciklama": "Kalemegdan içinde, Osmanlı veziri Damat Ali Paşa'nın türbesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Damad%20Ali%20Pasha%20Turbe%20Belgrade",
+"sira": 99
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Bayraklı Camii",
+"aciklama": "Belgrad'da ayakta kalan tek Osmanlı camii; Gospodar Jevremova Caddesi'nde.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Bajrakli%20Mosque%20Belgrade",
+"sira": 98
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Knez Mihailova Caddesi",
+"aciklama": "Şehrin en işlek yaya caddesi; mağazalar ve kafeler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Knez%20Mihailova%20Belgrade",
+"sira": 97
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Cumhuriyet Meydanı",
+"aciklama": "Ulusal Müze ve Ulusal Tiyatro'nun bulunduğu ana meydan.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Republic%20Square%20Belgrade",
+"sira": 96
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "gezi",
+"ad": "Zemun ve Gardoş Kulesi",
+"aciklama": "Tuna kıyısında eski Zemun; kuleden şehir manzarası, kıyıda yürüyüş.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Gardos%20Tower%20Zemun",
+"sira": 95
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "yemek",
+"ad": "Afifa Halal Food",
+"aciklama": "Bayraklı Camii yakınında; ćevapi ve Boşnak lezzetleri. Helal olduğunu belirtiyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Afifa%20Halal%20Food%20Belgrade",
+"sira": 94
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "yemek",
+"ad": "Kultura Café & Restaurant",
+"aciklama": "Türk ve Arap mutfağı; helal olduğunu belirtiyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kultura%20Cafe%20Restaurant%20Belgrade",
+"sira": 93
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "yemek",
+"ad": "Meze Türk Restoranı",
+"aciklama": "Türk mutfağı; helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Meze%20Turski%20Restoran%20Halal%20Belgrade",
+"sira": 92
+},
+{
+"sehir": "Belgrad",
+"diger_adlar": [
+"Belgrade",
+"Beograd"
+],
+"tur": "yemek",
+"ad": "Gurme Döner Kebab",
+"aciklama": "Sremska 4a, merkezde döner. Helal durumunu kasada sorun.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Gurme%20Doner%20Kebab%20Sremska%20Belgrade",
+"sira": 91
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Başçarşı ve Sebil",
+"aciklama": "Osmanlı çarşısı; Sebil çeşmesi, bakırcılar sokağı, Bursa Bedesteni.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Sebilj%20Bascarsija%20Sarajevo",
+"sira": 100
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Gazi Hüsrev Bey Camii",
+"aciklama": "1531'den kalma, Bosna'nın en önemli Osmanlı camii.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Gazi%20Husrev-beg%20Mosque%20Sarajevo",
+"sira": 99
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Latin Köprüsü",
+"aciklama": "1914 suikastının yaşandığı Osmanlı köprüsü; Miljacka üzerinde.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Latin%20Bridge%20Sarajevo",
+"sira": 98
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Sarı Tabya",
+"aciklama": "Şehre tepeden bakan eski tabya; gün batımında Saraybosna manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Zuta%20Tabija%20Sarajevo",
+"sira": 97
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Morića Hanı",
+"aciklama": "Başçarşı'daki Osmanlı kervansarayı; avlusunda kahve molası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Morica%20Han%20Sarajevo",
+"sira": 96
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Umut Tüneli",
+"aciklama": "Kuşatma yıllarında kazılan tünel; bugün müze.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Tunnel%20of%20Hope%20Sarajevo",
+"sira": 95
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "gezi",
+"ad": "Vrelo Bosne",
+"aciklama": "Bosna Nehri'nin kaynağı; Ilidža'da yeşillik içinde park.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Vrelo%20Bosne",
+"sira": 94
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Ćevabdžinica Željo",
+"aciklama": "Başçarşı'nın en bilinen ćevapçısı; yoğun saatlerde sıra olabilir.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Cevabdzinica%20Zeljo%20Sarajevo",
+"sira": 93
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Ćevabdžinica Hodžić",
+"aciklama": "Sebil'in yanında; hızlı servis, meydana bakan masalar.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Cevabdzinica%20Hodzic%20Bascarsija",
+"sira": 92
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Petica Ferhatović",
+"aciklama": "Bravadžiluk'ta; yerlilerin sevdiği ćevapçı, somunu övülür.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Petica%20Ferhatovic%20Sarajevo",
+"sira": 91
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Inat Kuća (İnat Evi)",
+"aciklama": "Tarihi İnat Evi'nde geleneksel Boşnak yemekleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Inat%20Kuca%20Sarajevo",
+"sira": 90
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Buregdžinica Sač",
+"aciklama": "Sac altında pişen Boşnak böreği (pita).",
+"harita": "https://www.google.com/maps/search/?api=1&query=Buregdzinica%20Sac%20Sarajevo",
+"sira": 89
+},
+{
+"sehir": "Saraybosna",
+"diger_adlar": [
+"Sarajevo",
+"Bosna",
+"Saraybosna"
+],
+"tur": "yemek",
+"ad": "Aščinica Hadžibajrić",
+"aciklama": "Ev yemekleri lokantası; günlük tencere yemekleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ascinica%20Hadzibajric%20Sarajevo",
+"sira": 88
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Mostar Köprüsü",
+"aciklama": "1566'da Mimar Hayreddin'in yaptığı, UNESCO listesindeki köprü; köprüden atlayışları izleyin.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Stari%20Most%20Mostar",
+"sira": 100
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Koski Mehmed Paşa Camii",
+"aciklama": "Minaresinden köprünün en güzel manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Koski%20Mehmed%20Pasha%20Mosque%20Mostar",
+"sira": 99
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Kuyumcular Çarşısı (Kujundžiluk)",
+"aciklama": "Köprüye inen taş sokak; el sanatları ve bakır işleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kujundziluk%20Mostar",
+"sira": 98
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Eğri Köprü",
+"aciklama": "Eski köprünün küçük ikizi sayılan Osmanlı köprüsü.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Crooked%20Bridge%20Mostar",
+"sira": 97
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Türk Evi (Bišćevića Kuća)",
+"aciklama": "Osmanlı dönemi konak; ev müzesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Biscevic%20House%20Mostar",
+"sira": 96
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Blagaj Tekkesi",
+"aciklama": "Buna Nehri'nin kaynağında, Sarı Saltuk'a atfedilen tekke.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Blagaj%20Tekija",
+"sira": 95
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Ćevabdžinica Tima-Irma",
+"aciklama": "30 yılı aşkın aile işletmesi; ćevapi ve karışık ızgara, uygun fiyat.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Cevabdzinica%20Tima%20Irma%20Mostar",
+"sira": 94
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Šadrvan",
+"aciklama": "Köprüye birkaç dakika; kebap, karışık ızgara ve Boşnak kahvesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restoran%20Sadrvan%20Mostar",
+"sira": 93
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Hindin Han",
+"aciklama": "Eğri Köprü'nün karşısında; bol porsiyon, makul fiyat.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Hindin%20Han%20Mostar",
+"sira": 92
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Lagero",
+"aciklama": "Köprü manzaralı teras; Boşnak yemekleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Lagero%20Mostar",
+"sira": 91
+},
+{
+"sehir": "Mostar",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Restoran Kaldrma",
+"aciklama": "Köprüye birkaç adım; geleneksel Boşnak yemekleri ve ćevapi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restoran%20Kaldrma%20Mostar",
+"sira": 90
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Ohri Kalesi",
+"aciklama": "Şehrin tepesindeki Çar Samuel Kalesi; göl manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Samuels%20Fortress%20Ohrid",
+"sira": 100
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Eski Çarşı ve Bin Yıllık Çınar",
+"aciklama": "Türk Çarşısı'nda alışveriş; meşhur Ohri incisi takılar.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ohrid%20Old%20Bazaar%20Plane%20Tree",
+"sira": 99
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Halveti Tekkesi",
+"aciklama": "Çarşı yakınındaki Osmanlı dönemi tekke.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Halveti%20Hayati%20Baba%20Tekke%20Ohrid",
+"sira": 98
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Ali Paşa Camii",
+"aciklama": "Ohri merkezdeki Osmanlı camii.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ali%20Pasha%20Mosque%20Ohrid",
+"sira": 97
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Kaneo Koyu",
+"aciklama": "Göl kıyısında yürüyüş yolu ve şehrin en bilinen manzara noktası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kaneo%20Ohrid",
+"sira": 96
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "gezi",
+"ad": "Ohri Gölü tekne turu",
+"aciklama": "Limandan kalkan teknelerle göl gezisi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ohrid%20harbour%20boat%20tour",
+"sira": 95
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "yemek",
+"ad": "Letna Bavča Kaneo",
+"aciklama": "Kaneo kıyısında; Ohri alabalığı ve göl balıkları, manzara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Letna%20Bavca%20Kaneo%20Ohrid",
+"sira": 94
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "yemek",
+"ad": "Kaj Kanevče",
+"aciklama": "Kaneo'da; geleneksel yemekler ve balık.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kaj%20Kanevce%20Ohrid",
+"sira": 93
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "yemek",
+"ad": "Restoran Čun",
+"aciklama": "Göl kenarında; balık yemekleri, kahvaltı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restoran%20Cun%20Ohrid",
+"sira": 92
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "yemek",
+"ad": "Restoran Sveta Sofija",
+"aciklama": "Ohri alabalığı ve yöresel yemekler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restoran%20Sveta%20Sofija%20Ohrid",
+"sira": 91
+},
+{
+"sehir": "Ohri",
+"diger_adlar": [
+"Ohrid",
+"Ohri"
+],
+"tur": "yemek",
+"ad": "Belvedere",
+"aciklama": "Liman yakınında; ızgara ve balık.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Belvedere%20Ohrid",
+"sira": 90
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Prizren Kalesi",
+"aciklama": "Şehre tepeden bakan kale; gün batımında manzara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Prizren%20Fortress",
+"sira": 100
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Şadırvan Meydanı",
+"aciklama": "Şehrin kalbi; kafeler ve çarşı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Shadervan%20Prizren",
+"sira": 99
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Taş Köprü",
+"aciklama": "Bistriça üzerindeki üç kemerli Osmanlı köprüsü.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Old%20Stone%20Bridge%20Prizren",
+"sira": 98
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Sinan Paşa Camii",
+"aciklama": "1615'ten kalma, şehrin simgesi büyük kubbeli cami.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Sinan%20Pasha%20Mosque%20Prizren",
+"sira": 97
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Gazi Mehmet Paşa Hamamı",
+"aciklama": "16. yüzyıl Osmanlı çifte hamamı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Gazi%20Mehmed%20Pasha%20Hamam%20Prizren",
+"sira": 96
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Saraçhane Halveti Tekkesi",
+"aciklama": "Tasavvuf musikisi programlarının yapıldığı tekke.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Halveti%20Tekke%20Prizren",
+"sira": 95
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Te Syla",
+"aciklama": "Bistriça kıyısında, Şadırvan yakınında; Prizren kebabı (qebapa) ve karışık ızgara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Te%20Syla%20Prizren",
+"sira": 94
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Ambient",
+"aciklama": "Nehir ve şelale manzarası; geleneksel et yemekleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ambient%20Restaurant%20Prizren",
+"sira": 93
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Sarajeva",
+"aciklama": "Şadırvan yakınında; kıymalı, peynirli, ıspanaklı börek.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Sarajeva%20burek%20Prizren",
+"sira": 92
+},
+{
+"sehir": "Prizren",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Tiffany",
+"aciklama": "Mantı, Elbasan tava, sarma gibi paylaşmalık yöresel yemekler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Tiffany%20Restaurant%20Prizren",
+"sira": 91
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "Rozafa Kalesi",
+"aciklama": "Göl ve nehirlere tepeden bakan kale; geniş manzara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Rozafa%20Castle%20Shkoder",
+"sira": 100
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "Kurşunlu Cami",
+"aciklama": "1773'ten kalma Osmanlı camii; kale eteğinde.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Lead%20Mosque%20Shkoder",
+"sira": 99
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "Kolë Idromeno Caddesi",
+"aciklama": "Renkli yaya caddesi; akşam yürüyüşü ve kafeler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kole%20Idromeno%20Shkoder",
+"sira": 98
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "Ebu Bekir Camii",
+"aciklama": "Şehir merkezindeki büyük cami.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ebu%20Bekr%20Mosque%20Shkoder",
+"sira": 97
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "İşkodra Gölü",
+"aciklama": "Balkanların en büyük gölü; kıyıda yürüyüş ve manzara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Lake%20Shkodra%20Shiroka",
+"sira": 96
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "gezi",
+"ad": "Mes Köprüsü",
+"aciklama": "Şehrin 8 km kuzeyindeki 18. yüzyıl Osmanlı köprüsü.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Mesi%20Bridge%20Shkoder",
+"sira": 95
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "yemek",
+"ad": "Tradita",
+"aciklama": "Geleneksel kuzey Arnavut mutfağı; göl balığı (tava e krapi) ve fërgesë.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Tradita%20Shkoder",
+"sira": 94
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "yemek",
+"ad": "Rozafa Oteli restoranı",
+"aciklama": "Merkezde; helal menü seçenekleri olduğu belirtiliyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Hotel%20Rozafa%20Shkoder",
+"sira": 93
+},
+{
+"sehir": "İşkodra",
+"diger_adlar": [
+"Shkoder",
+"Shkodër",
+"Shkodra",
+"Iskodra",
+"İşkodra"
+],
+"tur": "yemek",
+"ad": "Buna kıyısı balık restoranları",
+"aciklama": "Göl ve nehir balığı; sazan ve alabalık.",
+"harita": "https://www.google.com/maps/search/?api=1&query=fish%20restaurant%20Buna%20river%20Shkoder",
+"sira": 92
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Kraliyet Sarayı",
+"aciklama": "İspanya kraliyet sarayı; salonlar ve Sabatini bahçeleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Palacio%20Real%20Madrid",
+"sira": 100
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Arap Surları (Muralla Árabe)",
+"aciklama": "Endülüs döneminde Mayrit kalesinden kalan surlar; Almudena yakınında.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Muralla%20Arabe%20Madrid",
+"sira": 99
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Plaza Mayor",
+"aciklama": "Revaklarla çevrili tarihi meydan.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Plaza%20Mayor%20Madrid",
+"sira": 98
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Puerta del Sol",
+"aciklama": "Şehrin merkezi; 0 km noktası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Puerta%20del%20Sol%20Madrid",
+"sira": 97
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Retiro Parkı",
+"aciklama": "Göl, kayıklar ve Kristal Saray'ın bulunduğu büyük park.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Retiro%20Park%20Madrid",
+"sira": 96
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Prado Müzesi",
+"aciklama": "Dünyanın en önemli resim müzelerinden.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Museo%20del%20Prado",
+"sira": 95
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "gezi",
+"ad": "Madrid Merkez Camii (Ebu Bekir)",
+"aciklama": "Tetuán'daki şehrin en eski camii.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Mezquita%20Central%20de%20Madrid%20Abu%20Bakr",
+"sira": 94
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Nemrut Kebap",
+"aciklama": "Ópera ve Gran Vía yakınında; Türk döneri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Nemrut%20Kebap%20Calle%20de%20Vergara%20Madrid",
+"sira": 93
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Al-Mounia",
+"aciklama": "Recoletos'ta Fas mutfağı; helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Al-Mounia%20Calle%20de%20Recoletos%20Madrid",
+"sira": 92
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Aladino",
+"aciklama": "Plaza de España yakınında Fas ve Suriye mutfağı; helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Aladino%20Calle%20del%20Duque%20de%20Liria%20Madrid",
+"sira": 91
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Esfahan",
+"aciklama": "Plaza de España yakınında İran mutfağı; helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Esfahan%20Calle%20San%20Bernardino%20Madrid",
+"sira": 90
+},
+{
+"sehir": "Madrid",
+"diger_adlar": [],
+"tur": "yemek",
+"ad": "Chocolatería San Ginés",
+"aciklama": "1894'ten beri churros ve sıcak çikolata.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Chocolateria%20San%20Gines%20Madrid",
+"sira": 89
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Real Alcázar",
+"aciklama": "Endülüs ve mudéjar izleriyle saray ve bahçeler; bilet önceden alınmalı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Real%20Alcazar%20Sevilla",
+"sira": 100
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Giralda ve Katedral",
+"aciklama": "Giralda, Muvahhidler döneminin cami minaresi olarak yapıldı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Giralda%20Sevilla",
+"sira": 99
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Plaza de España",
+"aciklama": "Yarım daire biçimli, çini süslemeli meydan.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Plaza%20de%20Espana%20Sevilla",
+"sira": 98
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Santa Cruz Mahallesi",
+"aciklama": "Dar sokaklı, avlulu eski Yahudi mahallesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Barrio%20Santa%20Cruz%20Sevilla",
+"sira": 97
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Torre del Oro",
+"aciklama": "Guadalquivir kıyısında Muvahhid dönemi kulesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Torre%20del%20Oro%20Sevilla",
+"sira": 96
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "gezi",
+"ad": "Metropol Parasol (Las Setas)",
+"aciklama": "Ahşap çatı üzerinde seyir terası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Setas%20de%20Sevilla",
+"sira": 95
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "yemek",
+"ad": "Al Wadi",
+"aciklama": "Katedral yakınında; kabsa, mansaf, künefe ve baklava. Helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Al%20Wadi%20Calle%20Jimios%20Sevilla",
+"sira": 94
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "yemek",
+"ad": "Aladdin Centro",
+"aciklama": "Santa Cruz'da Orta Doğu mutfağı; helal ve alkolsüz olduğunu belirtiyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Aladdin%20Santa%20Maria%20la%20Blanca%20Sevilla",
+"sira": 93
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "yemek",
+"ad": "Fez",
+"aciklama": "Fas tajini, kuskus ve harira; helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Fez%20Calle%20San%20Esteban%20Sevilla",
+"sira": 92
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "yemek",
+"ad": "El Rincón de Beirut",
+"aciklama": "Lübnan mutfağı; şavurma, falafel, karışık ızgara. Helal.",
+"harita": "https://www.google.com/maps/search/?api=1&query=El%20Rincon%20de%20Beirut%20Sevilla",
+"sira": 91
+},
+{
+"sehir": "Sevilla",
+"diger_adlar": [
+"Seville",
+"Sevilla"
+],
+"tur": "yemek",
+"ad": "Tetería Al Sultan",
+"aciklama": "Fas çay evi; nane çayı ve tatlılar.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Teteria%20Al%20Sultan%20Calle%20Trajano%20Sevilla",
+"sira": 90
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "El Hambra Sarayı",
+"aciklama": "Nasrî sarayları; giriş saatli ve kontenjanlı, bilet önceden alınmalı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Alhambra%20Granada",
+"sira": 100
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "Generalife Bahçeleri",
+"aciklama": "El Hambra'nın yazlık sarayı ve bahçeleri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Generalife%20Granada",
+"sira": 99
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "San Nicolás Seyir Terası",
+"aciklama": "El Hambra'nın en güzel manzarası; gün batımında kalabalık.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Mirador%20de%20San%20Nicolas%20Granada",
+"sira": 98
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "Granada Büyük Camii",
+"aciklama": "Seyir terasının yanında; bahçesinden El Hambra manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Mezquita%20Mayor%20de%20Granada",
+"sira": 97
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "Albaicín",
+"aciklama": "Endülüs döneminden kalma dar sokaklı mahalle.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Albaicin%20Granada",
+"sira": 96
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "gezi",
+"ad": "Calderería Nueva",
+"aciklama": "Çay evleri ve Mağrip dükkânlarının olduğu sokak.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Caldereria%20Nueva%20Granada",
+"sira": 95
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "yemek",
+"ad": "Arrayanes",
+"aciklama": "1996'dan beri Fas mutfağı; pastilla, erikli kuzu tajin. Akşam için rezervasyon önerilir.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Arrayanes%20Granada",
+"sira": 94
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "yemek",
+"ad": "Calderería çay evleri",
+"aciklama": "Alkolsüz Fas çay evleri; nane çayı, baklava ve Mağrip tatlıları.",
+"harita": "https://www.google.com/maps/search/?api=1&query=teteria%20Caldereria%20Nueva%20Granada",
+"sira": 93
+},
+{
+"sehir": "Granada",
+"diger_adlar": [
+"Gırnata"
+],
+"tur": "yemek",
+"ad": "Plaza Nueva döner ve kebapçıları",
+"aciklama": "Merkezde uygun fiyatlı döner, tavuk şavurma, falafel.",
+"harita": "https://www.google.com/maps/search/?api=1&query=kebab%20Plaza%20Nueva%20Granada",
+"sira": 92
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "gezi",
+"ad": "Alcazaba",
+"aciklama": "Endülüs döneminden kalma saray-kale.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Alcazaba%20Malaga",
+"sira": 100
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "gezi",
+"ad": "Gibralfaro Kalesi",
+"aciklama": "Tepeden şehir ve liman manzarası.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Castillo%20de%20Gibralfaro",
+"sira": 99
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "gezi",
+"ad": "Roma Tiyatrosu",
+"aciklama": "Alcazaba'nın eteğindeki antik tiyatro.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Teatro%20Romano%20Malaga",
+"sira": 98
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "gezi",
+"ad": "Calle Larios",
+"aciklama": "Şehrin ana alışveriş caddesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Calle%20Larios%20Malaga",
+"sira": 97
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "gezi",
+"ad": "Muelle Uno",
+"aciklama": "Liman kıyısında yürüyüş yolu, kafeler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Muelle%20Uno%20Malaga",
+"sira": 96
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "yemek",
+"ad": "A La Turca Halal",
+"aciklama": "Plaza de la Merced'de Türk mutfağı; helal olduğunu belirtiyor.",
+"harita": "https://www.google.com/maps/search/?api=1&query=A%20La%20Turca%20Halal%20Plaza%20de%20la%20Merced%20Malaga",
+"sira": 95
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "yemek",
+"ad": "Al-Yamal",
+"aciklama": "1983'ten beri Fas ve Orta Doğu mutfağı; kuskus, tajin, ızgara.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Al-Yamal%20Calle%20Blasco%20de%20Garay%20Malaga",
+"sira": 94
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "yemek",
+"ad": "El Rey del Shawarma",
+"aciklama": "La Malagueta'da şavurma ve Lübnan mutfağı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=El%20Rey%20del%20Shawarma%20Paseo%20de%20Reding%20Malaga",
+"sira": 93
+},
+{
+"sehir": "Malaga",
+"diger_adlar": [
+"Málaga"
+],
+"tur": "yemek",
+"ad": "Casa Aranda",
+"aciklama": "Şehrin bilinen churros ve sıcak çikolata dükkânı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Casa%20Aranda%20Malaga%20churros",
+"sira": 92
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Lyabi Havuz",
+"aciklama": "Dut ağaçları altında havuz; Nadir Divan Begi Medresesi ve çayhaneler.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Lyabi%20Hauz%20Bukhara",
+"sira": 100
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Kalon Minaresi ve Poi Kalon",
+"aciklama": "Buhara'nın simgesi minare, cami ve Mir-i Arap Medresesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Kalon%20Minaret%20Bukhara",
+"sira": 99
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Ark Kalesi",
+"aciklama": "Buhara emirlerinin kalesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ark%20of%20Bukhara",
+"sira": 98
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "İsmail Samani Türbesi",
+"aciklama": "10. yüzyıldan kalma tuğla işçiliği şaheseri.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Samanid%20Mausoleum%20Bukhara",
+"sira": 97
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Bahaeddin Nakşibend Külliyesi",
+"aciklama": "Şehrin 12 km dışında; Nakşibendi yolunun kurucusunun türbesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Bahauddin%20Naqshband%20Complex",
+"sira": 96
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Çar Minar",
+"aciklama": "Dört minareli küçük medrese kapısı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Chor%20Minor%20Bukhara",
+"sira": 95
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "gezi",
+"ad": "Kubbeli çarşılar",
+"aciklama": "Toki Zargaron gibi tarihi kubbeli çarşılar; el sanatları.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Toki%20Zargaron%20Bukhara",
+"sira": 94
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "yemek",
+"ad": "Lyabi Havuz Restoranı",
+"aciklama": "Havuz kenarında; şaşlık ve somsa.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Lyabi%20Hauz%20restaurant%20Bukhara",
+"sira": 93
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "yemek",
+"ad": "Old Bukhara",
+"aciklama": "Tarihi merkezde; ağaçlı avlu ve teras.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Old%20Bukhara%20restaurant",
+"sira": 92
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "yemek",
+"ad": "The Plov",
+"aciklama": "Buhara ve Semerkant usulü pilav.",
+"harita": "https://www.google.com/maps/search/?api=1&query=The%20Plov%20Bukhara",
+"sira": 91
+},
+{
+"sehir": "Buhara",
+"diger_adlar": [
+"Bukhara",
+"Buxoro"
+],
+"tur": "yemek",
+"ad": "Ayvan",
+"aciklama": "Lyabi House Hotel içinde; avlulu restoran.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ayvan%20Restaurant%20Bukhara",
+"sira": 90
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Registan Meydanı",
+"aciklama": "Üç medreseyle çevrili meydan; akşam ışıklandırması.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Registan%20Samarkand",
+"sira": 100
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Gur-i Emir",
+"aciklama": "Emir Timur'un türbesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Gur-e%20Amir%20Samarkand",
+"sira": 99
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Şah-ı Zinde",
+"aciklama": "Çinili türbeler sokağı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Shah-i-Zinda%20Samarkand",
+"sira": 98
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Bibi Hanım Camii",
+"aciklama": "Timur döneminin dev camii.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Bibi-Khanym%20Mosque%20Samarkand",
+"sira": 97
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Siyob Pazarı",
+"aciklama": "Semerkant ekmeği, kuru meyve ve baharat.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Siyob%20Bazaar%20Samarkand",
+"sira": 96
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "Uluğ Bey Rasathanesi",
+"aciklama": "15. yüzyıl gözlemevinin kalıntısı ve müzesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Ulugh%20Beg%20Observatory",
+"sira": 95
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "gezi",
+"ad": "İmam Buhari Külliyesi",
+"aciklama": "Şehrin yaklaşık 25 km dışında; İmam Buhari'nin türbesi.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Imam%20al-Bukhari%20Memorial%20Complex",
+"sira": 94
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "yemek",
+"ad": "Platan",
+"aciklama": "Özbek ve Avrupa mutfağı; şık ortam.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Platan%20restaurant%20Samarkand",
+"sira": 93
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "yemek",
+"ad": "Karimbek",
+"aciklama": "Pilav ve şaşlık; Özbek mutfağı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Karimbek%20restaurant%20Samarkand",
+"sira": 92
+},
+{
+"sehir": "Semerkant",
+"diger_adlar": [
+"Samarkand",
+"Samarqand",
+"Semerkand"
+],
+"tur": "yemek",
+"ad": "Bibi Hanım Çayhanesi",
+"aciklama": "Bibi Hanım Camii karşısında; çay ve tatlı.",
+"harita": "https://www.google.com/maps/search/?api=1&query=Bibikhanum%20Teahouse%20Samarkand",
+"sira": 91
+}
+]
