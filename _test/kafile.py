@@ -233,8 +233,9 @@ with sync_playwright() as p:
     kontrol(pg.evaluate('!window.__xss') and '<img' in pg.inner_text('.mekan[data-mekan="2"]'), 'Güvenlik: mekan açıklamasındaki HTML çalışmıyor')
     pg.click('.mekan[data-mekan="2"] [data-eylem="mekan-paylas"]'); pg.wait_for_timeout(300)
     kontrol(pg.is_visible('#paylasPerde') and 'Željo' in pg.inner_text('#paylasPerde') and pg.locator('#paylasPerde [data-eylem="yazi-paylas"]').count() == 0
-            and pg.locator('#paylasPerde label.btn-dolu[for="paylasFoto"]').count() == 1 and pg.locator('#paylasOnizleme img').count() == 0,
-            'Paylaş: panel açılıyor; öne çıkan seçenek "Fotoğrafımla paylaş", "Yazıyla paylaş" yok')
+            and pg.locator('#paylasPerde label.btn-dolu[for="paylasFoto"]').count() == 1 and pg.get_attribute('#paylasKamera', 'capture') == 'environment' and pg.locator('#paylasPerde label[for="paylasKamera"]').count() == 1
+            and pg.locator('#paylasOnizleme img').count() == 0,
+            'Paylaş: panel açılıyor; "Fotoğraf çek" (kamera) ve "Galeriden seç" öne çıkıyor, "Yazıyla paylaş" yok')
     from PIL import Image as _I; import io as _io
     _b = _io.BytesIO(); _I.new('RGB', (800, 600), (40, 120, 200)).save(_b, 'JPEG')
     pg.set_input_files('#paylasFoto', files=[{'name': 'f.jpg', 'mimeType': 'image/jpeg', 'buffer': _b.getvalue()}]); pg.wait_for_timeout(1200)
@@ -244,6 +245,9 @@ with sync_playwright() as p:
     py = pg.evaluate('window.__paylas')
     kontrol(len(py) == 1 and len(py[-1]['files']) == 1 and py[-1]['files'][0].startswith('image/jpeg:') and '📍 Ćevabdžinica Željo, Saraybosna' in py[-1]['text'] and 'İsmail Coşar Turizm' in py[-1]['text'],
             'Paylaş: fotoğraflı görsel, mekan ve firma adıyla paylaşıma gidiyor', str(py)[:140])
+    ilk = pg.get_attribute('#paylasOnizleme img', 'src')
+    pg.set_input_files('#paylasKamera', files=[{'name': 'k.jpg', 'mimeType': 'image/jpeg', 'buffer': _b.getvalue()}]); pg.wait_for_timeout(1200)
+    kontrol(pg.get_attribute('#paylasOnizleme img', 'src') != ilk, 'Paylaş: kamerayla çekilen fotoğraftan da görsel hazırlanıyor', errs)
     ilk = pg.get_attribute('#paylasOnizleme img', 'src')
     pg.click('#paylasPerde [data-eylem="hazir-gorsel"]'); pg.wait_for_timeout(1200)
     kontrol(pg.locator('#paylasOnizleme img').count() == 1 and pg.get_attribute('#paylasOnizleme img', 'src') != ilk and pg.evaluate("document.querySelector('#paylasOnizleme img').naturalWidth") == 1080,
