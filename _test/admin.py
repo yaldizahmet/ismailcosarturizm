@@ -64,7 +64,14 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#appDiv'), 'Oturum açıkken panel açılıyor', errs)
 
     # Bütün sekmeler hatasız açılıyor
-    for sekme in ['basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri', 'rehber']:
+    kontrol(pg.is_visible('#sayfa-ana') and not pg.is_visible('#sayfa-basvuru') and 'Grup Yönetimi' in pg.inner_text('#sayfa-ana') and 'Site Yönetimi' in pg.inner_text('#sayfa-ana'),
+            'Girişte Ana Sayfa açılıyor (Başvurular değil); Grup Yönetimi ve Site Yönetimi bölümleri var', errs)
+    basliklar = pg.locator('.sidebar .nav-baslik, .sidebar .nav-item').evaluate_all("l => l.map(e => e.id || e.textContent.trim())")
+    kontrol(basliklar[:5] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber'] and basliklar[5:11] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-ekle', 'btn-duyuru', 'btn-yorum'],
+            'Menü gruplu: Grup Yönetimi (Gruplar, Müşteriler, Rehber) ve Site Yönetimi (Başvurular, Turlar, Duyurular, Yorumlar)', basliklar)
+    pg.locator('#sayfa-ana button', has_text='Müşteriler').click(); pg.wait_for_timeout(300)
+    kontrol(pg.is_visible('#sayfa-musteri'), 'Ana Sayfa: kutucuğa basınca ilgili sekme açılıyor')
+    for sekme in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri', 'rehber']:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(400)
         kontrol(pg.is_visible(f'#sayfa-{sekme}') and not errs, f'Sekme açılıyor: {sekme}', errs)
 
@@ -335,7 +342,7 @@ with sync_playwright() as p:
             window.__DB.musteriler = [{ id: 'm1', ad: 'Ayşe Kaya', telefon: '0533', dogum_tarihi: '1950-01-02', ileti_izni: true }];
             window.__DB.kafile_katilimcilar = [{ id: 7, kafile_id: 'k1', musteri_id: 'm1', odalar: { Mekke: '512' } }]; };""")
         rp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); rp.wait_for_timeout(300); rp.evaluate('window.__VERI_EK(); sekmeAc("kafile")'); rp.wait_for_timeout(500)
-        gorunen = [x for x in ['basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber'] if rp.is_visible('#btn-' + x)]
+        gorunen = [x for x in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber'] if rp.is_visible('#btn-' + x)] + (['başlık'] if rp.locator('.nav-baslik:visible').count() else [])
         kontrol(rp.is_visible('#appDiv') and not gorunen and 'Gruplarım' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Gruplarım" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')

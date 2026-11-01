@@ -25,8 +25,14 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 .sidebar-logo img{height:40px;width:auto}
 .nav-item{display:block;padding:12px 20px;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
 body.rol-rehber .yonetici{display:none!important}
+.nav-baslik{padding:16px 20px 6px;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(228,184,74,.8);font-weight:700}
+.ana-kart h3{margin-bottom:12px}
+.ana-btnler{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.ana-btnler button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 16px;border:1px solid #eee;border-radius:10px;background:#fafafa;cursor:pointer;font-size:15px;font-weight:600;color:#0B1F3A}
+.ana-btnler button:hover{border-color:#C9972B;background:#fff8ec}
+.ana-btnler small{font-size:12px;font-weight:400;color:#777}
 .nav-item:hover,.nav-item.active{background:rgba(201,151,43,.15);color:#E4B84A}
-.main{margin-left:220px;padding:24px;min-height:100vh}
+.main{margin-left:220px;padding:24px;min-height:100vh;flex:1;min-width:0}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .header h2{color:#0B1F3A;font-size:20px}
 .btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
@@ -66,6 +72,7 @@ body.rol-rehber .yonetici{display:none!important}
   .sidebar-logo{display:none}
   .nav-item{width:auto;flex:none;white-space:nowrap;padding:15px 14px;font-size:14px;margin-top:0!important;border-bottom:3px solid transparent}
   .nav-item.active{border-bottom-color:#C9972B}
+  .nav-baslik{display:flex;align-items:center;flex:none;white-space:nowrap;padding:0 4px 0 14px;font-size:9.5px;border-left:1px solid rgba(255,255,255,.15)}
   .main{margin-left:0;padding:14px 12px 40px;min-width:0}
   .header{flex-wrap:wrap;gap:10px}
   .header h2{font-size:18px}
@@ -101,17 +108,21 @@ body.rol-rehber .yonetici{display:none!important}
 <div class="app" id="appDiv">
   <div class="sidebar">
     <div class="sidebar-logo"><img src="logo.png" alt="Logo"></div>
-    <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
-    <button class="nav-item active yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
-    <button class="nav-item yonetici" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
-    <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
-    <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Gruplar (Uygulama)</button>
-    <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
+    <button class="nav-item yonetici active" id="btn-ana" onclick="sekmeAc('ana')">🏠 Ana Sayfa</button>
+    <div class="nav-baslik yonetici">Grup Yönetimi</div>
+    <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Gruplar</button>
     <button class="nav-item yonetici" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
     <button class="nav-item yonetici" id="btn-rehber" onclick="sekmeAc('rehber')">🧭 Rehber Hesapları</button>
+    <div class="nav-baslik yonetici">Site Yönetimi</div>
+    <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
+    <button class="nav-item yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
+    <button class="nav-item yonetici" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
+    <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
+    <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
+    <div id="sayfa-ana" style="display:none"></div>
     <div id="sayfa-basvuru" style="display:none"></div>
     <div id="sayfa-turlar"></div>
     <div id="sayfa-ekle" style="display:none"></div>
@@ -143,10 +154,10 @@ async function paneliAc() {
     return;
   }
   document.body.classList.toggle('rol-rehber', ROL === 'rehber');
-  document.getElementById('btn-kafile').textContent = ROL === 'rehber' ? '👥 Gruplarım' : '🧳 Gruplar (Uygulama)';
+  document.getElementById('btn-kafile').textContent = ROL === 'rehber' ? '👥 Gruplarım' : '🧳 Gruplar';
   document.getElementById('loginDiv').style.display = 'none';
   document.getElementById('appDiv').style.display = 'flex';
-  sekmeAc(ROL === 'rehber' ? 'kafile' : 'basvuru');
+  sekmeAc(ROL === 'rehber' ? 'kafile' : 'ana');
 }
 
 window.onload = async () => {
@@ -186,12 +197,13 @@ async function cikisYap() {
 
 function sekmeAc(ad) {
   if (ROL === 'rehber') ad = 'kafile';
-  ['basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber'].forEach(s => {
+  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
     if (btn && s === ad && btn.scrollIntoView) { try { btn.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {} } // telefonda üst şeritte seçili sekme görünsün
   });
+  if (ad === 'ana') renderAna();
   if (ad === 'basvuru') renderBasvurular();
   if (ad === 'turlar') renderTurlar();
   if (ad === 'ekle') renderEkle();
@@ -200,6 +212,23 @@ function sekmeAc(ad) {
   if (ad === 'yorum') renderYorumlar();
   if (ad === 'musteri') renderMusteriler();
   if (ad === 'rehber') renderRehberler();
+}
+
+// ── ANA SAYFA (girişte açılır): iki bölüm, Grup Yönetimi ve Site Yönetimi ──
+async function renderAna() {
+  const el = document.getElementById('sayfa-ana');
+  const b = (sekme, baslik, alt) => `<button type="button" onclick="sekmeAc('${sekme}')">${baslik}<small>${alt}</small></button>`;
+  el.innerHTML = `<div class="header"><h2>Hoş geldiniz</h2></div>
+    <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
+      ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}</div></div>
+    <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
+      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Tur Listesi', 'Turları düzenle, kopyala')}${b('ekle', '➕ Tur Ekle', 'Yeni tur programı')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>`;
+  const [{ data: g }, { data: bv }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni')]);
+  const ag = (g || []).filter(k => k.aktif).length, yb = (bv || []).length;
+  const e1 = document.getElementById('anaGrup'), e2 = document.getElementById('anaBasvuru');
+  if (e1) e1.textContent = ag + ' aktif grup';
+  yeniSayacGuncelle();
+  if (e2) e2.innerHTML = yb ? '<b style="color:#dc3545">' + yb + ' yeni başvuru</b>' : 'Yeni başvuru yok';
 }
 
 // ── TUR LİSTESİ ──
