@@ -9,7 +9,8 @@ BASE = 'http://localhost:8765/'
 VERI = json.load(open(os.path.join(HERE, 'db.json'), encoding='utf-8'))
 
 SAHTE = 'window.__DB=' + json.dumps(VERI, ensure_ascii=False) + r''';
-window.__islem = [];
+window.__islem = []; window.__fn = [];
+window.__DB.kullanici_rolleri = [{ user_id: 'test-uid', rol: window.__ROL || 'admin', ad: 'Test' }];
 (function(){
   function Q(t){
     var tum = (window.__DB[t] = window.__DB[t] || []), satir = tum.slice(), tek = false, mod = 'select', yuk = null, filtre = [];
@@ -33,7 +34,12 @@ window.__islem = [];
   }
   window.supabase = { createClient: function(){ return {
     from: Q,
-    auth: { getSession: function(){ return Promise.resolve({ data: { session: { user: { email: 'test@test' } } } }); },
+    functions: { invoke: function(ad, o){ var g = o.body; window.__fn.push({ ad: ad, govde: g });
+      if (g.islem === 'olustur') { var id = 'rehber-' + window.__fn.length; window.__DB.kullanici_rolleri.push({ user_id: id, rol: 'rehber', ad: g.ad, kullanici_adi: g.kullanici_adi }); return Promise.resolve({ data: { tamam: true, user_id: id }, error: null }); }
+      if (g.islem === 'sil') window.__DB.kullanici_rolleri = window.__DB.kullanici_rolleri.filter(function(x){ return x.user_id !== g.user_id; });
+      return Promise.resolve({ data: { tamam: true }, error: null }); } },
+    auth: { getSession: function(){ return Promise.resolve({ data: { session: { user: { id: 'test-uid', email: 'test@test' } } } }); },
+            getUser: function(){ return Promise.resolve({ data: { user: { id: 'test-uid', email: 'test@test' } } }); },
             signInWithPassword: function(){ return Promise.resolve({ error: null }); }, signOut: function(){ return Promise.resolve({}); },
             onAuthStateChange: function(){ return { data: { subscription: { unsubscribe: function(){} } } }; } },
     storage: { from: function(){ return { upload: function(){ return Promise.resolve({ error: null }); }, getPublicUrl: function(){ return { data: { publicUrl: '' } }; } }; } }
@@ -58,7 +64,7 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#appDiv'), 'Oturum açıkken panel açılıyor', errs)
 
     # Bütün sekmeler hatasız açılıyor
-    for sekme in ['basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri']:
+    for sekme in ['basvuru', 'turlar', 'ekle', 'duyuru', 'kafile', 'yorum', 'musteri', 'rehber']:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(400)
         kontrol(pg.is_visible(f'#sayfa-{sekme}') and not errs, f'Sekme açılıyor: {sekme}', errs)
 
@@ -215,6 +221,32 @@ with sync_playwright() as p:
     pg.get_by_role('button', name=re.compile('tamamen sil')).click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s_) == 1 and s_[0]['tablo'] == 'musteriler' and pg.locator('.musteri-satir').count() == 2, 'Müşteriler: tamamen silinebiliyor', errs)
+
+    # ── Rehber hesapları (admin) ──
+    pg.evaluate("sekmeAc('rehber')"); pg.wait_for_timeout(400); errs.clear(); pg.evaluate("window.__fn = []; window.__islem = []")
+    pg.fill('#rh_ad', 'Ali Yılmaz'); pg.fill('#rh_ka', 'Ali Yılmaz'); pg.fill('#rh_sifre', 'gizli1234')
+    pg.get_by_role('button', name=re.compile('Hesap aç')).click(); pg.wait_for_timeout(300)
+    kontrol(not pg.evaluate('window.__fn'), 'Rehber hesabı: Türkçe karakterli/boşluklu kullanıcı adıyla açılmıyor')
+    pg.fill('#rh_ka', 'Ali.Yilmaz'); pg.fill('#rh_sifre', 'kisa'); pg.get_by_role('button', name=re.compile('Hesap aç')).click(); pg.wait_for_timeout(300)
+    kontrol(not pg.evaluate('window.__fn'), 'Rehber hesabı: kısa şifreyle açılmıyor')
+    pg.fill('#rh_sifre', 'gizli1234'); pg.get_by_role('button', name=re.compile('Hesap aç')).click(); pg.wait_for_timeout(500)
+    fn = pg.evaluate('window.__fn')
+    kontrol(len(fn) == 1 and fn[0]['ad'] == 'rehber-hesap' and fn[0]['govde'] == {'islem': 'olustur', 'ad': 'Ali Yılmaz', 'kullanici_adi': 'ali.yilmaz', 'sifre': 'gizli1234'}
+            and pg.locator('.rehber-item').count() == 1 and 'ali.yilmaz' in pg.inner_text('.rehber-item'), 'Rehber hesabı: açılıyor (kullanıcı adı küçük harfe çevriliyor) ve listede', errs)
+    rid = pg.get_attribute('.rehber-item', 'data-user')
+    pg.locator('.rehber-item .rh_kafile').first.check(); pg.wait_for_timeout(300)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
+    kontrol(len(ek) == 1 and ek[0]['veri']['user_id'] == rid and ek[0]['veri']['kafile_id'], 'Rehber hesabı: kafile işaretlenince rehbere atanıyor')
+    pg.evaluate("window.__islem = []"); pg.locator('.rehber-item .rh_kafile').first.uncheck(); pg.wait_for_timeout(300)
+    sl = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'delete']
+    kontrol(len(sl) == 1 and ['user_id', rid] in sl[0]['filtre'] and len(sl[0]['filtre']) == 2, 'Rehber hesabı: işaret kaldırılınca yalnızca o atama siliniyor')
+    pg.evaluate("window.__fn = []"); pg.fill('.rehber-item .rh_yeni_sifre', 'yenisifre99'); pg.get_by_role('button', name='Şifreyi değiştir').click(); pg.wait_for_timeout(300)
+    fn = pg.evaluate('window.__fn')
+    kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sifre', 'user_id': rid, 'sifre': 'yenisifre99'} and pg.input_value('.rehber-item .rh_yeni_sifre') == '', 'Rehber hesabı: şifre değiştiriliyor')
+    pg.evaluate("window.__fn = []"); pg.get_by_role('button', name='Hesabı sil').click(); pg.wait_for_timeout(400)
+    fn = pg.evaluate('window.__fn')
+    kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sil', 'user_id': rid} and pg.locator('.rehber-item').count() == 0 and not errs, 'Rehber hesabı: siliniyor', errs)
+
     pg.evaluate("sekmeAc('kafile')"); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-item').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
@@ -280,6 +312,35 @@ with sync_playwright() as p:
     pg.evaluate(f"turSil('{son}')"); pg.wait_for_timeout(400)
     s = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s) == 1 and s[0]['filtre'] == [['id', son]], 'Sil yalnızca seçilen turu siler', errs)
+
+    # ── Rehber rolüyle giriş: yalnızca kafilesinin katılımcı/oda listesi ──
+    for vp in [{'width': 1300, 'height': 900}, {'width': 390, 'height': 844}]:
+        rp = b.new_page(viewport=vp); errs = []
+        rp.on('pageerror', lambda e: errs.append(str(e)[:160]))
+        rp.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=SAHTE, headers={'content-type': 'application/javascript'}))
+        rp.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort() if 'jsdelivr' not in q.url else r.fallback())
+        rp.add_init_script("""window.confirm = function(){ return true; }; window.__ROL = 'rehber';
+          window.__VERI_EK = function(){ window.__DB.kafileler = [{ id: 'k1', kod: 'KASIM-AAAAA', ad: 'Kasım Kafilesi', aktif: true, oteller: [{ sehir: 'Mekke', ad: 'Otel A' }], program: [] }];
+            window.__DB.musteriler = [{ id: 'm1', ad: 'Ayşe Kaya', telefon: '0533', dogum_tarihi: '1950-01-02', ileti_izni: true }];
+            window.__DB.kafile_katilimcilar = [{ id: 7, kafile_id: 'k1', musteri_id: 'm1', odalar: { Mekke: '512' } }]; };""")
+        rp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); rp.wait_for_timeout(300); rp.evaluate('window.__VERI_EK(); sekmeAc("kafile")'); rp.wait_for_timeout(500)
+        gorunen = [x for x in ['basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber'] if rp.is_visible('#btn-' + x)]
+        kontrol(rp.is_visible('#appDiv') and not gorunen and 'Kafilelerim' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Kafilelerim" var', gorunen or errs)
+        rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
+        kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')
+        kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1 and rp.locator('.kafile-item a').count() == 0, 'Rehber: kafilede yalnızca "Katılımcılar ve odalar" butonu')
+        rp.locator('.kafile-item button').click(); rp.wait_for_timeout(400)
+        kontrol(rp.locator('#kt_kart').count() == 0 and rp.locator('summary', has_text='Excel').count() == 0 and rp.locator('.katilimci-satir button', has_text='Çıkar').count() == 0
+                and rp.locator('.katilimci-satir').count() == 1, 'Rehber: listeyi görüyor; ekleme, Excel ve çıkarma yok', errs)
+        rp.evaluate("window.__islem = []"); rp.locator('.katilimci-satir').get_by_role('button', name='Düzenle').click(); rp.wait_for_timeout(200)
+        kontrol(rp.locator('#kt_izin').count() == 0 and rp.input_value('#kt_kart .kt_oda') == '512', 'Rehber: düzenleme formu açılıyor (ileti izni alanı yok)')
+        rp.fill('#kt_kart .kt_oda', '520'); rp.fill('#kt_tel', '0533 999 88 77'); rp.locator('#kt_kart').get_by_role('button', name=re.compile('Kaydet')).click(); rp.wait_for_timeout(500)
+        isl = rp.evaluate('window.__islem')
+        mu = [i for i in isl if i['tablo'] == 'musteriler' and i['tur'] == 'update']; ku = [i for i in isl if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'update']
+        kontrol(len(mu) == 1 and 'ileti_izni' not in mu[0]['veri'] and mu[0]['veri']['telefon'] == '0533 999 88 77' and len(ku) == 1 and ku[0]['veri'] == {'odalar': {'Mekke': '520'}}
+                and not [i for i in isl if i['tur'] in ('insert', 'delete')] and not errs, 'Rehber: oda ve telefonu düzeltebiliyor (izin değişmiyor, ekleme/silme yok)', errs)
+        kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
+        rp.close()
     b.close()
 
 print('\n=== ADMIN TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')

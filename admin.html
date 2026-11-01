@@ -24,6 +24,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 .sidebar-logo{text-align:center;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:10px}
 .sidebar-logo img{height:40px;width:auto}
 .nav-item{display:block;padding:12px 20px;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+body.rol-rehber .yonetici{display:none!important}
 .nav-item:hover,.nav-item.active{background:rgba(201,151,43,.15);color:#E4B84A}
 .main{margin-left:220px;padding:24px;min-height:100vh}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
@@ -90,23 +91,24 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
   <div class="login-box">
     <h1>🔐 Admin Paneli</h1>
     <p>İsmail Coşar Turizm</p>
-    <input type="email" id="uname" placeholder="E-posta" autocomplete="username">
+    <input type="text" id="uname" placeholder="E-posta ya da kullanıcı adı" autocomplete="username" autocapitalize="none" spellcheck="false">
     <input type="password" id="upass" placeholder="Şifre" autocomplete="current-password">
     <button onclick="girisYap()" id="girisBtn">Giriş Yap</button>
-    <div class="err" id="loginErr">E-posta veya şifre yanlış!</div>
+    <div class="err" id="loginErr">Kullanıcı adı / e-posta veya şifre yanlış!</div>
   </div>
 </div>
 
 <div class="app" id="appDiv">
   <div class="sidebar">
     <div class="sidebar-logo"><img src="logo.png" alt="Logo"></div>
-    <button class="nav-item" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
-    <button class="nav-item active" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
-    <button class="nav-item" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
-    <button class="nav-item" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
+    <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
+    <button class="nav-item active yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
+    <button class="nav-item yonetici" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
+    <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Kafileler (Uygulama)</button>
-    <button class="nav-item" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
-    <button class="nav-item" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
+    <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
+    <button class="nav-item yonetici" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
+    <button class="nav-item yonetici" id="btn-rehber" onclick="sekmeAc('rehber')">🧭 Rehber Hesapları</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
   </div>
   <div class="main">
@@ -117,6 +119,7 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
     <div id="sayfa-kafile" style="display:none"></div>
     <div id="sayfa-yorum" style="display:none"></div>
     <div id="sayfa-musteri" style="display:none"></div>
+    <div id="sayfa-rehber" style="display:none"></div>
   </div>
 </div>
 
@@ -125,10 +128,25 @@ body{font-family:Arial,sans-serif;background:#f0f2f5}
 <script>
 const sb = supabase.createClient('https://wpkjxwbvewwgdclbsdya.supabase.co', 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK');
 
-function paneliAc() {
+// Roller: admin (her şey) · rehber (yalnızca atandığı kafilelerin katılımcı/oda listesi; veritabanı da aynı sınırı uygular)
+let ROL = null;
+const REHBER_ALAN = '@rehber.ismailcosarturizm.com.tr';
+async function paneliAc() {
+  let uid = null;
+  try { const { data } = await sb.auth.getUser(); uid = data && data.user && data.user.id; } catch (e) {}
+  const { data: r } = uid ? await sb.from('kullanici_rolleri').select('*').eq('user_id', uid).maybeSingle() : { data: null };
+  ROL = r ? r.rol : null;
+  if (ROL !== 'admin' && ROL !== 'rehber') {
+    await sb.auth.signOut();
+    const e = document.getElementById('loginErr'); e.textContent = 'Bu hesaba yetki tanımlanmamış.'; e.style.display = 'block';
+    document.getElementById('loginDiv').style.display = 'flex'; document.getElementById('appDiv').style.display = 'none';
+    return;
+  }
+  document.body.classList.toggle('rol-rehber', ROL === 'rehber');
+  document.getElementById('btn-kafile').textContent = ROL === 'rehber' ? '👥 Kafilelerim' : '🧳 Kafileler (Uygulama)';
   document.getElementById('loginDiv').style.display = 'none';
   document.getElementById('appDiv').style.display = 'flex';
-  sekmeAc('basvuru');
+  sekmeAc(ROL === 'rehber' ? 'kafile' : 'basvuru');
 }
 
 window.onload = async () => {
@@ -143,7 +161,8 @@ document.querySelectorAll('#loginDiv input').forEach(i => {
 });
 
 async function girisYap() {
-  const email = document.getElementById('uname').value.trim();
+  let email = document.getElementById('uname').value.trim();
+  if (email && !email.includes('@')) email = email.toLocaleLowerCase('en') + REHBER_ALAN; // rehber: yalnızca kullanıcı adı
   const password = document.getElementById('upass').value;
   const btn = document.getElementById('girisBtn');
   btn.disabled = true; btn.textContent = 'Giriş yapılıyor...';
@@ -153,19 +172,21 @@ async function girisYap() {
     document.getElementById('upass').value = '';
     paneliAc();
   } else {
+    document.getElementById('loginErr').textContent = 'Kullanıcı adı / e-posta veya şifre yanlış!';
     document.getElementById('loginErr').style.display = 'block';
     setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
   }
 }
 
 async function cikisYap() {
-  await sb.auth.signOut();
+  await sb.auth.signOut(); ROL = null; document.body.classList.remove('rol-rehber');
   document.getElementById('loginDiv').style.display = 'flex';
   document.getElementById('appDiv').style.display = 'none';
 }
 
 function sekmeAc(ad) {
-  ['basvuru','turlar','ekle','duyuru','kafile','yorum','musteri'].forEach(s => {
+  if (ROL === 'rehber') ad = 'kafile';
+  ['basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -178,6 +199,7 @@ function sekmeAc(ad) {
   if (ad === 'kafile') renderKafileler();
   if (ad === 'yorum') renderYorumlar();
   if (ad === 'musteri') renderMusteriler();
+  if (ad === 'rehber') renderRehberler();
 }
 
 // ── TUR LİSTESİ ──
@@ -539,6 +561,13 @@ async function renderKafileler() {
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
   const katSay = {}; (katlar || []).forEach(a => { katSay[a.kafile_id] = (katSay[a.kafile_id] || 0) + 1; });
+  if (ROL === 'rehber') {
+    el.innerHTML = '<div class="header"><h2>👥 Kafilelerim</h2></div><div class="card"><div class="tur-list">' +
+      ((data || []).map(k => `<div class="tur-item kafile-item"><div class="tur-item-info"><h4>${esc(k.ad)}</h4><p>${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · ${katSay[k.id] || 0} kişi</p></div>
+        <div class="tur-item-actions"><button class="btn btn-gold" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar ve odalar</button></div></div>`).join('') ||
+        '<p style="color:#666;font-size:14px">Size atanmış kafile yok. Ofisten kafileye atanmanızı isteyin.</p>') + '</div></div>';
+    return;
+  }
   let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
   html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
@@ -809,30 +838,30 @@ function katilimciFormHtml(x) {
       <div class="form-group"><label>Doğum tarihi</label><input id="kt_dogum" type="date" value="${esc(m.dogum_tarihi)}"></div>
     </div>
     <div class="form-row">${anah.map(a => `<div class="form-group"><label>Oda no – ${esc(a)}</label><input class="kt_oda" data-otel="${esc(a)}" value="${esc(od[a])}"></div>`).join('')}</div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="kt_izin" ${m.ileti_izni ? 'checked' : ''}> Doğum günü / kampanya mesajı göndermemize izin verdi</label>`;
+    ${ROL === 'rehber' ? '<div style="height:8px"></div>' : `<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="kt_izin" ${m.ileti_izni ? 'checked' : ''}> Doğum günü / kampanya mesajı göndermemize izin verdi</label>`}`;
 }
 
 function katilimciCiz() {
-  const k = KT.kafile, anah = odaAnahtarlari(k), d = KT.duzenlenen;
+  const k = KT.kafile, anah = odaAnahtarlari(k), d = KT.duzenlenen, rehber = ROL === 'rehber';
   const odaSay = new Set(KT.liste.map(x => (x.kat.odalar || {})[anah[0]]).filter(Boolean)).size;
   document.getElementById('sayfa-kafile').innerHTML = `
-    <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← Kafileler</button></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Bu liste yalnızca admin panelinde görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (kafile silinse bile).</div>
-    <div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
+    <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← ${rehber ? 'Kafilelerim' : 'Kafileler'}</button></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">${rehber ? 'Oda numaralarını ve kişi bilgilerini “Düzenle” ile düzeltebilirsiniz. Kişi ekleme/çıkarma için ofise haber verin.' : 'Bu liste yalnızca admin panelinde (ve bu kafileye atanan rehberde) görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (kafile silinse bile).'}</div>
+    ${rehber && !d ? '' : `<div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : ''}</div>
       ${d ? '' : `<details style="margin-top:16px" ${KT.onizleme.length ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Excel'den toplu yapıştır</summary>
         <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'de satırları seçip kopyalayın, aşağıya yapıştırın. Sütun sırası: <b>Ad Soyad · Telefon · Doğum tarihi${anah.map(a => ' · Oda (' + esc(a) + ')').join('')}</b>. Boş sütun olabilir; başlık satırı varsa atlanır. Tarih 12.03.1955 gibi yazılabilir.</p>
         <textarea id="kt_yapistir" rows="6" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px" placeholder="Ayşe Kaya	0532 111 22 33	12.03.1955	512	304"></textarea>
         <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-navy" onclick="katilimciOnizle()">👀 Önizle</button></div>
         <div id="kt_onizleme">${katilimciOnizlemeHtml()}</div></details>`}
-    </div>
+    </div>`}
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
         ${KT.liste.length ? '<button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button>' : ''}</div>
       ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(a) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
         ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => '<td><b>' + esc((x.kat.odalar || {})[a] || '') + '</b></td>').join('')}
           <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
-          <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> <button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button></td></tr>`).join('')}
+          <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> ${rehber ? '' : `<button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button>`}</td></tr>`).join('')}
       </tbody></table></div>` : '<p style="color:#666;font-size:14px">Henüz kimse eklenmedi.</p>'}
     </div>`;
 }
@@ -845,7 +874,7 @@ function katilimciDuzenle(katId) {
 function katilimciFormOku() {
   const odalar = {}; document.querySelectorAll('#kt_kart .kt_oda').forEach(i => { const v = i.value.trim(); if (v) odalar[i.getAttribute('data-otel')] = v; });
   return { ad: adDuzelt(document.getElementById('kt_ad').value), telefon: document.getElementById('kt_tel').value.trim(),
-    dogum: document.getElementById('kt_dogum').value || '', izin: document.getElementById('kt_izin').checked, odalar };
+    dogum: document.getElementById('kt_dogum').value || '', izin: document.getElementById('kt_izin') ? document.getElementById('kt_izin').checked : !!(KT.duzenlenen && KT.duzenlenen.m.ileti_izni), odalar };
 }
 
 // Bir kişiyi müşteri tablosuna (yoksa) ekler; müşteri kimliğini döner. Eksik bilgileri tamamlar, var olanı ezmez.
@@ -1033,6 +1062,74 @@ async function musteriSil() {
   const { error } = await sb.from('musteriler').delete().eq('id', d.id);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Silindi', 'success'); renderMusteriler();
+}
+
+// ── REHBER HESAPLARI (yalnızca admin) ──
+// Rehber yalnızca atandığı kafilelerin katılımcı ve oda listesini görür, düzeltir. Hesap açma/şifre/silme "rehber-hesap" fonksiyonuyla yapılır.
+async function rehberIslem(govde) {
+  const { data, error } = await sb.functions.invoke('rehber-hesap', { body: govde });
+  let hata = data && data.hata;
+  if (error && !hata) { try { const j = await error.context.json(); hata = j.hata; } catch (e) { hata = error.message; } }
+  if (hata) { toast('❌ ' + hata, 'error'); return null; }
+  return data || {};
+}
+async function renderRehberler() {
+  const el = document.getElementById('sayfa-rehber');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const [{ data: roller, error }, { data: atamalar }, { data: kafileler }] = await Promise.all([
+    sb.from('kullanici_rolleri').select('*').eq('rol', 'rehber'),
+    sb.from('kafile_rehberleri').select('*'),
+    sb.from('kafileler').select('*').order('baslangic', { ascending: false })
+  ]);
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  const atandi = (u, k) => (atamalar || []).some(a => a.user_id === u && a.kafile_id === k);
+  el.innerHTML = `
+    <div class="header"><h2>🧭 Rehber Hesapları</h2></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı kafilelerin <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
+    <div class="card"><h3>➕ Yeni rehber hesabı</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Ad soyad</label><input id="rh_ad" placeholder="Ali Yılmaz"></div>
+        <div class="form-group"><label>Kullanıcı adı (girişte yazacağı)</label><input id="rh_ka" placeholder="ali.yilmaz" autocapitalize="none" spellcheck="false"></div>
+        <div class="form-group"><label>Şifre (en az 8 karakter)</label><input id="rh_sifre" type="text" autocomplete="off"></div>
+      </div>
+      <button class="btn btn-gold" onclick="rehberOlustur()">➕ Hesap aç</button>
+    </div>
+    <div class="card"><h3>Rehberler (${(roller || []).length})</h3><div class="tur-list">
+      ${(roller || []).map(r => `<div class="tur-item rehber-item" data-user="${esc(r.user_id)}" style="flex-direction:column;align-items:stretch">
+        <div class="tur-item-info"><h4>${esc(r.ad || '')}</h4><p>Kullanıcı adı: <b>${esc(r.kullanici_adi || '')}</b></p></div>
+        <div style="font-size:12.5px;font-weight:600;margin:8px 0 4px">Görebileceği kafileler</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${(kafileler || []).map(k => `<label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" class="rh_kafile" ${atandi(r.user_id, k.id) ? 'checked' : ''} onchange="rehberAta('${esc(r.user_id)}','${esc(k.id)}',this.checked)"> ${esc(k.ad)}</label>`).join('') || '<span style="font-size:13px;color:#888">Kafile yok</span>'}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
+          <input class="rh_yeni_sifre" type="text" placeholder="Yeni şifre" autocomplete="off" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;max-width:180px">
+          <button class="btn btn-navy" onclick="rehberSifre('${esc(r.user_id)}', this)">Şifreyi değiştir</button>
+          <button class="btn btn-red" style="margin-left:auto" onclick="rehberSil('${esc(r.user_id)}')">Hesabı sil</button>
+        </div></div>`).join('') || '<p style="color:#666;font-size:14px">Henüz rehber hesabı yok.</p>'}
+    </div></div>`;
+}
+async function rehberOlustur() {
+  const ad = document.getElementById('rh_ad').value.trim(), ka = document.getElementById('rh_ka').value.trim().toLocaleLowerCase('en'), sifre = document.getElementById('rh_sifre').value;
+  if (ad.length < 2) { toast('❌ Ad soyad gerekli', 'error'); return; }
+  if (!/^[a-z0-9._-]{3,30}$/.test(ka)) { toast('❌ Kullanıcı adı 3-30 karakter; Türkçe karakter ve boşluk olmadan (ör. ali.yilmaz)', 'error'); return; }
+  if (sifre.length < 8) { toast('❌ Şifre en az 8 karakter olmalı', 'error'); return; }
+  const r = await rehberIslem({ islem: 'olustur', ad, kullanici_adi: ka, sifre });
+  if (!r) return;
+  toast('✅ Hesap açıldı. Şimdi görebileceği kafileleri işaretleyin.', 'success');
+  renderRehberler();
+}
+async function rehberAta(userId, kafileId, ac) {
+  const { error } = ac ? await sb.from('kafile_rehberleri').insert({ user_id: userId, kafile_id: kafileId })
+                       : await sb.from('kafile_rehberleri').delete().eq('user_id', userId).eq('kafile_id', kafileId);
+  if (error) { toast('❌ ' + error.message, 'error'); renderRehberler(); return; }
+  toast(ac ? '✅ Kafile rehbere açıldı' : '✅ Kafile rehberden kaldırıldı', 'success');
+}
+async function rehberSifre(userId, btn) {
+  const kutu = btn.parentElement.querySelector('.rh_yeni_sifre'), sifre = kutu.value;
+  if (sifre.length < 8) { toast('❌ Şifre en az 8 karakter olmalı', 'error'); return; }
+  if (await rehberIslem({ islem: 'sifre', user_id: userId, sifre })) { kutu.value = ''; toast('✅ Şifre değiştirildi', 'success'); }
+}
+async function rehberSil(userId) {
+  if (!confirm('Rehber hesabı silinsin mi? Rehber artık giriş yapamaz.')) return;
+  if (await rehberIslem({ islem: 'sil', user_id: userId })) { toast('✅ Hesap silindi', 'success'); renderRehberler(); }
 }
 
 // ── YORUMLAR (yolculardan WhatsApp vb. ile gelen mesajlar; sitede "Misafirlerimiz Ne Diyor?" bölümünde) ──
