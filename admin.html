@@ -105,7 +105,7 @@ body.rol-rehber .yonetici{display:none!important}
     <button class="nav-item active yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item yonetici" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
-    <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Kafileler (Uygulama)</button>
+    <button class="nav-item" id="btn-kafile" onclick="sekmeAc('kafile')">🧳 Gruplar (Uygulama)</button>
     <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
     <button class="nav-item yonetici" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
     <button class="nav-item yonetici" id="btn-rehber" onclick="sekmeAc('rehber')">🧭 Rehber Hesapları</button>
@@ -143,7 +143,7 @@ async function paneliAc() {
     return;
   }
   document.body.classList.toggle('rol-rehber', ROL === 'rehber');
-  document.getElementById('btn-kafile').textContent = ROL === 'rehber' ? '👥 Kafilelerim' : '🧳 Kafileler (Uygulama)';
+  document.getElementById('btn-kafile').textContent = ROL === 'rehber' ? '👥 Gruplarım' : '🧳 Gruplar (Uygulama)';
   document.getElementById('loginDiv').style.display = 'none';
   document.getElementById('appDiv').style.display = 'flex';
   sekmeAc(ROL === 'rehber' ? 'kafile' : 'basvuru');
@@ -538,12 +538,20 @@ const TUR_TURLERI = { umre: 'Umre', hac: 'Hac', kultur: 'Kültür turu' };
 
 function kafileKodUret(ad) {
   const tr = {'Ç':'C','Ğ':'G','İ':'I','I':'I','Ö':'O','Ş':'S','Ü':'U'};
-  let on = String(ad || '').toLocaleUpperCase('tr').replace(/[ÇĞİIÖŞÜ]/g, c => tr[c]).replace(/[^A-Z]/g, ' ').trim().split(/\s+/)[0] || 'KAFILE';
+  let on = String(ad || '').toLocaleUpperCase('tr').replace(/[ÇĞİIÖŞÜ]/g, c => tr[c]).replace(/[^A-Z]/g, ' ').trim().split(/\s+/)[0] || 'GRUP';
   on = on.slice(0, 8);
   const r = new Uint32Array(5); crypto.getRandomValues(r);
   return on + '-' + Array.from(r, x => KOD_HARF[x % KOD_HARF.length]).join('');
 }
 
+// Yeni grupta kod, grup adı yazıldıkça adın ilk kelimesiyle güncellenir (ör. KASIM-7K3QX); kod elle değiştirildiyse dokunulmaz
+function kodOto() {
+  const k = document.getElementById('k_kod'), ad = document.getElementById('k_ad');
+  if (!k || !ad || k.dataset.elle) return;
+  const ek = (k.value.split('-').pop() || '').slice(0, 5);
+  const yeni = kafileKodUret(ad.value);
+  k.value = /^[A-Z2-9]{5}$/.test(ek) ? yeni.replace(/-[^-]*$/, '-' + ek) : yeni;
+}
 function kafileTarih(t) { return t ? new Date(t + 'T12:00:00').toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'}) : '—'; }
 
 function kafilePaylasMetni(k) {
@@ -562,17 +570,17 @@ async function renderKafileler() {
   const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
   const katSay = {}; (katlar || []).forEach(a => { katSay[a.kafile_id] = (katSay[a.kafile_id] || 0) + 1; });
   if (ROL === 'rehber') {
-    el.innerHTML = '<div class="header"><h2>👥 Kafilelerim</h2></div><div class="card"><div class="tur-list">' +
+    el.innerHTML = '<div class="header"><h2>👥 Gruplarım</h2></div><div class="card"><div class="tur-list">' +
       ((data || []).map(k => `<div class="tur-item kafile-item"><div class="tur-item-info"><h4>${esc(k.ad)}</h4><p>${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · ${katSay[k.id] || 0} kişi · Misafir kodu: <b style="letter-spacing:1px">${esc(k.kod)}</b></p></div>
         <div class="tur-item-actions" style="flex-wrap:wrap"><button class="btn btn-gold" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar ve odalar</button>
           <a class="btn rehber-paylas" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">📲 Misafir kodunu paylaş</a></div></div>`).join('') ||
-        '<p style="color:#666;font-size:14px">Size atanmış kafile yok. Ofisten kafileye atanmanızı isteyin.</p>') + '</div></div>';
+        '<p style="color:#666;font-size:14px">Size atanmış grup yok. Ofisten gruba atanmanızı isteyin.</p>') + '</div></div>';
     return;
   }
-  let html = '<div class="header"><h2>🧳 Kafileler</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Kafile</button></div>';
-  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını kafilenin WhatsApp grubuna gönderin. Pasif kafileler uygulamada görünmez.</div>';
+  let html = '<div class="header"><h2>🧳 Gruplar</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Grup</button></div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını grubun WhatsApp grubuna gönderin. Pasif gruplar uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
-  if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz kafile yok. “Yeni Kafile” ile ekleyin.</p>';
+  if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz grup yok. “Yeni Grup” ile ekleyin.</p>';
   html += (data || []).map(k => `
     <div class="tur-item kafile-item">
       <div class="tur-item-info">
@@ -634,12 +642,12 @@ function kafileFormu(k) {
   const oteller = (k.oteller && k.oteller.length) ? k.oteller : [{}, {}];
   while (oteller.length < 2) oteller.push({});
   document.getElementById('sayfa-kafile').innerHTML = `
-    <div class="header"><h2>${yeni ? '➕ Yeni Kafile' : '✏️ Kafile Düzenle'}</h2></div>
-    <div class="card"><h3>Kafile bilgileri</h3>
+    <div class="header"><h2>${yeni ? '➕ Yeni Grup' : '✏️ Grup Düzenle'}</h2></div>
+    <div class="card"><h3>Grup bilgileri</h3>
       <div class="form-row">
-        <div class="form-group"><label>Kafile adı</label><input id="k_ad" value="${esc(k.ad)}" placeholder="Kasım 2026 Umre Kafilesi"></div>
+        <div class="form-group"><label>Grup adı</label><input id="k_ad" value="${esc(k.ad)}" placeholder="Kasım 2026 Umre Grubu" ${yeni ? 'oninput="kodOto()"' : ''}></div>
         <div class="form-group"><label>Grup kodu (misafirler bununla girer)</label>
-          <div style="display:flex;gap:6px"><input id="k_kod" value="${esc(k.kod)}" style="text-transform:uppercase;letter-spacing:1px"><button type="button" class="btn btn-navy" onclick="document.getElementById('k_kod').value=kafileKodUret(document.getElementById('k_ad').value)">Yeni kod</button></div></div>
+          <div style="display:flex;gap:6px"><input id="k_kod" value="${esc(k.kod)}" oninput="this.dataset.elle = 1" style="text-transform:uppercase;letter-spacing:1px"><button type="button" class="btn btn-navy" onclick="document.getElementById('k_kod').value=kafileKodUret(document.getElementById('k_ad').value)">Yeni kod</button></div></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Gidiş tarihi</label><input id="k_baslangic" type="date" value="${esc(k.baslangic)}"></div>
@@ -678,7 +686,7 @@ function kafileYeni() {
 
 async function kafileDuzenle(id) {
   const { data, error } = await sb.from('kafileler').select('*').eq('id', id).single();
-  if (error || !data) { toast('❌ Kafile okunamadı', 'error'); return; }
+  if (error || !data) { toast('❌ Grup okunamadı', 'error'); return; }
   kafileFormu(data);
 }
 
@@ -702,16 +710,16 @@ function kafileFormOku() {
 
 async function kafileKaydet(id) {
   const k = kafileFormOku();
-  if (!k.ad) { toast('❌ Kafile adı gerekli', 'error'); return; }
+  if (!k.ad) { toast('❌ Grup adı gerekli', 'error'); return; }
   if (!/^[A-Z0-9-]{4,40}$/.test(k.kod)) { toast('❌ Kod en az 4 karakter olmalı; yalnızca harf, rakam ve tire', 'error'); return; }
   const { error } = id ? await sb.from('kafileler').update(k).eq('id', id) : await sb.from('kafileler').insert(k);
-  if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir kafilede kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
-  toast('✅ Kafile kaydedildi', 'success');
+  if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir grupta kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
+  toast('✅ Grup kaydedildi', 'success');
   renderKafileler();
 }
 
 async function kafileSil(id) {
-  if (!confirm('Kafile, tüm duyuruları ve katılımcı/oda listesi silinsin mi? (Müşteri kayıtları silinmez.) Bu geri alınamaz.')) return;
+  if (!confirm('Grup, tüm duyuruları ve katılımcı/oda listesi silinsin mi? (Müşteri kayıtları silinmez.) Bu geri alınamaz.')) return;
   const { error } = await sb.from('kafileler').delete().eq('id', id);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Silindi', 'success');
@@ -727,9 +735,9 @@ async function kafileDuyurular(id) {
     sb.from('bildirim_abonelikleri').select('id').eq('kafile_id', id)
   ]);
   const aboneSayisi = (aboneler || []).length;
-  if (!k) { toast('❌ Kafile okunamadı', 'error'); renderKafileler(); return; }
+  if (!k) { toast('❌ Grup okunamadı', 'error'); renderKafileler(); return; }
   el.innerHTML = `
-    <div class="header"><h2>📢 ${esc(k.ad)} – Duyurular</h2><button class="btn btn-navy" onclick="renderKafileler()">← Kafileler</button></div>
+    <div class="header"><h2>📢 ${esc(k.ad)} – Duyurular</h2><button class="btn btn-navy" onclick="renderKafileler()">← Gruplar</button></div>
     <div class="card"><h3>Yeni duyuru</h3>
       <div class="form-row">
         <div class="form-group"><label>Başlık</label><input id="kd_baslik" placeholder="Medine'ye hareket"></div>
@@ -807,6 +815,10 @@ function odaAnahtarlari(k) {
   const l = []; ((k && k.oteller) || []).filter(o => o && o.ad).forEach(o => { const a = o.sehir || o.ad; if (!l.includes(a)) l.push(a); });
   return l.length ? l : ['Oda'];
 }
+function odaEtiket(a) { // "Mekke (Hilton Suites)"
+  const o = ((KT.kafile && KT.kafile.oteller) || []).find(x => x && x.ad && (x.sehir || x.ad) === a);
+  return o && o.ad && o.ad !== a ? a + ' (' + o.ad + ')' : a;
+}
 function yeniKimlik() { return (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => (Math.random() * 16 | 0).toString(16))); }
 // Aynı kişi mi? Ad aynı + (telefon ya da doğum tarihi aynı). Aynı telefonu aile paylaşabilir; bu yüzden ad da şart.
 function musteriBul(ad, tel, dogum) {
@@ -822,7 +834,7 @@ async function kafileKatilimcilar(id) {
     sb.from('kafile_katilimcilar').select('*').eq('kafile_id', id),
     sb.from('musteriler').select('*')
   ]);
-  if (!k || error) { toast('❌ ' + (error ? error.message : 'Kafile okunamadı'), 'error'); renderKafileler(); return; }
+  if (!k || error) { toast('❌ ' + (error ? error.message : 'Grup okunamadı'), 'error'); renderKafileler(); return; }
   KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = [];
   const mm = {}; KT.musteriler.forEach(m => mm[m.id] = m);
   const anah = odaAnahtarlari(k);
@@ -838,7 +850,7 @@ function katilimciFormHtml(x) {
       <div class="form-group"><label>Telefon</label><input id="kt_tel" value="${esc(m.telefon)}" placeholder="05.. (isteğe bağlı)"></div>
       <div class="form-group"><label>Doğum tarihi</label><input id="kt_dogum" type="date" value="${esc(m.dogum_tarihi)}"></div>
     </div>
-    <div class="form-row">${anah.map(a => `<div class="form-group"><label>Oda no – ${esc(a)}</label><input class="kt_oda" data-otel="${esc(a)}" value="${esc(od[a])}"></div>`).join('')}</div>
+    <div class="form-row">${anah.map(a => `<div class="form-group"><label>Oda no – ${esc(odaEtiket(a))}</label><input class="kt_oda" data-otel="${esc(a)}" value="${esc(od[a])}"></div>`).join('')}</div>
     ${ROL === 'rehber' ? '<div style="height:8px"></div>' : `<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="kt_izin" ${m.ileti_izni ? 'checked' : ''}> Doğum günü / kampanya mesajı göndermemize izin verdi</label>`}`;
 }
 
@@ -846,12 +858,12 @@ function katilimciCiz() {
   const k = KT.kafile, anah = odaAnahtarlari(k), d = KT.duzenlenen, rehber = ROL === 'rehber';
   const odaSay = new Set(KT.liste.map(x => (x.kat.odalar || {})[anah[0]]).filter(Boolean)).size;
   document.getElementById('sayfa-kafile').innerHTML = `
-    <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← ${rehber ? 'Kafilelerim' : 'Kafileler'}</button></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">${rehber ? 'Oda numaralarını ve kişi bilgilerini “Düzenle” ile düzeltebilirsiniz. Kişi ekleme/çıkarma için ofise haber verin.' : 'Bu liste yalnızca admin panelinde (ve bu kafileye atanan rehberde) görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (kafile silinse bile).'}</div>
+    <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← ${rehber ? 'Gruplarım' : 'Gruplar'}</button></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">${rehber ? 'Oda numaralarını ve kişi bilgilerini “Düzenle” ile düzeltebilirsiniz. Kişi ekleme/çıkarma için ofise haber verin.' : 'Bu liste yalnızca admin panelinde (ve bu gruba atanan rehberde) görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (grup silinse bile).'}</div>
     ${rehber && !d ? '' : `<div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : ''}</div>
       ${d ? '' : `<details style="margin-top:16px" ${KT.onizleme.length ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Excel'den toplu yapıştır</summary>
-        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'de satırları seçip kopyalayın, aşağıya yapıştırın. Sütun sırası: <b>Ad Soyad · Telefon · Doğum tarihi${anah.map(a => ' · Oda (' + esc(a) + ')').join('')}</b>. Boş sütun olabilir; başlık satırı varsa atlanır. Tarih 12.03.1955 gibi yazılabilir.</p>
+        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'de satırları seçip kopyalayın, aşağıya yapıştırın. Sütun sırası: <b>Ad Soyad · Telefon · Doğum tarihi${anah.map(a => ' · Oda – ' + esc(odaEtiket(a))).join('')}</b>. Boş sütun olabilir; başlık satırı varsa atlanır. Tarih 12.03.1955 gibi yazılabilir.</p>
         <textarea id="kt_yapistir" rows="6" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px" placeholder="Ayşe Kaya	0532 111 22 33	12.03.1955	512	304"></textarea>
         <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-navy" onclick="katilimciOnizle()">👀 Önizle</button></div>
         <div id="kt_onizleme">${katilimciOnizlemeHtml()}</div></details>`}
@@ -859,7 +871,7 @@ function katilimciCiz() {
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
         ${KT.liste.length ? '<button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button>' : ''}</div>
-      ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(a) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
+      ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
         ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => '<td><b>' + esc((x.kat.odalar || {})[a] || '') + '</b></td>').join('')}
           <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
           <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> ${rehber ? '' : `<button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button>`}</td></tr>`).join('')}
@@ -916,7 +928,7 @@ async function katilimciKaydet() {
 
 async function katilimciCikar(katId) {
   const x = KT.liste.find(y => y.kat.id === katId);
-  if (!x || !confirm(`${x.m.ad} bu kafileden çıkarılsın mı? (Müşteri kaydı silinmez.)`)) return;
+  if (!x || !confirm(`${x.m.ad} bu gruptan çıkarılsın mı? (Müşteri kaydı silinmez.)`)) return;
   const { error } = await sb.from('kafile_katilimcilar').delete().eq('id', katId);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Çıkarıldı', 'success'); kafileKatilimcilar(KT.kafile.id);
@@ -943,7 +955,7 @@ function katilimciOnizle() {
 function katilimciOnizlemeHtml() {
   const l = KT.onizleme; if (!l.length) return '';
   const anah = odaAnahtarlari(KT.kafile), eklenecek = l.filter(v => !v.sorun || v.uyari).length;
-  return `<div style="overflow-x:auto;margin-top:10px"><table class="fiyat-tablo onizleme-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th>${anah.map(a => '<th>Oda – ' + esc(a) + '</th>').join('')}<th>Durum</th></tr></thead><tbody>
+  return `<div style="overflow-x:auto;margin-top:10px"><table class="fiyat-tablo onizleme-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Durum</th></tr></thead><tbody>
     ${l.map(v => `<tr style="${v.sorun && !v.uyari ? 'opacity:.5' : ''}"><td>${esc(v.ad)}</td><td>${esc(v.telefon)}</td><td>${v.dogum ? tarihGoster(v.dogum) : esc(v.dogumHam)}</td>${anah.map(a => '<td>' + esc(v.odalar[a] || '') + '</td>').join('')}
       <td style="font-size:12px;color:${v.sorun ? '#c62828' : '#2e7d32'}">${esc(v.sorun || v.bilgi || 'Yeni')}</td></tr>`).join('')}
   </tbody></table></div>
@@ -1026,7 +1038,7 @@ function musteriCiz() {
   const d = MU.duzenlenen;
   document.getElementById('sayfa-musteri').innerHTML = `
     <div class="header"><h2>🧑‍🤝‍🧑 Müşteriler (${MU.liste.length})</h2></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Kafilelerin “Katılımcılar” bölümünden eklenen herkes burada birikir. Doğum günü ya da kampanya mesajını yalnızca <b>izni olanlara</b> gönderin (İYS kaydı ve KVKK için gerekli).</div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Grupların “Katılımcılar” bölümünden eklenen herkes burada birikir. Doğum günü ya da kampanya mesajını yalnızca <b>izni olanlara</b> gönderin (İYS kaydı ve KVKK için gerekli).</div>
     ${d ? `<div class="card" id="mu_kart"><h3>✏️ ${esc(d.ad)}</h3>
       <div class="form-row"><div class="form-group"><label>Ad soyad</label><input id="mu_ad" value="${esc(d.ad)}"></div>
         <div class="form-group"><label>Telefon</label><input id="mu_tel" value="${esc(d.telefon)}"></div>
@@ -1042,7 +1054,7 @@ function musteriCiz() {
           <td>${tarihGoster(m.dogum_tarihi)}${kalan === 0 ? ' 🎂 bugün' : kalan <= 30 ? ' <span style="color:#C9972B">(' + kalan + ' gün)</span>' : ''}</td>
           <td>${m.ileti_izni ? '✅' : '—'}</td><td style="font-size:12px">${esc(turlari(m.id).join(', '))}</td>
           <td><button class="btn btn-navy" style="padding:5px 10px" onclick="musteriDuzenle('${m.id}')">Düzenle</button></td></tr>`; }).join('')}
-      </tbody></table></div>` : '<p style="color:#666;font-size:14px">' + (MU.liste.length ? 'Aramaya uyan kişi yok.' : 'Henüz müşteri yok. Kafileler → Katılımcılar\'dan ekleyin.') + '</p>'}
+      </tbody></table></div>` : '<p style="color:#666;font-size:14px">' + (MU.liste.length ? 'Aramaya uyan kişi yok.' : 'Henüz müşteri yok. Gruplar → Katılımcılar\'dan ekleyin.') + '</p>'}
     </div>`;
 }
 function musteriDuzenle(id) { MU.duzenlenen = MU.liste.find(m => m.id === id) || null; musteriCiz(); window.scrollTo(0, 0); }
@@ -1059,7 +1071,7 @@ async function musteriKaydet() {
 }
 async function musteriSil() {
   const d = MU.duzenlenen; if (!d) return;
-  if (!confirm(`${d.ad} tamamen silinsin mi? Tüm kafile listelerinden de çıkar. Bu geri alınamaz.`)) return;
+  if (!confirm(`${d.ad} tamamen silinsin mi? Tüm grup listelerinden de çıkar. Bu geri alınamaz.`)) return;
   const { error } = await sb.from('musteriler').delete().eq('id', d.id);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Silindi', 'success'); renderMusteriler();
@@ -1086,7 +1098,7 @@ async function renderRehberler() {
   const atandi = (u, k) => (atamalar || []).some(a => a.user_id === u && a.kafile_id === k);
   el.innerHTML = `
     <div class="header"><h2>🧭 Rehber Hesapları</h2></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı kafilelerin <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı grupların <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
     <div class="card"><h3>➕ Yeni rehber hesabı</h3>
       <div class="form-row">
         <div class="form-group"><label>Ad soyad</label><input id="rh_ad" placeholder="Ali Yılmaz"></div>
@@ -1098,8 +1110,8 @@ async function renderRehberler() {
     <div class="card"><h3>Rehberler (${(roller || []).length})</h3><div class="tur-list">
       ${(roller || []).map(r => `<div class="tur-item rehber-item" data-user="${esc(r.user_id)}" style="flex-direction:column;align-items:stretch">
         <div class="tur-item-info"><h4>${esc(r.ad || '')}</h4><p>Kullanıcı adı: <b>${esc(r.kullanici_adi || '')}</b></p></div>
-        <div style="font-size:12.5px;font-weight:600;margin:8px 0 4px">Görebileceği kafileler</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${(kafileler || []).map(k => `<label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" class="rh_kafile" ${atandi(r.user_id, k.id) ? 'checked' : ''} onchange="rehberAta('${esc(r.user_id)}','${esc(k.id)}',this.checked)"> ${esc(k.ad)}</label>`).join('') || '<span style="font-size:13px;color:#888">Kafile yok</span>'}</div>
+        <div style="font-size:12.5px;font-weight:600;margin:8px 0 4px">Görebileceği gruplar</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${(kafileler || []).map(k => `<label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" class="rh_kafile" ${atandi(r.user_id, k.id) ? 'checked' : ''} onchange="rehberAta('${esc(r.user_id)}','${esc(k.id)}',this.checked)"> ${esc(k.ad)}</label>`).join('') || '<span style="font-size:13px;color:#888">Grup yok</span>'}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
           <input class="rh_yeni_sifre" type="text" placeholder="Yeni şifre" autocomplete="off" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;max-width:180px">
           <button class="btn btn-navy" onclick="rehberSifre('${esc(r.user_id)}', this)">Şifreyi değiştir</button>
@@ -1114,14 +1126,14 @@ async function rehberOlustur() {
   if (sifre.length < 8) { toast('❌ Şifre en az 8 karakter olmalı', 'error'); return; }
   const r = await rehberIslem({ islem: 'olustur', ad, kullanici_adi: ka, sifre });
   if (!r) return;
-  toast('✅ Hesap açıldı. Şimdi görebileceği kafileleri işaretleyin.', 'success');
+  toast('✅ Hesap açıldı. Şimdi görebileceği grupları işaretleyin.', 'success');
   renderRehberler();
 }
 async function rehberAta(userId, kafileId, ac) {
   const { error } = ac ? await sb.from('kafile_rehberleri').insert({ user_id: userId, kafile_id: kafileId })
                        : await sb.from('kafile_rehberleri').delete().eq('user_id', userId).eq('kafile_id', kafileId);
   if (error) { toast('❌ ' + error.message, 'error'); renderRehberler(); return; }
-  toast(ac ? '✅ Kafile rehbere açıldı' : '✅ Kafile rehberden kaldırıldı', 'success');
+  toast(ac ? '✅ Grup rehbere açıldı' : '✅ Grup rehberden kaldırıldı', 'success');
 }
 async function rehberSifre(userId, btn) {
   const kutu = btn.parentElement.querySelector('.rh_yeni_sifre'), sifre = kutu.value;

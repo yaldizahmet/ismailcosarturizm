@@ -107,11 +107,13 @@ with sync_playwright() as p:
     # ── Kafileler (yolcu uygulaması) ──
     pg.evaluate("sekmeAc('kafile')"); pg.wait_for_timeout(400)
     pg.evaluate("window.__islem = []"); errs.clear()
-    pg.get_by_role('button', name=re.compile('Yeni Kafile')).click(); pg.wait_for_timeout(300)
-    kontrol(re.fullmatch(r'KAFILE-[A-Z2-9]{5}', pg.input_value('#k_kod')) is not None, 'Kafile: yeni formda otomatik kod üretiliyor', pg.input_value('#k_kod'))
+    pg.get_by_role('button', name=re.compile('Yeni Grup')).click(); pg.wait_for_timeout(300)
+    kontrol(re.fullmatch(r'GRUP-[A-Z2-9]{5}', pg.input_value('#k_kod')) is not None, 'Grup: yeni formda otomatik kod üretiliyor (GRUP-…)', pg.input_value('#k_kod'))
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
     kontrol(not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Kafile: adı boşken kaydetmiyor')
-    pg.fill('#k_ad', 'Kasım 2026 Umre Kafilesi'); pg.get_by_role('button', name='Yeni kod').click()
+    ek0 = pg.input_value('#k_kod')[-5:]; pg.fill('#k_ad', 'Kasım 2026 Umre Kafilesi')
+    kontrol(pg.input_value('#k_kod') == 'KASIM-' + ek0, 'Grup: ad yazılınca kod adın ilk kelimesiyle güncelleniyor', pg.input_value('#k_kod'))
+    pg.get_by_role('button', name='Yeni kod').click()
     kod = pg.input_value('#k_kod')
     pg.fill('#k_baslangic', '2026-11-10'); pg.fill('#k_bitis', '2026-11-23')
     pg.fill('#k_rehber_ad', "Ali O'Hoca"); pg.fill('#k_rehber_tel', '0533 000 00 00')
@@ -158,11 +160,12 @@ with sync_playwright() as p:
     pg.locator('.kafile-duyuru').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s_) == 1 and s_[0]['tablo'] == 'kafile_duyurular' and pg.locator('.kafile-duyuru').count() == 0, 'Kafile duyurusu: siliniyor', errs)
-    pg.get_by_role('button', name=re.compile('Kafileler')).first.click(); pg.wait_for_timeout(400)
+    pg.get_by_role('button', name=re.compile('Gruplar')).first.click(); pg.wait_for_timeout(400)
 
     # ── Katılımcılar (oda listesi) ──
     pg.evaluate("window.__islem = []"); errs.clear()
     pg.locator('.kafile-item').get_by_role('button', name=re.compile('Katılımcılar')).click(); pg.wait_for_timeout(400)
+    kontrol('Oda no – Mekke (Test Otel Mekke)'.upper() in pg.inner_text('#kt_kart').upper(), 'Katılımcılar: oda başlığında otel adı da yazıyor')
     kontrol(pg.locator('#kt_kart .kt_oda').count() == 1 and pg.get_attribute('#kt_kart .kt_oda', 'data-otel') == 'Mekke' and 'Henüz kimse' in pg.inner_text('#sayfa-kafile'),
             'Katılımcılar: sayfa açılıyor, kafilenin oteline göre oda alanı (Mekke) var', errs)
     pg.locator('#kt_kart').get_by_role('button', name=re.compile('Ekle')).click(); pg.wait_for_timeout(200)
@@ -325,7 +328,7 @@ with sync_playwright() as p:
             window.__DB.kafile_katilimcilar = [{ id: 7, kafile_id: 'k1', musteri_id: 'm1', odalar: { Mekke: '512' } }]; };""")
         rp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); rp.wait_for_timeout(300); rp.evaluate('window.__VERI_EK(); sekmeAc("kafile")'); rp.wait_for_timeout(500)
         gorunen = [x for x in ['basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber'] if rp.is_visible('#btn-' + x)]
-        kontrol(rp.is_visible('#appDiv') and not gorunen and 'Kafilelerim' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Kafilelerim" var', gorunen or errs)
+        kontrol(rp.is_visible('#appDiv') and not gorunen and 'Gruplarım' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Gruplarım" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')
         kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1, 'Rehber: kafilede düzenle/sil/duyuru yok, yalnızca "Katılımcılar ve odalar"')
