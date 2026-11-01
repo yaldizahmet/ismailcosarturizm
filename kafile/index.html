@@ -775,12 +775,12 @@ details.tum[open] summary::after{content:'▴'}
     paylasimKapat();
     var d = document.createElement('div'); d.className = 'paylas-perde'; d.id = 'paylasPerde';
     d.innerHTML = '<div class="paylas-kutu" role="dialog" aria-label="Paylaş"><h3>📍 ' + esc(m.ad) + '</h3><div class="kucuk-not" style="margin-top:-6px">' + esc(m.sehir) + '</div>' +
+      '<label class="btn-dolu" for="paylasFoto">📷 Fotoğrafımla paylaş</label><input id="paylasFoto" type="file" accept="image/*" hidden data-id="' + m.id + '">' +
       '<div id="paylasOnizleme"></div>' +
-      '<label class="btn-cizgi" for="paylasFoto">📷 Kendi fotoğrafımı kullan</label><input id="paylasFoto" type="file" accept="image/*" hidden data-id="' + m.id + '">' +
+      '<button type="button" class="btn-cizgi" data-eylem="hazir-gorsel" data-id="' + m.id + '">🖼️ Fotoğrafsız, hazır görselle paylaş</button>' +
       '<button type="button" class="cikis" data-eylem="paylas-kapat">Kapat</button></div>';
     d.addEventListener('click', function (e) { if (e.target === d) paylasimKapat(); });
     document.body.appendChild(d);
-    fotoPaylas(m, null); // önce hazır görsel (logolu); misafir isterse kendi fotoğrafını koyar
   }
   function mekanBul(id) { return (S.mekanlar || []).filter(function (m) { return String(m.id) === String(id); })[0]; }
   function resimYukle(src) { return new Promise(function (ok, hata) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = hata; i.src = src; }); }
@@ -1005,6 +1005,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'rehber-sehir') { S.rehberSehir = t.getAttribute('data-sehir'); ciz(); }
     else if (ey === 'mekan-paylas') { var mk = mekanBul(t.getAttribute('data-id')); if (mk) paylasimAc(mk); }
     else if (ey === 'foto-gonder') fotoGonder();
+    else if (ey === 'hazir-gorsel') { var mh = mekanBul(t.getAttribute('data-id')); if (mh) fotoPaylas(mh, null); }
     else if (ey === 'paylas-kapat') paylasimKapat();
     else if (ey === 'karsilama-bitti') { S.karsilama = false; yaz('kafile-karsilandi-' + S.kod, true); S.sekme = 'bugun'; ciz(); window.scrollTo(0, 0); }
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }
