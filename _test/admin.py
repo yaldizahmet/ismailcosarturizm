@@ -128,7 +128,7 @@ with sync_playwright() as p:
     kontrol(pg.inner_text('.otel-blok .o_gece') == '5 gece', 'Grup: otel giriş-çıkışından gece sayısı gösteriliyor')
     pg.get_by_role('button', name=re.compile('Otel ekle')).click()
     kontrol(pg.locator('#k_oteller .otel-blok').count() == 3, 'Grup: "Otel ekle" ile üçüncü otel eklenebiliyor (kültür turları için)')
-    pg.fill('#k_inis_sehri', 'Cidde'); pg.fill('#k_donus_sehri', 'Medine')
+    pg.fill('#k_inis_sehri', 'Cidde'); pg.fill('#k_donus_sehri', 'Medine'); pg.fill('#k_yorum_link', 'https://g.page/r/ABC/review')
     pg.select_option('#k_tur_turu', 'kultur'); pg.fill('#k_acil_tel', '112')
     satir = pg.locator('#k_program .prog-satir').first
     satir.locator('.p_tarih').fill('2026-11-11'); satir.locator('.p_saat').fill('14:30'); satir.locator('.p_baslik').fill('Mekke ziyaretleri'); satir.locator('.p_yer').fill('Otel lobisi')
@@ -141,7 +141,7 @@ with sync_playwright() as p:
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
             and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112'
-            and v.get('inis_sehri') == 'Cidde' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15',
+            and v.get('inis_sehri') == 'Cidde' and v.get('yorum_link') == 'https://g.page/r/ABC/review' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15',
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
     kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile') and pg.inner_text('.kafile-item .abone-sayisi') == '0', 'Kafile: listede görünüyor (bildirim açık telefon sayısıyla)')
     href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''

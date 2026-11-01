@@ -217,6 +217,9 @@ details.tum[open] summary::after{content:'▴'}
   var SB_URL = 'https://wpkjxwbvewwgdclbsdya.supabase.co';
   var SB_KEY = 'sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
   var SITE = 'https://ismailcosarturizm.com.tr/';
+  // Google yorumu: grupta özel bağlantı (admin'de "Google yorum bağlantısı") yoksa işletmenin Google Haritalar sayfası açılır
+  var VARSAYILAN_YORUM = 'https://maps.app.goo.gl/kcsyZAUVKr1JB5UH9';
+  function yorumLink() { var l = S.veri && S.veri.yorum_link; return /^https:\/\//.test(l || '') ? l : VARSAYILAN_YORUM; }
   var OFIS_TEL = '+905331980781';
   var VAPID_ACIK = 'BJ58Opl4TDN6Trdatt453hQdKT7MRK4ONeFlbhKzlx8VnH8uJFinngO5yJ2EGs1IoMCDgOcn6gnl2_cwzN30AUM'; // bildirim (Web Push) genel anahtarı; gizli olanı yalnızca sunucuda
   var KABE = { enlem: 21.4225, boylam: 39.8262 };
@@ -500,6 +503,9 @@ details.tum[open] summary::after{content:'▴'}
     else if (S.iosIpucu && /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone) h += '<div class="yukle-kart"><p>Uygulama olarak kurmak için alttaki <b>Paylaş</b> simgesine, sonra <b>Ana Ekrana Ekle</b>\'ye dokunun.</p><button type="button" class="kapat" data-eylem="ios-kapat" aria-label="Kapat">×</button></div>';
 
     h += bildirimKarti('bugun');
+    if (v.bitis && gunSayisi(v.bitis, bugun) >= 0) h += '<div class="altin-kart" id="yorumKart" style="flex-direction:column;align-items:stretch;gap:8px"><div class="kart-etiket">⭐ Yolculuğunuzdan memnun kaldınız mı?</div>' +
+      '<p style="margin:0;font-size:15px;line-height:1.5">Google\'da birkaç cümlelik yorumunuz, bizi tanımayan misafirlerin karar vermesine çok yardımcı olur.</p>' +
+      '<a class="btn-dolu" href="' + esc(yorumLink()) + '" target="_blank" rel="noopener">⭐ Google\'da yorum yap</a></div>';
     var prog = programListesi();
     // Sıradaki buluşma
     var sonraki = null;
@@ -633,7 +639,8 @@ details.tum[open] summary::after{content:'▴'}
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
       '<a href="' + SITE + 'rehber-ilk-umre.html" target="_blank" rel="noopener">İlk kez umreye gideceklere rehber<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'rehber-umre-valiz-listesi.html" target="_blank" rel="noopener">Umre valiz listesi (ayrıntılı)<span class="ok" aria-hidden="true">›</span></a>' +
-      '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a></div>';
+      '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a>' +
+      '<a href="' + esc(yorumLink()) + '" target="_blank" rel="noopener" class="yorum-satir">⭐ Google\'da yorum yapın<span class="ok" aria-hidden="true">›</span></a></div>';
     return h + '</div>';
   }
 
@@ -711,7 +718,8 @@ details.tum[open] summary::after{content:'▴'}
     h += '<p class="kucuk-not">İşaretleriniz telefonda saklanır; uygulama kapansa da kaybolmaz.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
       '<a href="' + SITE + 'turlar.html" target="_blank" rel="noopener">Kültür turlarımız<span class="ok" aria-hidden="true">›</span></a>' +
-      '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a></div>';
+      '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a>' +
+      '<a href="' + esc(yorumLink()) + '" target="_blank" rel="noopener" class="yorum-satir">⭐ Google\'da yorum yapın<span class="ok" aria-hidden="true">›</span></a></div>';
     return h + '</div>';
   }
 

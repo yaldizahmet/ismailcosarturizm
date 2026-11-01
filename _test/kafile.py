@@ -100,6 +100,7 @@ with sync_playwright() as p:
     pg.click('details.tum summary'); pg.wait_for_timeout(200)
     kontrol(pg.locator('details.tum .gun-baslik').count() == 2 and '4. GÜN' in pg.inner_text('details.tum').upper(), 'Bugün: "Tüm program" 2 günü gün numarasıyla listeliyor')
     kontrol(not tasma(pg), 'Bugün: telefonda yatay taşma yok')
+    kontrol(pg.locator('#yorumKart').count() == 0, 'Google yorumu: tur devam ederken Bugün ekranında yorum kartı yok')
 
     # ── Duyurular ──
     pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(300)
@@ -156,6 +157,7 @@ with sync_playwright() as p:
     pg.click('[data-eylem="gecmis-temizle"]'); pg.wait_for_timeout(100)
     kontrol(pg.locator('#gecmisListe').count() == 0 and 'tavaf 3/7' in pg.inner_text('#gecmisDevam') and pg.locator('#gecmisPaylas').count() == 1, 'Geçmiş: "Geçmişi temizle" çalışıyor, devam eden sayaç paylaşılabilir kalıyor')
     kontrol(not tasma(pg), 'Rehber: telefonda yatay taşma yok')
+    kontrol(pg.get_attribute('.yorum-satir', 'href') == 'https://maps.app.goo.gl/kcsyZAUVKr1JB5UH9', 'Google yorumu: bağlantı girilmemişse işletmenin Google Haritalar sayfası')
 
     # ── Vakitler ──
     pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(300)
@@ -295,13 +297,17 @@ with sync_playwright() as p:
     kontrol(not tasma(pg) and not errs, 'Kültür turu: taşma ve JavaScript hatası yok', errs)
     c.close()
     # Şehir rehberi: iki şehir (Bosna yazılmış otel → Saraybosna, Mostar), şehir seçici, çevrimdışı açılış
-    K2 = dict(KULTUR, oteller=[{'sehir': 'Bosna', 'ad': 'Otel A'}, {'sehir': 'Mostar', 'ad': 'Otel B'}])
+    K2 = dict(KULTUR, oteller=[{'sehir': 'Bosna', 'ad': 'Otel A'}, {'sehir': 'Mostar', 'ad': 'Otel B'}], bitis='2026-11-12', yorum_link='https://g.page/r/TEST/review')
     c = b.new_context(viewport={'width': 360, 'height': 760}, service_workers='block', locale='tr-TR', timezone_id='Europe/Sarajevo')
     c.add_init_script("window.__SIMDI = '2026-11-12T11:00:00+01:00';")
     c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(K2), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
     c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
     c.route('**/rest/v1/sehir_rehberi**', lambda route, req: route.fulfill(status=200, body=json.dumps(MEKANLAR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
     errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR'); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(400)
+    kontrol(pg.get_attribute('.yorum-satir', 'href') == 'https://g.page/r/TEST/review', 'Google yorumu: Rehber ekranında grubun yorum bağlantısı')
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#yorumKart a').get_attribute('href') == 'https://g.page/r/TEST/review' and 'Google' in pg.inner_text('#yorumKart'), 'Google yorumu: dönüş günü Bugün ekranında "Google\'da yorum yap" kartı')
+    pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
     kontrol(pg.locator('.sehir-sec button').all_inner_texts() == ['Saraybosna', 'Mostar'] and 'Sarı Tabya' in pg.inner_text('#ekran'), 'Şehir rehberi: "Bosna" yazılan otel Saraybosna ile eşleşiyor; iki şehir seçilebiliyor', errs)
     pg.click('.sehir-sec button:has-text("Mostar")'); pg.wait_for_timeout(200)
     m = pg.inner_text('#ekran'); hm = pg.get_attribute('.mekan[data-mekan="3"] a', 'href') or ''

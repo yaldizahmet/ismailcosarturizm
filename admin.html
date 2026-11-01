@@ -711,6 +711,8 @@ function kafileFormu(k) {
         <div class="form-group"><label>Yerel acil numara (isteğe bağlı)</label><input id="k_acil_tel" value="${esc(k.acil_tel)}" placeholder="Ör. 112">
           <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında gidilen ülkenin acil numarası. Umre/Hac'da 911 ve 997 zaten gösterilir.</div></div>
       </div>
+      <div class="form-group"><label>Google yorum bağlantısı (isteğe bağlı)</label><input id="k_yorum_link" value="${esc(k.yorum_link)}" placeholder="https://g.page/r/.../review">
+        <div style="font-size:11.5px;color:#888;margin-top:4px">Misafir uygulamasında turun son günü ve sonrasında “Google'da yorum yap” butonu çıkar. Boş bırakılırsa işletmenin Google Haritalar sayfası açılır. Google İşletme Profili'ndeki “Yorum iste” bağlantısını yapıştırırsanız yorum penceresi doğrudan açılır.</div></div>
       <div class="form-group" style="max-width:200px"><label>Durum</label>
         <select id="k_aktif"><option value="true" ${k.aktif !== false ? 'selected' : ''}>Aktif</option><option value="false" ${k.aktif === false ? 'selected' : ''}>Pasif</option></select></div>
     </div>
@@ -728,8 +730,10 @@ function kafileFormu(k) {
   window.scrollTo(0, 0);
 }
 
-function kafileYeni() {
-  kafileFormu({ kod: kafileKodUret(''), aktif: true, program: [{}] });
+async function kafileYeni() {
+  const { data } = await sb.from('kafileler').select('*').order('olusturma', { ascending: false });
+  const son = (data || []).find(x => x.yorum_link);
+  kafileFormu({ kod: kafileKodUret(''), aktif: true, program: [{}], yorum_link: son ? son.yorum_link : '' });
 }
 
 async function kafileDuzenle(id) {
@@ -752,6 +756,7 @@ function kafileFormOku() {
     baslangic: d('k_baslangic') || null, bitis: d('k_bitis') || null,
     rehber_ad: d('k_rehber_ad'), rehber_tel: d('k_rehber_tel'),
     inis_sehri: d('k_inis_sehri') || null, donus_sehri: d('k_donus_sehri') || null,
+    yorum_link: d('k_yorum_link') || null,
     tur_turu: d('k_tur_turu'), acil_tel: d('k_acil_tel') || null,
     aktif: d('k_aktif') === 'true', oteller, program
   };
@@ -761,6 +766,7 @@ async function kafileKaydet(id) {
   const k = kafileFormOku();
   if (!k.ad) { toast('❌ Grup adı gerekli', 'error'); return; }
   if (!/^[A-Z0-9-]{4,40}$/.test(k.kod)) { toast('❌ Kod en az 4 karakter olmalı; yalnızca harf, rakam ve tire', 'error'); return; }
+  if (k.yorum_link && !/^https:\/\//.test(k.yorum_link)) { toast('❌ Google yorum bağlantısı https:// ile başlamalı', 'error'); return; }
   const { error } = id ? await sb.from('kafileler').update(k).eq('id', id) : await sb.from('kafileler').insert(k);
   if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir grupta kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
   toast('✅ Grup kaydedildi', 'success');
