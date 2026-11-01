@@ -214,6 +214,10 @@ with sync_playwright() as p:
     def mekan_yanit(route, req):
         c.__mekan_istek.append(req.url); route.fulfill(status=200, body=json.dumps(MEKANLAR), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
     c.route('**/rest/v1/sehir_rehberi**', mekan_yanit)
+    c.__il = []; c.__il_ad = ('Saraybosna', 'Bosna-Hersek')
+    def il_yanit(route, req):
+        c.__il.append(req.url); route.fulfill(status=200, body=json.dumps({'city': c.__il_ad[0], 'countryName': c.__il_ad[1]}), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})
+    c.route('https://api.bigdatacloud.net/**', il_yanit)
     c.add_init_script("""window.__paylas = []; navigator.share = function(d){ window.__paylas.push({ text: d.text, files: (d.files || []).map(function(f){ return f.type + ':' + f.size; }) }); return Promise.resolve(); };
       navigator.canShare = function(d){ return true; };""")
     errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR')
@@ -259,12 +263,31 @@ with sync_playwright() as p:
     kontrol(pg.locator('#paylasPerde').count() == 0 and not tasma(pg), 'Paylaş: panel kapanıyor, taşma yok')
     pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
     kontrol(pg.locator('[data-eylem="sehir-mekke"]').count() == 0 and pg.locator('#ekran [data-eylem="konum-vakit"]').count() >= 1, 'Kültür turu: Mekke/Medine yerine "Konumumu kullan" çıkıyor')
-    pg.click('#ekran .btn-dolu[data-eylem="konum-vakit"]'); pg.wait_for_timeout(600)
+    if pg.locator('#ekran .btn-dolu[data-eylem="konum-vakit"]').count(): pg.click('#ekran .btn-dolu[data-eylem="konum-vakit"]')
+    else: print('  (konum izni zaten verili: açılışta kendiliğinden alındı)')
+    pg.wait_for_timeout(600)
     mk = [re.findall(r'\d\d:\d\d', x)[0] for x in pg.locator('#vakitListesi .vakit-satir').all_inner_texts()]
     kontrol(len(mk) == 6 and '06:30' <= mk[1] <= '07:10' and '11:30' <= mk[2] <= '11:55' and '16:05' <= mk[4] <= '16:40' and 'Öğle' in pg.inner_text('#siradakiVakit'),
             'Kültür turu: Saraybosna vakitleri yerel saatle makul, sıradaki Öğle', ' '.join(mk))
     pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(400); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(200)
     kontrol(pg.locator('#vakitListesi .vakit-satir').count() == 6, 'Kültür turu: konum hatırlanıyor, tekrar sorulmuyor')
+    kontrol('Saraybosna, Bosna-Hersek' in pg.inner_text('#konumIl') and 'alındı: ' in pg.inner_text('#konumIl') and c.__il and 'latitude=43.86' in c.__il[0] and 'longitude=18.41' in c.__il[0],
+            'Kültür turu: namaz ekranında konumun il/ülke adı ve alınma saati görünüyor (yalnızca yaklaşık konum soruluyor)', (pg.inner_text('#konumIl'), c.__il[:1]))
+    n_il = len(c.__il)
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(600)
+    kontrol(len(c.__il) == n_il, 'Kültür turu: 30 dakikadan yeni konum açılışta yeniden alınmıyor')
+    # 30 dakikadan eski konum + yeni şehir (Mostar) → açılışta kendiliğinden yenilenir
+    pg.evaluate("(() => { const k = JSON.parse(localStorage.getItem('kafile-konum')); k.zaman = Date.now() - 31 * 60 * 1000; localStorage.setItem('kafile-konum', JSON.stringify(k)); })()")
+    c.set_geolocation({'latitude': 43.3438, 'longitude': 17.8078}); c.__il_ad = ('Mostar', 'Bosna-Hersek')
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(900); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(300)
+    k = pg.evaluate("JSON.parse(localStorage.getItem('kafile-konum'))")
+    kontrol(abs(k['enlem'] - 43.3438) < 0.001 and 'Mostar' in pg.inner_text('#konumIl'), 'Kültür turu: açılışta 30 dakikadan eski konum kendiliğinden yenileniyor (Mostar)', pg.inner_text('#konumIl'))
+    # konum alınamazsa eski konum kullanılır
+    pg.evaluate("(() => { const k = JSON.parse(localStorage.getItem('kafile-konum')); k.zaman = Date.now() - 31 * 60 * 1000; localStorage.setItem('kafile-konum', JSON.stringify(k)); })()")
+    c.clear_permissions()
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(900); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#vakitListesi .vakit-satir').count() == 6 and 'Mostar' in pg.inner_text('#konumIl') and not errs, 'Kültür turu: konum alınamazsa eski konumla vakitler gösteriliyor, izin penceresi açılmıyor', errs)
+    c.grant_permissions(['geolocation'])
     pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(200)
     hrefler = pg.eval_on_selector_all('#ekran a[href^="tel:"]', 'els => els.map(e => e.getAttribute("href"))')
     kontrol('tel:112' in hrefler and 'tel:911' not in hrefler and 'tel:997' not in hrefler and 'tel:+903122922929' in hrefler and 'tel:+38733000000' in hrefler,
@@ -283,6 +306,9 @@ with sync_playwright() as p:
     pg.click('.sehir-sec button:has-text("Mostar")'); pg.wait_for_timeout(200)
     m = pg.inner_text('#ekran'); hm = pg.get_attribute('.mekan[data-mekan="3"] a', 'href') or ''
     kontrol('Mostar Köprüsü' in m and 'Sarı Tabya' not in m and hm.startswith('https://www.google.com/maps/'), 'Şehir rehberi: Mostar seçilince Mostar mekanları; "javascript:" bağlantısı yerine harita araması')
+    pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#ekran .btn-dolu[data-eylem="konum-vakit"]').count() == 1 and pg.locator('#vakitListesi').count() == 0, 'Kültür turu: konum izni yokken açılışta izin istenmiyor, "Konumumu kullan" butonu çıkıyor')
+    pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(200)
     c.unroute('**/rest/v1/sehir_rehberi**'); c.route('**/rest/v1/**', lambda route, req: route.abort())
     pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(500); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
     kontrol('Sarı Tabya' in pg.inner_text('#ekran') and not tasma(pg) and not errs, 'Şehir rehberi: internet yokken de son kaydedilen mekanlar görünüyor', errs)

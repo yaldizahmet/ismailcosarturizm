@@ -406,7 +406,7 @@ details.tum[open] summary::after{content:'▴'}
       uygulamaGoster();
     }).catch(function () { btn.disabled = false; girisGoster('Bağlantı kurulamadı. İnternetinizi kontrol edip tekrar deneyin.'); });
   });
-  function uygulamaGoster() { $('giris').hidden = true; $('uygulama').hidden = false; ciz(); window.scrollTo(0, 0); bildirimDurumu(); }
+  function uygulamaGoster() { $('giris').hidden = true; $('uygulama').hidden = false; ciz(); window.scrollTo(0, 0); bildirimDurumu(); konumOtoYenile(); }
   function kafiledenCik() {
     if (!confirm('Bu telefondan gruptan çıkılsın mı? Tekrar girmek için kodu yeniden girmeniz gerekir.')) return;
     bildirimKapat(true);
@@ -841,7 +841,7 @@ details.tum[open] summary::after{content:'▴'}
     var s = yerel ? (k0 ? { ad: 'Bulunduğunuz yer', enlem: k0.enlem, boylam: k0.boylam } : null) : (SEHIRLER[S.sehir] || SEHIRLER.mekke);
     if (yerel && !s) {
       return '<header class="bas"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></header><div class="icerik">' +
-        '<div class="kart"><div class="kart-etiket">Bulunduğunuz yerin vakitleri</div><p class="bos">Namaz vakitlerini bulunduğunuz şehre göre hesaplamak için konumunuzu bir kez paylaşmanız yeterli. Konum yalnızca bu telefonda kullanılır, hiçbir yere gönderilmez.</p>' +
+        '<div class="kart"><div class="kart-etiket">Bulunduğunuz yerin vakitleri</div><p class="bos">Namaz vakitlerini bulunduğunuz şehre göre hesaplamak için konumunuzu bir kez paylaşmanız yeterli. Konumunuz bu telefonda saklanır. Ekranda şehir adını göstermek için yalnızca yaklaşık konum (1 km civarı) bir harita servisine sorulur; adınız ya da başka bir bilginiz gönderilmez.</p>' +
         (S.konumHata ? '<p class="bos" style="color:var(--kirmizi)">' + esc(S.konumHata) + '</p>' : '') +
         '<button type="button" class="btn-dolu" data-eylem="konum-vakit">Konumumu kullan</button></div>' + kibleKarti() + '</div>';
     }
@@ -858,7 +858,7 @@ details.tum[open] summary::after{content:'▴'}
     kalanDk = Math.max(0, Math.ceil(kalanDk));
     var kalan = (kalanDk >= 60 ? Math.floor(kalanDk / 60) + ' sa ' : '') + (kalanDk % 60) + ' dk';
     var h = '<header class="bas"><div class="bas-ust"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></div>' +
-      (yerel ? '<div class="bas-alt">Bulunduğunuz yere göre</div>' : '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (S.sehir !== 'medine') + '">Mekke</button>' +
+      (yerel ? '<div class="bas-alt" id="konumIl">📍 ' + esc(k0.il || 'Bulunduğunuz yer') + (k0.zaman ? ' · alındı: ' + new Date(k0.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' : '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (S.sehir !== 'medine') + '">Mekke</button>' +
       '<button type="button" data-eylem="sehir-medine" aria-pressed="' + (S.sehir === 'medine') + '">Medine</button></div>') + '</header><div class="icerik">';
     h += '<div class="altin-kart" style="flex-direction:row;justify-content:space-between;align-items:center"><div><div class="kart-etiket">Sıradaki vakit</div>' +
       '<div style="font-family:var(--ff-b);font-size:24px;font-weight:700;margin-top:2px" id="siradakiVakit">' + esc(siraAd) + ' · ' + siraSaat + '</div></div><div style="font-size:15px;font-weight:700;text-align:right">' + kalan + '</div></div>';
@@ -883,13 +883,44 @@ details.tum[open] summary::after{content:'▴'}
     return h;
   }
 
+  // Kültür turu vakitleri: konum telefonda saklanır; uygulama açıldığında 30 dakikadan eskiyse (izin zaten verilmişse) sessizce yenilenir.
+  // Yenilenemezse eski konum kullanılır. Şehir/ülke adı konumdan bulunur (yalnızca koordinat gönderilir).
+  var KONUM_OMUR = 30 * 60 * 1000;
+  function ilBul(k) {
+    return fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + k.enlem.toFixed(2) + '&longitude=' + k.boylam.toFixed(2) + '&localityLanguage=tr')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (!j) return null; var il = j.city || j.locality || j.principalSubdivision || ''; return [il, j.countryName].filter(Boolean).join(', ') || null; })
+      .catch(function () { return null; });
+  }
+  function mesafeKm(a, b) {
+    var D = Math.PI / 180, x = (b.boylam - a.boylam) * D * Math.cos((a.enlem + b.enlem) / 2 * D), y = (b.enlem - a.enlem) * D;
+    return Math.sqrt(x * x + y * y) * 6371;
+  }
+  function konumKaydet(p) {
+    var eski = S.konumVakit, k = { enlem: p.coords.latitude, boylam: p.coords.longitude, zaman: Date.now(), il: null };
+    if (eski && eski.il && mesafeKm(eski, k) < 10) k.il = eski.il; // aynı şehirdeyse adı koru
+    S.konumHata = null; S.konumVakit = k; yaz('kafile-konum', k); ciz();
+    if (!k.il) ilAdiGetir();
+  }
+  function ilAdiGetir() {
+    var k = S.konumVakit; if (!k || k.il) return;
+    ilBul(k).then(function (il) { if (il && S.konumVakit === k) { k.il = il; yaz('kafile-konum', k); if (S.sekme === 'vakitler') ciz(); } });
+  }
   function konumVakitAl() {
     if (!navigator.geolocation) { S.konumHata = 'Bu telefonda konum kullanılamıyor.'; ciz(); return; }
     bildir('Konumunuz alınıyor…');
-    navigator.geolocation.getCurrentPosition(function (p) {
-      S.konumHata = null; S.konumVakit = { enlem: p.coords.latitude, boylam: p.coords.longitude, zaman: Date.now() };
-      yaz('kafile-konum', S.konumVakit); ciz();
-    }, function () { S.konumHata = 'Konum izni verilmedi. Telefon ayarlarından tarayıcıya konum izni verip tekrar deneyin.'; ciz(); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 1800000 });
+    navigator.geolocation.getCurrentPosition(konumKaydet, function () { S.konumHata = 'Konum izni verilmedi. Telefon ayarlarından tarayıcıya konum izni verip tekrar deneyin.'; ciz(); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: KONUM_OMUR });
+  }
+  function konumOtoYenile() {
+    if (!S.veri || kutsalMi() || !navigator.geolocation) return;
+    var k = S.konumVakit;
+    if (k && !k.il) ilAdiGetir();
+    if (k && Date.now() - (k.zaman || 0) < KONUM_OMUR) return;
+    if (!navigator.permissions || !navigator.permissions.query) return; // izin durumu bilinmiyorsa izin penceresi açtırma
+    navigator.permissions.query({ name: 'geolocation' }).then(function (d) {
+      if (d.state !== 'granted') return;
+      navigator.geolocation.getCurrentPosition(konumKaydet, function () {}, { enableHighAccuracy: false, timeout: 15000, maximumAge: KONUM_OMUR });
+    }).catch(function () {});
   }
 
   function pusulaCiz() {
@@ -1022,7 +1053,7 @@ details.tum[open] summary::after{content:'▴'}
   });
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); S.yukleIstemi = e; if (S.sekme === 'bugun' || S.karsilama) ciz(); });
   window.addEventListener('appinstalled', function () { S.yukleIstemi = null; ciz(); });
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.kod) yenile(true); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.kod) { yenile(true); konumOtoYenile(); } });
   window.addEventListener('online', function () { if (S.kod) yenile(true); });
   setInterval(function () { if (document.visibilityState === 'visible' && S.veri && (S.sekme === 'bugun' || S.sekme === 'vakitler')) ciz(); }, 30000);
   setInterval(function () { if (document.visibilityState === 'visible' && S.kod) yenile(true); }, 120000);
