@@ -67,7 +67,7 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#sayfa-ana') and not pg.is_visible('#sayfa-basvuru') and 'Grup Yönetimi' in pg.inner_text('#sayfa-ana') and 'Site Yönetimi' in pg.inner_text('#sayfa-ana'),
             'Girişte Ana Sayfa açılıyor (Başvurular değil); Grup Yönetimi ve Site Yönetimi bölümleri var', errs)
     basliklar = pg.locator('.sidebar .nav-baslik, .sidebar .nav-item').evaluate_all("l => l.map(e => e.id || e.textContent.trim())")
-    kontrol(basliklar[:6] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber', 'btn-sehir'] and basliklar[6:12] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-ekle', 'btn-duyuru', 'btn-yorum'],
+    kontrol(basliklar[:6] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber', 'btn-sehir'] and basliklar[6:11] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-duyuru', 'btn-yorum'],
             'Menü gruplu: Grup Yönetimi (Gruplar, Müşteriler, Rehber) ve Site Yönetimi (Başvurular, Turlar, Duyurular, Yorumlar)', basliklar)
     pg.locator('#sayfa-ana button', has_text='Müşteriler').click(); pg.wait_for_timeout(300)
     kontrol(pg.is_visible('#sayfa-musteri'), 'Ana Sayfa: kutucuğa basınca ilgili sekme açılıyor')
@@ -77,6 +77,16 @@ with sync_playwright() as p:
 
     # Tur listesi
     pg.evaluate("sekmeAc('turlar')"); pg.wait_for_timeout(400)
+    kontrol(pg.locator('#btn-ekle').count() == 0 and pg.locator('#yeniTurBtn').count() == 1, 'Tur Ekle menüden kalktı; Tur Listesi\'nde "Yeni Tur" butonu var')
+    pg.click('#yeniTurBtn'); pg.wait_for_timeout(300)
+    kontrol(pg.is_visible('#sayfa-ekle') and pg.is_visible('#n_baslik') and 'active' in (pg.get_attribute('#btn-turlar', 'class') or ''), 'Yeni Tur formu açılıyor, menüde Tur Listesi seçili kalıyor')
+    pg.get_by_role('button', name=re.compile('Tur Listesi')).last.click(); pg.wait_for_timeout(400)
+    kontrol(pg.is_visible('#sayfa-turlar'), 'Yeni Tur formundan "← Tur Listesi" ile geri dönülüyor')
+    pg.click('#yeniTurBtn'); pg.wait_for_timeout(300); pg.evaluate("window.__islem = []")
+    pg.fill('#n_baslik', 'Deneme Turu'); pg.get_by_role('button', name=re.compile('Tur Ekle')).click(); pg.wait_for_timeout(500)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'turlar']
+    kontrol(len(ek) == 1 and ek[0]['veri'].get('baslik') == 'Deneme Turu' and pg.is_visible('#sayfa-turlar') and 'Deneme Turu' in pg.inner_text('#sayfa-turlar'), 'Yeni tur eklenince Tur Listesi\'ne dönülüyor ve yeni tur listede', errs)
+    pg.evaluate("window.__DB.turlar = window.__DB.turlar.filter(function(x){ return x.baslik !== 'Deneme Turu'; })"); pg.evaluate("sekmeAc('turlar')"); pg.wait_for_timeout(300)
     n_tur = len(VERI['turlar'])
     kontrol(pg.locator('#sayfa-turlar .tur-item').count() == n_tur, 'Tur listesi tüm turları gösteriyor', f"({pg.locator('#sayfa-turlar .tur-item').count()}/{n_tur})")
 
@@ -374,7 +384,7 @@ with sync_playwright() as p:
 
     # Telefon görünümü: her sekmede yatay taşma yok, seçili sekme üst şeritte görünür
     pg.set_viewport_size({'width': 390, 'height': 844})
-    for sekme, ek in [('basvuru', ''), ('turlar', ''), ('ekle', ''), ('duyuru', ''), ('kafile', ''), ('yorum', ''), ('yorum', 'yorumYeni()'), ('kafile', 'kafileYeni()'), ('turlar', f"turDuzenle('{VERI['turlar'][1]['id']}')")]:
+    for sekme, ek in [('basvuru', ''), ('turlar', ''), ('turlar', "sekmeAc('ekle')"), ('duyuru', ''), ('kafile', ''), ('yorum', ''), ('yorum', 'yorumYeni()'), ('kafile', 'kafileYeni()'), ('turlar', f"turDuzenle('{VERI['turlar'][1]['id']}')")]:
         errs.clear(); pg.evaluate(f"sekmeAc('{sekme}')"); pg.wait_for_timeout(250)
         if ek: pg.evaluate(ek); pg.wait_for_timeout(250)
         genis = pg.evaluate('document.documentElement.scrollWidth')
@@ -400,7 +410,7 @@ with sync_playwright() as p:
             window.__DB.musteriler = [{ id: 'm1', ad: 'Ayşe Kaya', telefon: '0533', dogum_tarihi: '1950-01-02', ileti_izni: true }];
             window.__DB.kafile_katilimcilar = [{ id: 7, kafile_id: 'k1', musteri_id: 'm1', odalar: { Mekke: '512' } }]; };""")
         rp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); rp.wait_for_timeout(300); rp.evaluate('window.__VERI_EK(); sekmeAc("kafile")'); rp.wait_for_timeout(500)
-        gorunen = [x for x in ['ana', 'basvuru', 'turlar', 'ekle', 'duyuru', 'yorum', 'musteri', 'rehber', 'sehir'] if rp.is_visible('#btn-' + x)] + (['başlık'] if rp.locator('.nav-baslik:visible').count() else [])
+        gorunen = [x for x in ['ana', 'basvuru', 'turlar', 'duyuru', 'yorum', 'musteri', 'rehber', 'sehir'] if rp.is_visible('#btn-' + x)] + (['başlık'] if rp.locator('.nav-baslik:visible').count() else [])
         kontrol(rp.is_visible('#appDiv') and not gorunen and 'Gruplarım' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Gruplarım" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')

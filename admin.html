@@ -117,7 +117,6 @@ body.rol-rehber .yonetici{display:none!important}
     <div class="nav-baslik yonetici">Site Yönetimi</div>
     <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
     <button class="nav-item yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
-    <button class="nav-item yonetici" id="btn-ekle" onclick="sekmeAc('ekle')">➕ Tur Ekle</button>
     <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
     <button class="nav-item" onclick="cikisYap()" style="color:rgba(255,100,100,.7);margin-top:20px">🚪 Çıkış</button>
@@ -208,7 +207,7 @@ function sekmeAc(ad) {
   if (ad === 'ana') renderAna();
   if (ad === 'basvuru') renderBasvurular();
   if (ad === 'turlar') renderTurlar();
-  if (ad === 'ekle') renderEkle();
+  if (ad === 'ekle') { renderEkle(); const tb = document.getElementById('btn-turlar'); if (tb) tb.classList.add('active'); } // Yeni tur formu Tur Listesi'nin içinde
   if (ad === 'duyuru') renderDuyuru();
   if (ad === 'kafile') renderKafileler();
   if (ad === 'yorum') renderYorumlar();
@@ -225,7 +224,7 @@ async function renderAna() {
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
       ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
-      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Tur Listesi', 'Turları düzenle, kopyala')}${b('ekle', '➕ Tur Ekle', 'Yeni tur programı')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>`;
+      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>`;
   const [{ data: g }, { data: bv }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni')]);
   const ag = (g || []).filter(k => k.aktif).length, yb = (bv || []).length;
   const e1 = document.getElementById('anaGrup'), e2 = document.getElementById('anaBasvuru');
@@ -241,7 +240,7 @@ async function renderTurlar() {
   const { data, error } = await sb.from('turlar').select('*').order('kategori').order('tarih');
   if (error) { el.innerHTML = '<div class="loading">❌ ' + error.message + '</div>'; return; }
   const katMap = {hac:'🕋 Hac', umre:'🌙 Umre', diger:'✈️ Diğer'};
-  el.innerHTML = '<div class="header"><h2>📋 Tur Listesi (' + data.length + ' tur)</h2></div>' +
+  el.innerHTML = '<div class="header"><h2>📋 Tur Listesi (' + data.length + ' tur)</h2><button class="btn btn-gold" id="yeniTurBtn" onclick="sekmeAc(\'ekle\')">➕ Yeni Tur</button></div>' +
     '<div class="card"><div class="tur-list">' +
     data.map(t => `
       <div class="tur-item">
@@ -394,7 +393,7 @@ async function turKaydet(id) {
 // ── TUR EKLE ──
 function renderEkle() {
   document.getElementById('sayfa-ekle').innerHTML = `
-    <div class="header"><h2>➕ Yeni Tur Ekle</h2></div>
+    <div class="header"><h2>➕ Yeni Tur Ekle</h2><button class="btn btn-navy" onclick="sekmeAc('turlar')">← Tur Listesi</button></div>
     <div class="card">
       <div class="form-row">
         <div class="form-group"><label>Başlık *</label><input id="n_baslik" placeholder="Tur adı"></div>
@@ -469,7 +468,7 @@ async function turEkle() {
   });
   if (error) { toast('❌ Hata: ' + error.message, 'error'); return; }
   toast('✅ Tur eklendi!', 'success');
-  renderEkle();
+  sekmeAc('turlar');
 }
 
 // ── DUYURULAR ──
