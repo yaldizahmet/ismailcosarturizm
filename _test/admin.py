@@ -62,6 +62,7 @@ with sync_playwright() as p:
     pg.add_init_script('window.confirm = function(){ return true; };')
     pg.goto(BASE + 'admin.html', wait_until='domcontentloaded'); pg.wait_for_timeout(1000)
     kontrol(pg.is_visible('#appDiv'), 'Oturum açıkken panel açılıyor', errs)
+    kontrol('Test · Yönetici' in pg.inner_text('#kullaniciBilgi'), 'Sağ üstte giriş yapan kullanıcı ve rolü görünüyor', pg.inner_text('#kullaniciBilgi'))
 
     # Bütün sekmeler hatasız açılıyor
     kontrol(pg.is_visible('#sayfa-ana') and not pg.is_visible('#sayfa-basvuru') and 'Grup Yönetimi' in pg.inner_text('#sayfa-ana') and 'Site Yönetimi' in pg.inner_text('#sayfa-ana'),
@@ -414,6 +415,7 @@ with sync_playwright() as p:
         kontrol(rp.is_visible('#appDiv') and not gorunen and 'Gruplarım' in rp.inner_text('#btn-kafile'), f'Rehber ({vp["width"]}px): menüde yalnızca "Gruplarım" var', gorunen or errs)
         rp.evaluate("sekmeAc('basvuru')"); rp.wait_for_timeout(300)
         kontrol(rp.is_visible('#sayfa-kafile') and not rp.is_visible('#sayfa-basvuru'), 'Rehber: başka sekmeye geçemiyor')
+        kontrol('Test · Rehber' in rp.inner_text('#kullaniciBilgi') and rp.is_visible('#kullaniciBilgi'), 'Rehber: sağ üstte kullanıcı adı ve rolü görünüyor', rp.inner_text('#kullaniciBilgi'))
         kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1, 'Rehber: kafilede düzenle/sil/duyuru yok, yalnızca "Katılımcılar ve odalar"')
         h = rp.get_attribute('.kafile-item a.rehber-paylas', 'href') or ''
         kontrol('KASIM-AAAAA' in rp.inner_text('.kafile-item') and h.startswith('https://wa.me/?text=') and 'kafile%2F%23KASIM-AAAAA' in h, 'Rehber: misafir kodu görünüyor, "Misafir kodunu paylaş" WhatsApp bağlantısı kodlu')
