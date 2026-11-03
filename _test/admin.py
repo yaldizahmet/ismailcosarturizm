@@ -204,10 +204,10 @@ with sync_playwright() as p:
             and ki[0]['veri']['musteri_id'] == mv.get('id') and pg.locator('.katilimci-satir').count() == 1, 'Katılımcılar: kişi elle ekleniyor (müşteri + oda no, tipi, giriş-çıkış; izin tarihiyle)', errs)
     pg.evaluate("window.__islem = []")
     pg.locator('summary', has_text='Excel').click()
-    pg.fill('#kt_yapistir', "Ad Soyad\tTelefon\tDoğum tarihi\tOda\nMehmet Kaya\t0532 111 22 33\t12.03.1955\t512\t3\nAyşe Kaya\t0533 444 55 66\t\t512\nHasan <b>Ç</b>\t\t31.02.1950\t514\t2 kişilik\n\n")
+    pg.fill('#kt_yapistir', "Ad Soyad\tTelefon\tDoğum tarihi\tOda\tOda tipi\nMehmet Kaya\t0532 111 22 33\t12.03.1955\t512\t3\nAyşe Kaya\t0533 444 55 66\t\t512\nHasan <b>Ç</b>\t\t31.02.1950\t514\t2 kişilik\n\n")
     pg.get_by_role('button', name=re.compile('Önizle')).click(); pg.wait_for_timeout(200)
     o = pg.inner_text('#kt_onizleme')
-    kontrol(pg.locator('.onizleme-tablo tbody tr').count() == 3 and 'Zaten listede' in o and 'Tarih okunamadı' in o and '12.03.1955' in o and '2 kişiyi ekle' in o,
+    kontrol(pg.locator('.onizleme-tablo tbody tr').count() == 3 and 'Zaten listede' in o and 'tarihi okunamadı' in o and '12.03.1955' in o and '2 kişiyi ekle' in o,
             'Excel yapıştırma: başlık atlanıyor, tarih okunuyor, listede olan ve hatalı tarih işaretleniyor', o.replace('\n', ' | ')[:160])
     pg.get_by_role('button', name=re.compile('kişiyi ekle')).click(); pg.wait_for_timeout(500)
     isl = pg.evaluate('window.__islem'); mi = [i for i in isl if i['tablo'] == 'musteriler' and i['tur'] == 'insert']; ki = [i for i in isl if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']
@@ -399,6 +399,66 @@ with sync_playwright() as p:
     pg.evaluate(f"turSil('{son}')"); pg.wait_for_timeout(400)
     s = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s) == 1 and s[0]['filtre'] == [['id', son]], 'Sil yalnızca seçilen turu siler', errs)
+
+    # ── Akıllı yapıştırma: ofisin gerçek oda listesi düzeni (uydurma isimlerle) ve transfer listesi ──
+    ap = b.new_page(viewport={'width': 1300, 'height': 900}); errs = []
+    ap.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    ap.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=SAHTE, headers={'content-type': 'application/javascript'}))
+    ap.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort() if 'jsdelivr' not in q.url else r.fallback())
+    ap.add_init_script('window.confirm = function(){ return true; };')
+    ap.goto(BASE + 'admin.html', wait_until='domcontentloaded'); ap.wait_for_timeout(400)
+    ap.evaluate("""window.__DB.kafileler = [{ id: 'k9', kod: 'KASIM-BBBBB', ad: 'Kasım Umre', aktif: true, tur_turu: 'umre', baslangic: '2026-11-05', bitis: '2026-11-18',
+      oteller: [{ sehir: 'Mekke', ad: 'Samama', giris: '2026-11-05', cikis: '2026-11-15' }, { sehir: 'Medine', ad: 'Saraya Harmony', giris: '2026-11-15', cikis: '2026-11-18' }], program: [] }];
+      window.__DB.musteriler = []; window.__DB.kafile_katilimcilar = []; sekmeAc('kafile'); kafileKatilimcilar('k9');""")
+    ap.wait_for_timeout(500); ap.locator('summary', has_text='Excel').click()
+    OFIS = ('\t\t\tMEKKE\t\t\t\t\tMedine\n\t\t\tYÜRÜME\n\tODA SAYISI\t\t\tGİRİŞ\tÇIKIŞ\tGECE\t\tODA SAYISI\tGİRİŞ\n'
+            '\t10\t\t\t05.11.2026\t15.11.2026\t10\t\t10.01.1900\t15.11.2026\n'
+            'S.N\tOD SY\tTİPİ\tADI\tSOYADI\tMK. OTELİ\tGRŞ TRH\tARA TRH\tÇKŞ TRH\tMD. OTELİ\tG.SY\tŞUBE\n'
+            '1\t1\tDBL\tALİ\tYILMAZ\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\tCOŞAR\n'
+            '2\t\t\tAYŞE\tYILMAZ\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\t\n'
+            '3\t2\t"TRPL /KNG\n/EKSTRA BED"\tVELİ\tDEMİR\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\tCOŞAR\n'
+            '4\t\t\tFATMA\tDEMİR\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\t\n'
+            '5\t\t\tZEYNEP\tDEMİR\tSAMAMA\t07.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t12\t\n'
+            '6\t3\tSNGL\tHASAN\tKARA\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\tCOŞAR\n'
+            '\t\t\t\t\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\n')
+    ap.evaluate("t => { document.getElementById('kt_yapistir').value = t; }", OFIS)
+    ap.get_by_role('button', name=re.compile('Önizle')).click(); ap.wait_for_timeout(300)
+    es = ap.evaluate("KT.eslesme")
+    kontrol(es[:10] == ['sira', 'no', 'tip', 'ad', 'soyad', 'yok', 'giris', 'ara', 'cikis', 'yok'], 'Akıllı yapıştırma: başlık satırı bulunuyor, kolonlar başlıklarından tanınıyor (üstteki başlık/özet satırları atlanıyor)', es)
+    v = ap.evaluate("KT.onizleme")
+    adlar = [x['ad'] for x in v]
+    kontrol(adlar == ['Ali Yılmaz', 'Ayşe Yılmaz', 'Veli Demir', 'Fatma Demir', 'Zeynep Demir', 'Hasan Kara'], 'Akıllı yapıştırma: ad + soyad birleşiyor, BÜYÜK HARF isim düzeltiliyor (Ali Yılmaz), isimsiz satır atlanıyor', adlar)
+    o = {x['ad']: x['odalar'] for x in v}
+    kontrol(o['Ayşe Yılmaz'] == {'Mekke': {'no': '1', 'tip': 'DBL'}, 'Medine': {'no': '1', 'tip': 'DBL'}} and o['Fatma Demir']['Mekke'] == {'no': '2', 'tip': 'TRPL/KNG/EKSTRA BED'}
+            and o['Zeynep Demir']['Mekke'] == {'no': '2', 'tip': 'TRPL/KNG/EKSTRA BED', 'giris': '2026-11-07'} and o['Hasan Kara']['Mekke'] == {'no': '3', 'tip': 'SNGL'},
+            'Akıllı yapıştırma: birleştirilmiş oda no/tip alttakilere uygulanıyor; otel tarihinden farklı giriş kişiye özel kaydediliyor', str(o)[:200])
+    kontrol(ap.locator('#kt_onizleme .oda-uyari').count() == 0 and '3 kişiyi' not in ap.inner_text('#kt_onizleme') and '6 kişiyi ekle' in ap.inner_text('#kt_onizleme'),
+            'Akıllı yapıştırma: TRPL + ekstra yatak odasında 3 kişi uyarı vermiyor, 6 kişi eklenebilir', errs)
+    # kolonu elle değiştir: TİPİ → Kullanma; seçim hatırlanır
+    ap.select_option('#kt_onizleme .kolon-sec[data-i="2"]', 'yok'); ap.wait_for_timeout(200)
+    v = ap.evaluate("KT.onizleme")
+    kontrol('tip' not in v[0]['odalar']['Mekke'], 'Akıllı yapıştırma: kolon eşleştirmesi elle değiştirilince önizleme güncelleniyor')
+    ap.get_by_role('button', name=re.compile('Önizle')).click(); ap.wait_for_timeout(200)
+    kontrol(ap.evaluate("KT.eslesme[2]") == 'yok', 'Akıllı yapıştırma: aynı başlıklı tablo tekrar yapıştırılınca elle yapılan eşleştirme hatırlanıyor')
+    ap.select_option('#kt_onizleme .kolon-sec[data-i="2"]', 'tip'); ap.wait_for_timeout(200)
+    ap.evaluate("window.__islem = []"); ap.get_by_role('button', name=re.compile('kişiyi ekle')).click(); ap.wait_for_timeout(500)
+    ki = [i for i in ap.evaluate('window.__islem') if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']
+    kontrol(len(ki) == 1 and len(ki[0]['veri']) == 6 and ap.locator('.katilimci-satir').count() == 6 and ap.locator('.oda-uyarilari').count() == 0 and not errs,
+            'Akıllı yapıştırma: 6 kişi odalarıyla ekleniyor, oda uyarısı yok', errs)
+    # transfer listesi → program
+    ap.evaluate("kafileDuzenle('k9')"); ap.wait_for_timeout(400)
+    TRANSFER = ('ISMAIL COSAR TURIZM\tGELIS PC670 /DONUS PC689\tMAWEKEB\n\t\t\t\tTARIH\tSAAT\n'
+                'BUS\t1\tJAD AIRPORT\tMAKKAH HOTEL\t05.11.2026\t11:00\nBUS\t1\tMAKKAH\tMAZARAT\t07.11.2026\t08:00\n'
+                'BUS\t1\tMEDINAH TRAIN STATION\tMEDINAH HOTEL\t15.11.2026\t17:20\n')
+    ap.locator('summary', has_text='Transfer').click(); ap.fill('#k_program_yapistir', TRANSFER)
+    ap.get_by_role('button', name=re.compile('Programa ekle')).click(); ap.wait_for_timeout(200)
+    satir = [(s.locator('.p_tarih').input_value(), s.locator('.p_saat').input_value(), s.locator('.p_baslik').input_value(), s.locator('.p_yer').input_value()) for s in ap.locator('#k_program .prog-satir').all()]
+    kontrol(satir == [('2026-11-05', '11:00', '🚌 Makkah Hotel', 'Jad Airport'), ('2026-11-07', '08:00', '🚌 Mazarat', 'Makkah'), ('2026-11-15', '17:20', '🚌 Medinah Hotel', 'Medinah Train Station')],
+            'Transfer listesi: tarihli satırlar programa ekleniyor (başlık satırları atlanıyor, "Medinah" Türkçe ı ile bozulmuyor)', satir)
+    ap.evaluate("window.__islem = []"); ap.get_by_role('button', name=re.compile('Kaydet')).click(); ap.wait_for_timeout(400)
+    g = [i for i in ap.evaluate('window.__islem') if i['tur'] == 'update' and i['tablo'] == 'kafileler']
+    kontrol(len(g) == 1 and len(g[0]['veri']['program']) == 3 and not errs, 'Transfer listesi: kaydedilince program gruba yazılıyor', errs)
+    ap.close()
 
     # ── Rehber rolüyle giriş: yalnızca kafilesinin katılımcı/oda listesi ──
     for vp in [{'width': 1300, 'height': 900}, {'width': 390, 'height': 844}]:

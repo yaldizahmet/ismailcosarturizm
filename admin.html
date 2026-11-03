@@ -650,6 +650,33 @@ function programSatiri(p) {
   </div>`;
 }
 
+// Transfer listesi: her satırda tarih (gg.aa.yyyy) ve saat aranır; kalan yazılar sırayla "nereden → nereye"
+function buyukHarfDuzelt(t) { // "MAKKAH HOTEL" → "Makkah Hotel"; Türkçe harf varsa Türkçe kurallarla ("ÇARŞI" → "Çarşı")
+  t = String(t || ''); const tr = /[ÇĞİÖŞÜçğıöşü]/.test(t);
+  return (tr ? t.toLocaleLowerCase('tr') : t.toLowerCase()).replace(/(^|[\s\-/(])(\S)/g, (m, a, b) => a + (tr ? b.toLocaleUpperCase('tr') : b.toUpperCase()));
+}
+function programYapistir() {
+  const kutu = document.getElementById('k_program_yapistir'), tablo = tabloOku(kutu.value || '');
+  const yeni = [];
+  tablo.forEach(h => {
+    let tarih = '', saat = ''; const yazi = [];
+    h.forEach(x => {
+      if (!tarih && tarihOkuGenel(x)) { tarih = tarihOkuGenel(x); return; }
+      const sa = x.match(/^(\d{1,2})[:.](\d{2})$/); if (!saat && sa && +sa[1] < 24) { saat = sa[1].padStart(2, '0') + ':' + sa[2]; return; }
+      if (!x || /^\d+$/.test(x) || /^(BUS|OTOBUS|OTOBÜS|VAN|ARAC|ARAÇ|MINIBUS|MİNİBÜS|TREN|TRAIN)$/i.test(x)) return;
+      yazi.push(x);
+    });
+    if (!tarih || !yazi.length) return;
+    const nereye = yazi[yazi.length - 1], nereden = yazi.length > 1 ? yazi[yazi.length - 2] : '';
+    yeni.push({ tarih, saat, baslik: '🚌 ' + buyukHarfDuzelt(nereye), yer: buyukHarfDuzelt(nereden), konum: '' });
+  });
+  if (!yeni.length) { toast('❌ Tarihli satır bulunamadı', 'error'); return; }
+  const k = document.getElementById('k_program');
+  k.querySelectorAll('.prog-satir').forEach(sr => { if (!sr.querySelector('.p_baslik').value.trim()) sr.remove(); });
+  k.insertAdjacentHTML('beforeend', yeni.map(programSatiri).join(''));
+  kutu.value = '';
+  toast(`✅ ${yeni.length} satır programa eklendi; kontrol edip Kaydet'e basın`, 'success');
+}
 function programSatirEkle() {
   const kutu = document.getElementById('k_program');
   const son = kutu.querySelector('.prog-satir:last-child');
@@ -728,6 +755,11 @@ function kafileFormu(k) {
       <p style="font-size:12px;color:#666;margin-bottom:10px">Her satır bir etkinlik. Uygulamada tarihe ve saate göre sıralanır; “Bugün” ekranında o günün satırları görünür.</p>
       <div id="k_program">${(k.program || []).map(programSatiri).join('')}</div>
       <button type="button" class="btn btn-navy" onclick="programSatirEkle()">➕ Satır ekle</button>
+      <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Transfer / program listesini Excel'den yapıştır</summary>
+        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Transfer listesini (ör. “BUS · MAKKAH · MAZARAT · 07.11.2026 · 08:00”) olduğu gibi kopyalayıp yapıştırın. Tarih ve saati olan her satır programa eklenir: son yer etkinlik, ondan önceki yer buluşma yeri olur. Eklenen satırları kontrol edip <b>Kaydet</b>'e basın.</p>
+        <textarea id="k_program_yapistir" rows="5" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px"></textarea>
+        <button type="button" class="btn btn-gold" style="margin-top:8px" onclick="programYapistir()">➕ Programa ekle</button>
+      </details>
     </div>
     <div style="display:flex;gap:10px">
       <button class="btn btn-gold" id="kafileKaydetBtn" onclick="kafileKaydet(${yeni ? 'null' : `'${k.id}'`})">💾 Kaydet</button>
@@ -886,7 +918,7 @@ function odaBilgi(odalar, a) {
   b.giris = b.giris || o.giris || ''; b.cikis = b.cikis || o.cikis || '';
   return b;
 }
-function tipOku(t) { t = String(t || '').trim(); const n = t.match(/^(\d)\s*(kişilik|kisilik|k)?$/i); return n ? (n[1] === '1' ? 'Tek kişilik' : n[1] + ' kişilik') : t; }
+function tipOku(t) { t = String(t || '').replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ').trim(); const n = t.match(/^(\d)\s*(kişilik|kisilik|k)?$/i); return n ? (n[1] === '1' ? 'Tek kişilik' : n[1] + ' kişilik') : t; }
 function kisaTarih(t) { return t ? t.slice(8, 10) + '.' + t.slice(5, 7) : ''; }
 function odaOzet(b, tarihli) {
   const p = [b.no ? 'Oda ' + b.no : '', b.tip].filter(Boolean).join(' · ');
@@ -894,7 +926,14 @@ function odaOzet(b, tarihli) {
   return tarihli && b.giris && b.cikis ? p + (p ? ' · ' : '') + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (g ? ' (' + g + ' gece)' : '') : p;
 }
 // Oda doluluğu: "2 kişilik" odaya 3. kişi girilirse uyarı. Suit ve tipi girilmemiş odalarda sınır yok.
-function odaKapasite(tip) { if (!tip) return null; if (/^tek/i.test(tip)) return 1; const n = String(tip).match(/(\d+)/); return n ? +n[1] : null; }
+function odaKapasite(tip) { // "2 kişilik", "Tek kişilik", ya da otel kısaltmaları: SNGL, DBL/KNG, TRPL/EKSTRA BED, QUAD
+  if (!tip) return null; const t = basNorm(tip), ek = /EKSTRA|EXTRA|ILAVE/.test(t) ? 1 : 0;
+  if (/^TEK|^SNGL|^SGL|^SINGLE/.test(t)) return 1 + ek;
+  if (/^DBL|^DOUBLE|^TWN|^TWIN|^DUBLE/.test(t)) return 2 + ek;
+  if (/^TRPL|^TRP|^TRIPLE/.test(t)) return 3 + ek;
+  if (/^QUAD|^QDR|^QUADR/.test(t)) return 4 + ek;
+  const n = String(tip).match(/(\d+)/); return n ? +n[1] + ek : null;
+}
 function odaSorunlari(kisiler) { // kisiler: [{ ad, odalar }] → [{ otel, no, metin, adlar }]
   const out = [];
   odaAnahtarlari(KT.kafile).forEach(a => {
@@ -929,7 +968,7 @@ async function kafileKatilimcilar(id) {
     sb.from('musteriler').select('*')
   ]);
   if (!k || error) { toast('❌ ' + (error ? error.message : 'Grup okunamadı'), 'error'); renderKafileler(); return; }
-  KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = [];
+  KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = []; KT.tablo = null;
   const mm = {}; KT.musteriler.forEach(m => mm[m.id] = m);
   const anah = odaAnahtarlari(k);
   KT.liste = (kat || []).filter(x => mm[x.musteri_id]).map(x => ({ kat: x, m: mm[x.musteri_id] }))
@@ -966,10 +1005,10 @@ function katilimciCiz() {
     ${rehber && !d ? '' : `<div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : ''}</div>
       ${d ? '' : `<details style="margin-top:16px" ${KT.onizleme.length ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Excel'den toplu yapıştır</summary>
-        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'de satırları seçip kopyalayın, aşağıya yapıştırın. Sütun sırası: <b>Ad Soyad · Telefon · Doğum tarihi${anah.map(a => ' · Oda no – ' + esc(odaEtiket(a)) + ' · Oda tipi').join('')}</b>. Oda tipi “3” ya da “3 kişilik” yazılabilir; giriş-çıkış tarihleri grubun otel tarihlerinden alınır (kişiye özelse sonra “Düzenle” ile değiştirin). Boş sütun olabilir; başlık satırı varsa atlanır. Tarih 12.03.1955 gibi yazılabilir.</p>
+        <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'deki oda listesini <b>başlık satırıyla birlikte</b> kopyalayıp aşağıya yapıştırın. Kolonlar (Adı, Soyadı, Oda no, Tipi, Giriş/Ara/Çıkış tarihi, Telefon…) başlıklarından tanınır; birleştirilmiş oda hücreleri odadaki herkese uygulanır. Tanınmayan kolonu önizlemede elle seçebilirsiniz.</p>
         <textarea id="kt_yapistir" rows="6" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px" placeholder="Ayşe Kaya	0532 111 22 33	12.03.1955	512	3	304	3"></textarea>
         <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-navy" onclick="katilimciOnizle()">👀 Önizle</button></div>
-        <div id="kt_onizleme">${katilimciOnizlemeHtml()}</div></details>`}
+        <div id="kt_onizleme">${kolonEslesmeHtml() + katilimciOnizlemeHtml()}</div></details>`}
     </div>`}
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
@@ -1049,32 +1088,142 @@ async function katilimciCikar(katId) {
   toast('✅ Çıkarıldı', 'success'); kafileKatilimcilar(KT.kafile.id);
 }
 
-function katilimciOnizle() {
-  const anah = odaAnahtarlari(KT.kafile), metin = (document.getElementById('kt_yapistir') || {}).value || '';
-  KT.onizleme = metin.split(/\r?\n/).map(s => s.replace(/\s+$/, '')).filter(s => s.trim()).map(s => {
-    const h = (s.includes('\t') ? s.split('\t') : s.split(';')).map(x => x.trim());
-    const v = { ad: adDuzelt(h[0]), telefon: h[1] || '', dogumHam: h[2] || '', odalar: {}, sorun: '' };
-    anah.forEach((a, i) => { const e = {}; if (h[3 + 2 * i]) e.no = h[3 + 2 * i]; if (h[4 + 2 * i]) e.tip = tipOku(h[4 + 2 * i]); if (Object.keys(e).length) v.odalar[a] = e; });
-    if (!/\d/.test(s) && /^ad\b|ad[ıi]? ?soyad|isim/i.test(v.ad)) v.baslik = true;
+// ── Akıllı Excel yapıştırma: kolonlar başlık adından tanınır, tanınmayan kolon elle seçilir, seçim hatırlanır ──
+// Excel'den kopyalanan metin: sekmeyle ayrılmış; çok satırlı hücreler tırnak içinde gelir.
+function tabloOku(metin) {
+  const satirlar = []; let satir = [], hucre = '', tirnak = false;
+  const ayir = metin.includes('\t') ? '\t' : ';';
+  for (let i = 0; i < metin.length; i++) {
+    const c = metin[i];
+    if (tirnak) {
+      if (c === '"' && metin[i + 1] === '"') { hucre += '"'; i++; }
+      else if (c === '"') tirnak = false;
+      else hucre += c;
+    } else if (c === '"' && hucre === '') tirnak = true;
+    else if (c === ayir) { satir.push(hucre); hucre = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && metin[i + 1] === '\n') i++; satir.push(hucre); satirlar.push(satir); satir = []; hucre = ''; }
+    else hucre += c;
+  }
+  if (hucre !== '' || satir.length) { satir.push(hucre); satirlar.push(satir); }
+  return satirlar.map(s => s.map(x => x.replace(/\s+/g, ' ').trim())).filter(s => s.some(Boolean));
+}
+function basNorm(t) { return String(t || '').toLocaleUpperCase('tr').replace(/İ/g, 'I').replace(/Ş/g, 'S').replace(/Ğ/g, 'G').replace(/Ü/g, 'U').replace(/Ö/g, 'O').replace(/Ç/g, 'C').replace(/[^A-Z0-9]/g, ''); }
+const KOLON_ADLARI = {
+  sira: ['SN', 'SIRA', 'SIRANO', 'NO'],
+  adsoyad: ['ADSOYAD', 'ADISOYADI', 'ADSOYADI', 'ISIMSOYISIM', 'ISIM', 'FULLNAME', 'NAME', 'YOLCU', 'MISAFIR', 'KATILIMCI'],
+  ad: ['ADI', 'AD', 'FIRSTNAME'],
+  soyad: ['SOYADI', 'SOYAD', 'SURNAME', 'LASTNAME'],
+  telefon: ['TEL', 'TELEFON', 'GSM', 'CEP', 'CEPTEL', 'PHONE', 'TELNO'],
+  dogum: ['DOGUMTARIHI', 'DTARIHI', 'DOGUM', 'DT', 'DTARIH', 'BIRTHDATE', 'DOB'],
+  no: ['ODSY', 'ODANO', 'ODA', 'ODANUMARASI', 'ROOM', 'ROOMNO'],
+  tip: ['TIPI', 'TIP', 'ODATIPI', 'ODATIP', 'TYPE', 'ROOMTYPE'],
+  giris: ['GRSTRH', 'GIRIS', 'GIRISTARIHI', 'GRS', 'CHECKIN'],
+  ara: ['ARATRH', 'ARA', 'ARATARIH', 'GECIS'],
+  cikis: ['CKSTRH', 'CIKIS', 'CIKISTARIHI', 'CKS', 'CHECKOUT']
+};
+function kolonTahmin(baslik) {
+  const b = basNorm(baslik); if (!b) return '';
+  for (const [k, l] of Object.entries(KOLON_ADLARI)) if (l.includes(b)) return k;
+  return 'yok';
+}
+// Seçenekler: genel alanlar + her otel için ayrı oda no/tip/giriş/çıkış
+function kolonSecenekleri() {
+  const anah = odaAnahtarlari(KT.kafile), l = [['yok', '— Kullanma'], ['adsoyad', 'Ad soyad'], ['ad', 'Ad'], ['soyad', 'Soyad'], ['telefon', 'Telefon'], ['dogum', 'Doğum tarihi'],
+    ['no', 'Oda no' + (anah.length > 1 ? ' (tüm oteller)' : '')], ['tip', 'Oda tipi' + (anah.length > 1 ? ' (tüm oteller)' : '')], ['giris', 'Giriş tarihi (ilk otel)'], ['ara', 'Ara tarih (otel değişimi)'], ['cikis', 'Çıkış tarihi (son otel)']];
+  if (anah.length > 1) anah.forEach(a => l.push(['no:' + a, 'Oda no – ' + a], ['tip:' + a, 'Oda tipi – ' + a], ['giris:' + a, 'Giriş – ' + a], ['cikis:' + a, 'Çıkış – ' + a]));
+  l.push(['sira', 'Sıra no (kullanma)']);
+  return l;
+}
+const KOLON_ESKI_SIRA = ['adsoyad', 'telefon', 'dogum']; // başlıksız eski düzen: Ad Soyad · Telefon · Doğum · (her otel için) Oda no · Oda tipi
+function eskiSiraAlani(i) {
+  if (i < 3) return KOLON_ESKI_SIRA[i];
+  const anah = odaAnahtarlari(KT.kafile), k = i - 3, a = anah[Math.floor(k / 2)];
+  return a ? (k % 2 ? 'tip:' : 'no:') + a : 'yok';
+}
+function tarihOkuGenel(s) { // ileri tarihlere de izin verir (giriş/çıkış)
+  s = String(s || '').trim(); let m, g, a, y;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { y = +m[1]; a = +m[2]; g = +m[3]; }
+  else if ((m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})$/))) { g = +m[1]; a = +m[2]; y = +m[3]; if (m[3].length === 2) y += 2000; }
+  else return '';
+  const t = new Date(Date.UTC(y, a - 1, g));
+  return (t.getUTCMonth() === a - 1 && t.getUTCDate() === g && y > 2000) ? `${y}-${String(a).padStart(2, '0')}-${String(g).padStart(2, '0')}` : '';
+}
+function tabloImzasi(b) { return 'kt-kolon:' + b.map(basNorm).join('|'); }
+
+function katilimciOnizle(elleEslesme) {
+  const metin = (document.getElementById('kt_yapistir') || {}).value || '';
+  const tablo = tabloOku(metin);
+  // Başlık satırı: ilk 15 satırda en az 2 kolonu tanınan satır
+  let bi = -1;
+  for (let i = 0; i < Math.min(15, tablo.length); i++) {
+    const k = tablo[i].map(kolonTahmin), tanınan = k.filter(x => x && x !== 'yok' && x !== 'sira').length;
+    if (tanınan >= 2 && k.some(x => x === 'ad' || x === 'adsoyad' || x === 'soyad') && !tablo[i].some(x => /\d{1,2}[./]\d{1,2}[./]\d{2,4}/.test(x))) { bi = i; break; }
+  }
+  const basliklar = bi >= 0 ? tablo[bi] : [];
+  const genislik = Math.max(0, ...tablo.map(s => s.length));
+  let es = elleEslesme;
+  if (!es) {
+    let kayitli = null; try { kayitli = JSON.parse(localStorage.getItem(tabloImzasi(basliklar)) || 'null'); } catch (e) {}
+    es = [];
+    for (let i = 0; i < genislik; i++) es.push((kayitli && kayitli[i]) || (basliklar[i] ? kolonTahmin(basliklar[i]) || 'yok' : (bi >= 0 ? 'yok' : eskiSiraAlani(i))));
+  }
+  KT.eslesme = es; KT.basliklar = basliklar; KT.tablo = tablo; KT.baslikSatiri = bi;
+  const anah = odaAnahtarlari(KT.kafile), onceki = {};
+  const veri = tablo.slice(bi + 1).map(h => {
+    const al = {}; es.forEach((k, i) => { if (k && k !== 'yok' && k !== 'sira' && h[i]) al[k] = h[i]; });
+    let ad = adDuzelt(al.adsoyad || [al.ad, al.soyad].filter(Boolean).join(' '));
+    if (ad && ad === ad.toLocaleUpperCase('tr')) ad = ad.toLocaleLowerCase('tr').replace(/(^|[\s\-'])(\S)/g, (m, x, y) => x + y.toLocaleUpperCase('tr')); // "ALİ YILMAZ" → "Ali Yılmaz"
+    if (!ad || ad.length < 2 || !/[a-zçğıöşüA-ZÇĞİÖŞÜ]/.test(ad)) { return null; }
+    // Birleştirilmiş hücreler: oda no / tip / tarihler boşsa bir önceki kişininkini al
+    ['no', 'tip', 'giris', 'ara', 'cikis'].concat(anah.flatMap(a => ['no:' + a, 'tip:' + a, 'giris:' + a, 'cikis:' + a])).forEach(k => {
+      if (es.includes(k)) { if (al[k]) onceki[k] = al[k]; else if (onceki[k]) al[k] = onceki[k]; }
+    });
+    const v = { ad, telefon: al.telefon || '', dogumHam: al.dogum || '', odalar: {}, sorun: '' };
+    anah.forEach((a, i) => {
+      const e = {}, o = otelAl(a);
+      const no = al['no:' + a] || al.no, tip = al['tip:' + a] || al.tip;
+      let g = al['giris:' + a] || (i === 0 ? al.giris : (i === 1 ? al.ara : '')) || '';
+      let c = al['cikis:' + a] || (i === anah.length - 1 ? al.cikis : (i === 0 ? al.ara : '')) || '';
+      g = tarihOkuGenel(g); c = tarihOkuGenel(c);
+      if (no) e.no = no; if (tip) e.tip = tipOku(tip);
+      if (g && g !== o.giris) e.giris = g; if (c && c !== o.cikis) e.cikis = c;
+      if (Object.keys(e).length) v.odalar[a] = e;
+    });
     v.dogum = tarihOku(v.dogumHam);
-    if (v.ad.length < 2) v.sorun = 'Ad yok';
-    else if (v.dogum === null) { v.sorun = 'Tarih okunamadı, boş bırakılacak'; v.dogum = ''; v.uyari = true; }
+    if (v.dogum === null) { v.sorun = 'Doğum tarihi okunamadı, boş bırakılacak'; v.dogum = ''; v.uyari = true; }
     const m = musteriBul(v.ad, v.telefon, v.dogum);
-    if (m && KT.liste.some(x => x.m.id === m.id)) v.sorun = 'Zaten listede';
+    if (m && KT.liste.some(x => x.m.id === m.id)) { v.sorun = 'Zaten listede'; v.uyari = false; }
     else if (m) v.bilgi = 'Kayıtlı müşteri';
     return v;
-  }).filter(v => !v.baslik);
+  }).filter(Boolean);
+  KT.onizleme = veri;
   const eklenecek = KT.onizleme.filter(v => !v.sorun || v.uyari);
   const sorunlar = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar })).concat(eklenecek.map(v => ({ ad: v.ad, odalar: v.odalar }))));
   eklenecek.forEach(v => { const o = sorunlar.find(x => x.adlar.includes(v.ad)); if (o) v.odaUyari = 'Oda ' + o.no + ' dolu: ' + o.adlar.length + ' kişi'; });
-  document.getElementById('kt_onizleme').innerHTML = katilimciOnizlemeHtml();
+  document.getElementById('kt_onizleme').innerHTML = kolonEslesmeHtml() + katilimciOnizlemeHtml();
+}
+function kolonDegis() {
+  const es = [...document.querySelectorAll('#kt_onizleme .kolon-sec')].map(s => s.value);
+  try { localStorage.setItem(tabloImzasi(KT.basliklar || []), JSON.stringify(es)); } catch (e) {}
+  katilimciOnizle(es);
+}
+function kolonEslesmeHtml() {
+  if (!KT.tablo || !KT.tablo.length) return '';
+  const sec = kolonSecenekleri(), ornek = KT.tablo[(KT.baslikSatiri || -1) + 1] || [];
+  return `<div style="margin-top:10px;font-size:12.5px;color:#555">Kolonlar${KT.baslikSatiri >= 0 ? ' (başlıklardan tanındı; yanlışsa değiştirin, seçiminiz hatırlanır)' : ' (başlık bulunamadı; sırayla eşleştirildi)'}:</div>
+    <div class="kolon-eslesme" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0">${KT.eslesme.map((k, i) => `
+      <div style="flex:none;min-width:120px;border:1px solid #eee;border-radius:6px;padding:6px;background:#fafafa">
+        <div style="font-size:11px;font-weight:700;color:#0B1F3A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(KT.basliklar[i] || '')}">${esc(KT.basliklar[i] || ('Kolon ' + (i + 1)))}</div>
+        <div style="font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">${esc(ornek[i] || '')}</div>
+        <select class="kolon-sec" data-i="${i}" onchange="kolonDegis()" style="width:100%;font-size:12px;padding:4px">${sec.map(([v, t]) => `<option value="${esc(v)}" ${v === k ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>
+      </div>`).join('')}</div>`;
 }
 
 function katilimciOnizlemeHtml() {
   const l = KT.onizleme; if (!l.length) return '';
   const anah = odaAnahtarlari(KT.kafile), eklenecek = l.filter(v => !v.sorun || v.uyari).length;
   return `<div style="overflow-x:auto;margin-top:10px"><table class="fiyat-tablo onizleme-tablo"><thead><tr><th>Ad soyad</th><th>Telefon</th><th>Doğum tarihi</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Durum</th></tr></thead><tbody>
-    ${l.map(v => `<tr style="${v.sorun && !v.uyari ? 'opacity:.5' : ''}"><td>${esc(v.ad)}</td><td>${esc(v.telefon)}</td><td>${v.dogum ? tarihGoster(v.dogum) : esc(v.dogumHam)}</td>${anah.map(a => '<td>' + esc(odaOzet(odaBilgi(v.odalar, a), false)) + '</td>').join('')}
+    ${l.map(v => `<tr style="${v.sorun && !v.uyari ? 'opacity:.5' : ''}"><td>${esc(v.ad)}</td><td>${esc(v.telefon)}</td><td>${v.dogum ? tarihGoster(v.dogum) : esc(v.dogumHam)}</td>${anah.map(a => '<td>' + esc(odaOzet(odaBilgi(v.odalar, a), true)) + '</td>').join('')}
       <td style="font-size:12px;color:${v.sorun ? '#c62828' : '#2e7d32'}">${esc(v.sorun || v.bilgi || 'Yeni')}${v.odaUyari ? `<div class="oda-uyari" style="color:#b26a00">⚠️ ${esc(v.odaUyari)}</div>` : ''}</td></tr>`).join('')}
   </tbody></table></div>
   <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0"><input type="checkbox" id="kt_toplu_izin"> Bu kişilerin hepsi doğum günü / kampanya mesajına izin verdi</label>
