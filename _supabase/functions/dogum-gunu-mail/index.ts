@@ -1,16 +1,14 @@
 // Supabase Edge Function: dogum-gunu-mail
-// Her pazartesi 09:00'da (pg_cron, Europe/Istanbul) o haftanın (bugün + 6 gün) doğum günlerini
+// Her pazartesi 09:00 (pg_cron, İstanbul) o haftanın (bugün + 6 gün) doğum günlerini
 // ofis e-postasına gönderir. Doğum günü olan yoksa e-posta gönderilmez.
 // Kimlik doğrulama: x-bildirim-anahtar başlığı, kasadaki (vault) bildirim_anahtar ile aynı olmalı.
-// E-posta Resend ile gider; API anahtarı RESEND_API_KEY ortam sırrındadır (kodda gizli bilgi yoktur).
-// İstek gövdesi: {} → normal çalışma; {"deneme": true} → göndermeden listeyi döndürür; {"zorla": true} → liste boşsa da gönderir; {"kontrol": true} → yalnızca anahtar var mı söyler.
+// E-posta, sitedeki başvuru formlarıyla aynı Web3Forms hesabından gider (erişim anahtarı zaten sitede açık; gizli değil).
+// İstek gövdesi: {} → normal çalışma; {"deneme": true} → göndermeden listeyi döndürür; {"deneme_mail": true} → konusu "DENEME" olan bir e-posta gönderir.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
-const ALICI = "ismailcosarturizm@gmail.com";
-const GONDEREN = "İsmail Coşar Turizm <onboarding@resend.dev>";
+const WEB3FORMS = "e07b7888-be33-4c67-b2aa-01447f3586cf";
 const PANEL = "https://ismailcosarturizm.com.tr/admin.html";
 const json = (v: unknown, durum = 200) => new Response(JSON.stringify(v), { status: durum, headers: { "Content-Type": "application/json" } });
-const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 
 function esit(a: string, b: string) {
   if (a.length !== b.length) return false;
@@ -36,9 +34,8 @@ Deno.serve(async (req: Request) => {
   const { data: ayar, error: ayarHata } = await db.rpc("bildirim_ayarlari");
   if (ayarHata || !ayar?.bildirim_anahtar) return json({ hata: "ayarlar okunamadı" }, 500);
   if (!esit(req.headers.get("x-bildirim-anahtar") ?? "", ayar.bildirim_anahtar)) return json({ hata: "yetkisiz" }, 401);
-  let g: { deneme?: boolean; zorla?: boolean; kontrol?: boolean } = {};
+  let g: { deneme?: boolean; deneme_mail?: boolean } = {};
   try { g = await req.json(); } catch { /* boş gövde */ }
-  if (g.kontrol) return json({ resend_anahtari: !!Deno.env.get("RESEND_API_KEY"), sirlar: Object.keys(Deno.env.toObject()).filter((k) => /RESEND|MAIL|SMTP/i.test(k)) });
 
   const bas = bugunTR(), bit = gunEkle(bas, 6);
   const { data: mus, error } = await db.from("musteriler").select("id, ad, telefon, dogum_tarihi, ileti_izni").not("dogum_tarihi", "is", null);
@@ -63,28 +60,27 @@ Deno.serve(async (req: Request) => {
     for (const k of kat ?? []) (gruplar[k.musteri_id] = gruplar[k.musteri_id] || []).push(ad[k.kafile_id] || "");
   }
   if (g.deneme) return json({ bas, bit, liste });
-  if (!liste.length && !g.zorla) return json({ gonderildi: false, not: "bu hafta doğum günü yok" });
+  if (!liste.length && !g.deneme_mail) return json({ gonderildi: false, not: "bu hafta doğum günü yok" });
 
-  const anahtar = Deno.env.get("RESEND_API_KEY");
-  if (!anahtar) return json({ hata: "RESEND_API_KEY tanımlı değil" }, 500);
-  const satirlar = liste.map((x) => {
-    const no = x.izin ? waNumara(x.tel) : "";
-    const mesaj = `Sayın ${x.ad}, doğum gününüzü en içten dileklerimizle kutlarız. Nice sağlıklı, huzurlu ve hayırlı yıllara… İsmail Coşar Turizm`;
-    return `<tr><td style="padding:10px;border-bottom:1px solid #eee"><b>${esc(x.ad)}</b><br><span style="color:#777;font-size:13px">${esc((gruplar[x.id] || []).join(", "))}</span></td>
-      <td style="padding:10px;border-bottom:1px solid #eee">${esc(guzelTarih(x.gun))}${x.yas > 0 && x.yas < 120 ? `<br><span style="color:#777;font-size:13px">${x.yas} yaşına giriyor</span>` : ""}</td>
-      <td style="padding:10px;border-bottom:1px solid #eee">${no ? `<a href="https://wa.me/${no}?text=${encodeURIComponent(mesaj)}" style="background:#25D366;color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none;font-weight:bold">WhatsApp ile kutla</a>` : `<span style="color:#999;font-size:13px">${x.izin ? "telefon yok" : "ileti izni yok"}</span>`}</td></tr>`;
-  }).join("");
-  const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#0B1F3A">
-    <h2 style="margin-bottom:4px">🎂 Bu haftanın doğum günleri</h2>
-    <p style="color:#777;margin-top:0">${esc(guzelTarih(bas))} – ${esc(guzelTarih(bit))}</p>
-    ${liste.length ? `<table style="width:100%;border-collapse:collapse;font-size:15px">${satirlar}</table>` : "<p>Bu hafta doğum günü olan misafir yok.</p>"}
-    <p style="margin-top:24px"><a href="${PANEL}" style="color:#C9972B">Admin paneli</a> · Bu e-posta her pazartesi otomatik gönderilir.</p></div>`;
-  const r = await fetch("https://api.resend.com/emails", {
+  // Web3Forms düz metin gönderir; her kişi ayrı paragraf, WhatsApp bağlantısı tıklanabilir
+  const metin = [
+    `${guzelTarih(bas)} – ${guzelTarih(bit)} arasında doğum günü olan misafirlerimiz:`, "",
+    ...(liste.length ? liste.map((x, i) => {
+      const no = x.izin ? waNumara(x.tel) : "";
+      const mesaj = `Sayın ${x.ad}, doğum gününüzü en içten dileklerimizle kutlarız. Nice sağlıklı, huzurlu ve hayırlı yıllara… İsmail Coşar Turizm`;
+      return [`${i + 1}) ${x.ad} – ${guzelTarih(x.gun)}${x.yas > 0 && x.yas < 120 ? ` (${x.yas} yaşına giriyor)` : ""}`,
+        (gruplar[x.id] || []).length ? `   Gruplar: ${gruplar[x.id].join(", ")}` : "",
+        no ? `   WhatsApp ile kutla: https://wa.me/${no}?text=${encodeURIComponent(mesaj)}` : `   (${x.izin ? "telefon yok" : "ileti izni yok"})`, ""].filter(Boolean).join("\n");
+    }) : ["Bu hafta doğum günü olan misafir yok."]),
+    "", `Admin paneli: ${PANEL}`, "Bu e-posta her pazartesi 09:00'da otomatik gönderilir.",
+  ].join("\n");
+  const r = await fetch("https://api.web3forms.com/submit", {
     method: "POST",
-    headers: { Authorization: `Bearer ${anahtar}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: GONDEREN, to: [ALICI], subject: `🎂 Bu hafta ${liste.length} misafirimizin doğum günü var`, html }),
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ access_key: WEB3FORMS, from_name: "İsmail Coşar Turizm – Doğum Günleri",
+      subject: (g.deneme_mail ? "DENEME – " : "") + `🎂 Bu hafta ${liste.length} misafirimizin doğum günü var`, "Doğum günleri": metin }),
   });
   const sonuc = await r.json().catch(() => ({}));
-  if (!r.ok) return json({ hata: "e-posta gönderilemedi", durum: r.status, ayrinti: sonuc }, 502);
-  return json({ gonderildi: true, kisi: liste.length, id: sonuc.id });
+  if (!r.ok || !sonuc.success) return json({ hata: "e-posta gönderilemedi", durum: r.status, ayrinti: sonuc }, 502);
+  return json({ gonderildi: true, kisi: liste.length });
 });
