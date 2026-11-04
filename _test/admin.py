@@ -527,6 +527,9 @@ with sync_playwright() as p:
         kontrol('Oda 520' in (pv.get('text') or '') and 'Ayşe Kaya' in pv.get('text', '') and 'oda listesi' in (pv.get('title') or ''), 'Rehber: "Listeyi paylaş" telefonun paylaş menüsünü oda listesiyle açıyor', pv)
         kontrol(rp.locator('#odaGirBtn').count() == 1, 'Rehber: "Oda numaralarını gir" butonu var')
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
+        rp.evaluate("sekmeAc('kafile')"); rp.wait_for_timeout(400)
+        kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
+        kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafir kodunu paylaş" yazısı ortalı')
         rp.close()
     b.close()
 
