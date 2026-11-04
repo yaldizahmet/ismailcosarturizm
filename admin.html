@@ -1485,6 +1485,31 @@ async function rehberIslem(govde) {
   if (hata) { toast('❌ ' + hata, 'error'); return null; }
   return data || {};
 }
+// Rehbere gönderilecek giriş bilgisi. Şifre yalnızca hesap açılınca / şifre değişince bilinir (sonra kimse göremez).
+const REHBER_GIRIS = 'https://ismailcosarturizm.com.tr/admin.html';
+let RH_SON = null; // { ad, ka, sifre, yeni }
+function rehberGirisMetni(ad, ka, sifre) {
+  return 'Merhaba ' + ad + ',\n\nİsmail Coşar Turizm rehber hesabınız ' + (sifre ? 'hazır' : 'bilgileri') + '.\n\n'
+    + '🔗 Giriş adresi: ' + REHBER_GIRIS + '\n👤 Kullanıcı adı: ' + ka + '\n🔑 Şifre: ' + (sifre || 'size daha önce iletilen şifre') + '\n\n'
+    + 'Girişten sonra "Gruplarım" ekranında size atanan grupların katılımcı ve oda listesini görebilir, oda numaralarını girebilirsiniz.';
+}
+function rehberGirisKutusu() {
+  if (!RH_SON) return '';
+  const m = rehberGirisMetni(RH_SON.ad, RH_SON.ka, RH_SON.sifre);
+  return `<div class="card rehber-giris-kutu" style="border:2px solid #25D366">
+    <h3>📲 ${esc(RH_SON.ad)} – giriş bilgilerini gönderin</h3>
+    <p style="font-size:13px;color:#555">${RH_SON.yeni ? 'Hesap açıldı.' : 'Şifre değiştirildi.'} Bu şifre bir daha gösterilmez; şimdi rehbere gönderin.</p>
+    <pre style="white-space:pre-wrap;background:#f6f8f7;padding:12px;border-radius:8px;font-family:inherit;font-size:14px;margin:10px 0">${esc(m)}</pre>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn rehber-giris-wa" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(m)}">💬 WhatsApp ile gönder</a>
+      <button class="btn btn-navy" onclick="metinKopyala(${esc(JSON.stringify(m))})">📋 Kopyala</button>
+      <button class="btn" style="background:#eee" onclick="RH_SON=null;renderRehberler()">Kapat</button></div></div>`;
+}
+function metinKopyala(t) {
+  const yedek = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); };
+  (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t).catch(yedek) : Promise.resolve(yedek())).then(() => toast('✅ Kopyalandı', 'success'));
+  window.__sonKopya = t;
+}
 async function renderRehberler() {
   const el = document.getElementById('sayfa-rehber');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
@@ -1497,7 +1522,8 @@ async function renderRehberler() {
   const atandi = (u, k) => (atamalar || []).some(a => a.user_id === u && a.kafile_id === k);
   el.innerHTML = `
     <div class="header"><h2>🧭 Rehber Hesapları</h2></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı grupların <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
+    ${rehberGirisKutusu()}
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">🔗 Rehber giriş adresi: <b>ismailcosarturizm.com.tr/admin.html</b><br>Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı grupların <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
     <div class="card"><h3>➕ Yeni rehber hesabı</h3>
       <div class="form-row">
         <div class="form-group"><label>Ad soyad</label><input id="rh_ad" placeholder="Ali Yılmaz"></div>
@@ -1514,6 +1540,7 @@ async function renderRehberler() {
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
           <input class="rh_yeni_sifre" type="text" placeholder="Yeni şifre" autocomplete="off" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;max-width:180px">
           <button class="btn btn-navy" onclick="rehberSifre('${esc(r.user_id)}', this)">Şifreyi değiştir</button>
+          <a class="btn rehber-bilgi-wa" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" title="Şifre yazılmaz; şifreyi unuttuysa önce şifreyi değiştirin" href="https://wa.me/?text=${encodeURIComponent(rehberGirisMetni(r.ad || '', r.kullanici_adi || '', ''))}">📲 Giriş adresini gönder</a>
           <button class="btn btn-red" style="margin-left:auto" onclick="rehberSil('${esc(r.user_id)}')">Hesabı sil</button>
         </div></div>`).join('') || '<p style="color:#666;font-size:14px">Henüz rehber hesabı yok.</p>'}
     </div></div>`;
@@ -1525,8 +1552,9 @@ async function rehberOlustur() {
   if (sifre.length < 8) { toast('❌ Şifre en az 8 karakter olmalı', 'error'); return; }
   const r = await rehberIslem({ islem: 'olustur', ad, kullanici_adi: ka, sifre });
   if (!r) return;
-  toast('✅ Hesap açıldı. Şimdi görebileceği grupları işaretleyin.', 'success');
-  renderRehberler();
+  toast('✅ Hesap açıldı. Görebileceği grupları işaretleyin ve giriş bilgilerini gönderin.', 'success');
+  RH_SON = { ad, ka, sifre, yeni: true };
+  await renderRehberler(); window.scrollTo(0, 0);
 }
 async function rehberAta(userId, kafileId, ac) {
   const { error } = ac ? await sb.from('kafile_rehberleri').insert({ user_id: userId, kafile_id: kafileId })
@@ -1537,7 +1565,11 @@ async function rehberAta(userId, kafileId, ac) {
 async function rehberSifre(userId, btn) {
   const kutu = btn.parentElement.querySelector('.rh_yeni_sifre'), sifre = kutu.value;
   if (sifre.length < 8) { toast('❌ Şifre en az 8 karakter olmalı', 'error'); return; }
-  if (await rehberIslem({ islem: 'sifre', user_id: userId, sifre })) { kutu.value = ''; toast('✅ Şifre değiştirildi', 'success'); }
+  if (await rehberIslem({ islem: 'sifre', user_id: userId, sifre })) {
+    const it = btn.closest('.rehber-item');
+    RH_SON = { ad: it.querySelector('h4').textContent, ka: it.querySelector('.tur-item-info b').textContent, sifre, yeni: false };
+    toast('✅ Şifre değiştirildi', 'success'); await renderRehberler(); window.scrollTo(0, 0);
+  }
 }
 async function rehberSil(userId) {
   if (!confirm('Rehber hesabı silinsin mi? Rehber artık giriş yapamaz.')) return;

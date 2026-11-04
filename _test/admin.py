@@ -298,6 +298,16 @@ with sync_playwright() as p:
     fn = pg.evaluate('window.__fn')
     kontrol(len(fn) == 1 and fn[0]['ad'] == 'rehber-hesap' and fn[0]['govde'] == {'islem': 'olustur', 'ad': 'Ali Yılmaz', 'kullanici_adi': 'ali.yilmaz', 'sifre': 'gizli1234'}
             and pg.locator('.rehber-item').count() == 1 and 'ali.yilmaz' in pg.inner_text('.rehber-item'), 'Rehber hesabı: açılıyor (kullanıcı adı küçük harfe çevriliyor) ve listede', errs)
+    gm = pg.inner_text('.rehber-giris-kutu') if pg.locator('.rehber-giris-kutu').count() else ''
+    wa = pg.get_attribute('.rehber-giris-wa', 'href') or ''
+    kontrol('ismailcosarturizm.com.tr/admin.html' in gm and 'ali.yilmaz' in gm and 'gizli1234' in gm and wa.startswith('https://wa.me/?text=') and 'gizli1234' in wa,
+            'Rehber hesabı: açılınca giriş adresi, kullanıcı adı ve şifre "WhatsApp ile gönder" kutusunda', gm[:120])
+    pg.locator('.rehber-giris-kutu').get_by_role('button', name=re.compile('Kopyala')).click(); pg.wait_for_timeout(200)
+    kontrol('Kullanıcı adı: ali.yilmaz' in (pg.evaluate('window.__sonKopya') or ''), 'Rehber hesabı: giriş bilgisi kopyalanabiliyor')
+    wb = pg.get_attribute('.rehber-item .rehber-bilgi-wa', 'href') or ''
+    kontrol('admin.html' in wb and 'ali.yilmaz' in wb and 'gizli1234' not in wb, 'Rehber hesabı: listede "Giriş adresini gönder" (şifresiz)')
+    pg.locator('.rehber-giris-kutu').get_by_role('button', name='Kapat').click(); pg.wait_for_timeout(300)
+    kontrol(pg.locator('.rehber-giris-kutu').count() == 0, 'Rehber hesabı: bilgi kutusu kapatılınca şifre ekrandan kalkıyor')
     rid = pg.get_attribute('.rehber-item', 'data-user')
     pg.locator('.rehber-item .rh_kafile').first.check(); pg.wait_for_timeout(300)
     ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
@@ -307,7 +317,7 @@ with sync_playwright() as p:
     kontrol(len(sl) == 1 and ['user_id', rid] in sl[0]['filtre'] and len(sl[0]['filtre']) == 2, 'Rehber hesabı: işaret kaldırılınca yalnızca o atama siliniyor')
     pg.evaluate("window.__fn = []"); pg.fill('.rehber-item .rh_yeni_sifre', 'yenisifre99'); pg.get_by_role('button', name='Şifreyi değiştir').click(); pg.wait_for_timeout(300)
     fn = pg.evaluate('window.__fn')
-    kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sifre', 'user_id': rid, 'sifre': 'yenisifre99'} and pg.input_value('.rehber-item .rh_yeni_sifre') == '', 'Rehber hesabı: şifre değiştiriliyor')
+    kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sifre', 'user_id': rid, 'sifre': 'yenisifre99'} and pg.input_value('.rehber-item .rh_yeni_sifre') == '' and 'yenisifre99' in pg.inner_text('.rehber-giris-kutu'), 'Rehber hesabı: şifre değiştiriliyor, yeni şifre gönderilmek üzere gösteriliyor')
     pg.evaluate("window.__fn = []"); pg.get_by_role('button', name='Hesabı sil').click(); pg.wait_for_timeout(400)
     fn = pg.evaluate('window.__fn')
     kontrol(len(fn) == 1 and fn[0]['govde'] == {'islem': 'sil', 'user_id': rid} and pg.locator('.rehber-item').count() == 0 and not errs, 'Rehber hesabı: siliniyor', errs)
