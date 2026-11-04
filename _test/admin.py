@@ -457,6 +457,26 @@ with sync_playwright() as p:
     ki = [i for i in ap.evaluate('window.__islem') if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']
     kontrol(len(ki) == 1 and len(ki[0]['veri']) == 7 and ap.locator('.katilimci-satir').count() == 7 and ap.locator('.oda-uyarilari').count() == 0 and not errs,
             'Akıllı yapıştırma: 7 kişi odalarıyla ekleniyor, oda uyarısı yok', errs)
+    # toplu oda numarası girişi
+    ap.click('#odaGirBtn'); ap.wait_for_timeout(200)
+    kontrol(ap.locator('.toplu-oda .to_no').count() == 14 and ap.locator('.katilimci-tablo').count() == 0, 'Oda numaraları: herkes için Mekke ve Medine kutusu (7 kişi × 2 otel), tek ekranda')
+    def kutu(ad, otel): return ap.locator(f'.toplu-oda tr:has-text("{ad}") .to_no[data-otel="{otel}"]')
+    for ad, mk in [('Ali Yılmaz', '512'), ('Ayşe Yılmaz', '512'), ('Veli Demir', '514'), ('Fatma Demir', '514'), ('Zeynep Demir', '514'), ('Sait Bulmus', '512')]:
+        kutu(ad, 'Mekke').fill(mk)
+    kutu('Hasan Kara', 'Mekke').fill(''); kutu('Ali Yılmaz', 'Medine').fill('301')
+    ap.evaluate("window.__islem = []; window.confirm = function(m){ window.__onay = m; return false; }")
+    ap.get_by_role('button', name=re.compile('Hepsini kaydet')).click(); ap.wait_for_timeout(300)
+    kontrol('Oda 512' in (ap.evaluate('window.__onay') or '') and not ap.evaluate('window.__islem'), 'Oda numaraları: DBL odaya 3 kişi yazılınca uyarı; "Hayır" denirse hiçbir şey kaydedilmiyor')
+    kutu('Sait Bulmus', 'Mekke').fill('516')
+    ap.evaluate("window.__islem = []; window.__onay = null")
+    ap.get_by_role('button', name=re.compile('Hepsini kaydet')).click(); ap.wait_for_timeout(600)
+    g = {x['filtre'][0][1]: x['veri']['odalar'] for x in ap.evaluate('window.__islem') if x['tablo'] == 'kafile_katilimcilar' and x['tur'] == 'update'}
+    ali = next((v for v in g.values() if v.get('Medine', {}).get('no') == '301'), {})
+    kontrol(ap.evaluate('window.__onay') is None and len(g) == 7 and ali == {'Mekke': {'no': '512', 'tip': 'DBL'}, 'Medine': {'no': '301', 'tip': 'DBL'}}
+            and any(v['Mekke'] == {'no': '514', 'tip': 'TRPL/KNG/EKSTRA BED', 'giris': '2026-11-07'} for v in g.values())
+            and any(v['Mekke'] == {'tip': 'SNGL'} for v in g.values()), 'Oda numaraları: tek Kaydet ile hepsi yazılıyor; tip ve kişiye özel tarih korunuyor, silinen numara kalkıyor', str(g)[:200])
+    kontrol(ap.locator('.toplu-oda').count() == 0 and ap.locator('.katilimci-satir').count() == 7 and not errs, 'Oda numaraları: kaydedince liste normal görünümüne dönüyor', errs)
+    ap.evaluate("window.confirm = function(){ return true; }")
     # transfer listesi → program
     ap.evaluate("kafileDuzenle('k9')"); ap.wait_for_timeout(400)
     TRANSFER = ('ISMAIL COSAR TURIZM\tGELIS PC670 /DONUS PC689\tMAWEKEB\n\t\t\t\tTARIH\tSAAT\n'
@@ -501,6 +521,11 @@ with sync_playwright() as p:
         mu = [i for i in isl if i['tablo'] == 'musteriler' and i['tur'] == 'update']; ku = [i for i in isl if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'update']
         kontrol(len(mu) == 1 and 'ileti_izni' not in mu[0]['veri'] and mu[0]['veri']['telefon'] == '0533 999 88 77' and len(ku) == 1 and ku[0]['veri'] == {'odalar': {'Mekke': {'no': '520'}}}
                 and not [i for i in isl if i['tur'] in ('insert', 'delete')] and not errs, 'Rehber: oda ve telefonu düzeltebiliyor (izin değişmiyor, ekleme/silme yok)', errs)
+        rp.evaluate("window.__paylasilan = null; navigator.share = function(v){ window.__paylasilan = v; return Promise.resolve(); }")
+        rp.get_by_role('button', name=re.compile('Listeyi paylaş')).click(); rp.wait_for_timeout(200)
+        pv = rp.evaluate('window.__paylasilan') or {}
+        kontrol('Oda 520' in (pv.get('text') or '') and 'Ayşe Kaya' in pv.get('text', '') and 'oda listesi' in (pv.get('title') or ''), 'Rehber: "Listeyi paylaş" telefonun paylaş menüsünü oda listesiyle açıyor', pv)
+        kontrol(rp.locator('#odaGirBtn').count() == 1, 'Rehber: "Oda numaralarını gir" butonu var')
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
         rp.close()
     b.close()

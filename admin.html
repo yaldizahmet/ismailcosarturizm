@@ -999,7 +999,7 @@ async function kafileKatilimcilar(id) {
     sb.from('musteriler').select('*')
   ]);
   if (!k || error) { toast('❌ ' + (error ? error.message : 'Grup okunamadı'), 'error'); renderKafileler(); return; }
-  KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = []; KT.tablo = null;
+  KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = []; KT.tablo = null; KT.topluOda = false;
   const mm = {}; KT.musteriler.forEach(m => mm[m.id] = m);
   const anah = odaAnahtarlari(k);
   KT.liste = (kat || []).filter(x => mm[x.musteri_id]).map(x => ({ kat: x, m: mm[x.musteri_id] }))
@@ -1043,9 +1043,10 @@ function katilimciCiz() {
     </div>`}
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
-        ${KT.liste.length ? '<button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button>' : ''}</div>
+        ${KT.liste.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${KT.topluOda ? '' : '<button class="btn btn-navy" id="odaGirBtn" onclick="KT.topluOda=true;katilimciCiz()">🔢 Oda numaralarını gir</button>'}<button class="btn btn-gold" id="listePaylasBtn" onclick="odaListesiPaylas()">📤 Listeyi paylaş</button><button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button></div>` : ''}</div>
+      ${KT.topluOda ? topluOdaHtml() : ''}
       ${(() => { const o = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar }))); return o.length ? `<div class="oda-uyarilari" style="background:#fff4e0;border:1px solid #f0d9a8;color:#6b5413;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:10px;line-height:1.6">${o.map(x => '⚠️ ' + esc(x.metin)).join('<br>')}</div>` : ''; })()}
-      ${KT.liste.length ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
+      ${KT.liste.length && !KT.topluOda ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
         ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => { const b = odaBilgi(x.kat.odalar, a), gc = geceSayisi(b.giris, b.cikis); return '<td' + (odaSorunlari(KT.liste.map(y => ({ ad: y.m.ad, odalar: y.kat.odalar }))).some(o => o.otel === a && o.no === b.no) ? ' class="oda-dolu" style="background:#fdecea"' : '') + '><b>' + esc(b.no || '') + '</b>' + (b.tip ? ' <span style="color:#555">· ' + esc(b.tip) + '</span>' : '') + (b.giris && b.cikis ? '<div style="font-size:11.5px;color:#777">' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (gc ? ' · ' + gc + ' gece' : '') + '</div>' : '') + '</td>'; }).join('')}
           <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
           <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> ${rehber ? '' : `<button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button>`}</td></tr>`).join('')}
@@ -1053,6 +1054,36 @@ function katilimciCiz() {
     </div>`;
 }
 
+// Toplu oda numarası girişi: herkes alt alta, her otel için bir kutu, tek Kaydet (rehber de kullanabilir)
+function topluOdaHtml() {
+  const anah = odaAnahtarlari(KT.kafile);
+  return `<div class="toplu-oda"><p style="font-size:13px;color:#555;margin-bottom:8px">Otelden gelen oda numaralarını yazın; aynı odadakilere aynı numarayı verin. Bitince en alttaki <b>Hepsini kaydet</b>'e basın.</p>
+    <div style="overflow-x:auto"><table class="fiyat-tablo"><thead><tr><th>Ad soyad</th>${anah.map(a => '<th>' + esc(a) + ' oda no</th>').join('')}</tr></thead><tbody>
+    ${KT.liste.map(x => `<tr><td style="white-space:nowrap">${esc(x.m.ad)}${odaBilgi(x.kat.odalar, anah[0]).tip ? `<div style="font-size:11px;color:#888">${esc(odaBilgi(x.kat.odalar, anah[0]).tip)}</div>` : ''}</td>
+      ${anah.map(a => `<td><input class="to_no" data-kat="${x.kat.id}" data-otel="${esc(a)}" value="${esc(odaBilgi(x.kat.odalar, a).no || '')}" inputmode="numeric" style="width:90px;padding:8px;border:1.5px solid #ddd;border-radius:6px;font-size:15px;text-align:center"></td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-gold" style="padding:12px 22px;font-size:15px" onclick="topluOdaKaydet()">💾 Hepsini kaydet</button><button class="btn btn-navy" onclick="KT.topluOda=false;katilimciCiz()">Vazgeç</button></div></div>`;
+}
+async function topluOdaKaydet() {
+  const yeni = {}; // kat.id → odalar
+  KT.liste.forEach(x => { yeni[x.kat.id] = JSON.parse(JSON.stringify(x.kat.odalar || {})); });
+  document.querySelectorAll('.toplu-oda .to_no').forEach(i => {
+    const id = +i.getAttribute('data-kat'), a = i.getAttribute('data-otel'), v = i.value.trim(), od = yeni[id];
+    let e = od[a]; if (typeof e === 'string') e = { no: e }; e = Object.assign({}, e || {});
+    if (v) e.no = v; else delete e.no;
+    if (Object.keys(e).length) od[a] = e; else delete od[a];
+  });
+  const degisen = KT.liste.filter(x => JSON.stringify(yeni[x.kat.id]) !== JSON.stringify(x.kat.odalar || {}));
+  if (!degisen.length) { KT.topluOda = false; katilimciCiz(); toast('Değişiklik yok', 'success'); return; }
+  const sorun = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: yeni[x.kat.id] })));
+  if (sorun.length && !confirm('⚠️ ' + sorun.map(o => o.metin).join('\n⚠️ ') + '\n\nYine de kaydedilsin mi?')) return;
+  for (const x of degisen) {
+    const { error } = await sb.from('kafile_katilimcilar').update({ odalar: yeni[x.kat.id] }).eq('id', x.kat.id);
+    if (error) { toast('❌ ' + x.m.ad + ': ' + error.message, 'error'); return; }
+  }
+  toast(`✅ ${degisen.length} kişinin odası kaydedildi`, 'success');
+  KT.topluOda = false; kafileKatilimcilar(KT.kafile.id);
+}
 function odaGeceGoster(i) { const b = i.closest('.oda-blok'); b.querySelector('.kt_gece').textContent = geceYazi(b.querySelector('.kt_giris').value, b.querySelector('.kt_cikis').value); }
 function katilimciDuzenle(katId) {
   KT.duzenlenen = KT.liste.find(x => x.kat.id === katId) || null; katilimciCiz();
@@ -1308,6 +1339,12 @@ function odaListesiMetni() {
     if (odasiz.length) satirlar.push('Odası girilmemiş: ' + odasiz.join(', '));
   });
   return satirlar.join('\n');
+}
+function odaListesiPaylas() {
+  const t = odaListesiMetni();
+  window.__sonPaylas = t;
+  if (navigator.share) navigator.share({ title: KT.kafile.ad + ' – oda listesi', text: t }).catch(() => {});
+  else odaListesiKopyala();
 }
 function odaListesiKopyala() {
   const t = odaListesiMetni();
