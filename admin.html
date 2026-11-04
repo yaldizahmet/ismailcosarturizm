@@ -1172,7 +1172,8 @@ function katilimciOnizle(elleEslesme) {
   const veri = tablo.slice(bi + 1).map(h => {
     const al = {}; es.forEach((k, i) => { if (k && k !== 'yok' && k !== 'sira' && h[i]) al[k] = h[i]; });
     let ad = adDuzelt(al.adsoyad || [al.ad, al.soyad].filter(Boolean).join(' '));
-    if (ad && ad === ad.toLocaleUpperCase('tr')) ad = ad.toLocaleLowerCase('tr').replace(/(^|[\s\-'])(\S)/g, (m, x, y) => x + y.toLocaleUpperCase('tr')); // "ALİ YILMAZ" → "Ali Yılmaz"
+    // BÜYÜK HARF isim → "Ali Yılmaz". Türkçe harf (İ, Ş, Ğ…) varsa Türkçe kurallar; tablo Türkçe karaktersiz yazılmışsa ("SAIT") I → i ("Sait", "Saıt" değil)
+    if (ad && ad === ad.toLocaleUpperCase('tr')) { const tr = /[İŞĞÜÖÇ]/.test(ad); ad = (tr ? ad.toLocaleLowerCase('tr') : ad.toLowerCase()).replace(/(^|[\s\-'])(\S)/g, (m, x, y) => x + (tr ? y.toLocaleUpperCase('tr') : y.toUpperCase())); }
     if (!ad || ad.length < 2 || !/[a-zçğıöşüA-ZÇĞİÖŞÜ]/.test(ad)) { return null; }
     // Birleştirilmiş hücreler: oda no / tip / tarihler boşsa bir önceki kişininkini al
     ['no', 'tip', 'giris', 'ara', 'cikis'].concat(anah.flatMap(a => ['no:' + a, 'tip:' + a, 'giris:' + a, 'cikis:' + a])).forEach(k => {

@@ -419,6 +419,7 @@ with sync_playwright() as p:
             '3\t2\t"TRPL /KNG\n/EKSTRA BED"\tVELİ\tDEMİR\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\tCOŞAR\n'
             '4\t\t\tFATMA\tDEMİR\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\t\n'
             '5\t\t\tZEYNEP\tDEMİR\tSAMAMA\t07.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t12\t\n'
+            '7\t4\tDBL\tSAIT\tBULMUS\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\t\n'
             '6\t3\tSNGL\tHASAN\tKARA\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\t14\tCOŞAR\n'
             '\t\t\t\t\tSAMAMA\t05.11.2026\t15.11.2026\t18.11.2026\tSARAYA HARMONY\n')
     ap.evaluate("t => { document.getElementById('kt_yapistir').value = t; }", OFIS)
@@ -427,13 +428,13 @@ with sync_playwright() as p:
     kontrol(es[:10] == ['sira', 'no', 'tip', 'ad', 'soyad', 'yok', 'giris', 'ara', 'cikis', 'yok'], 'Akıllı yapıştırma: başlık satırı bulunuyor, kolonlar başlıklarından tanınıyor (üstteki başlık/özet satırları atlanıyor)', es)
     v = ap.evaluate("KT.onizleme")
     adlar = [x['ad'] for x in v]
-    kontrol(adlar == ['Ali Yılmaz', 'Ayşe Yılmaz', 'Veli Demir', 'Fatma Demir', 'Zeynep Demir', 'Hasan Kara'], 'Akıllı yapıştırma: ad + soyad birleşiyor, BÜYÜK HARF isim düzeltiliyor (Ali Yılmaz), isimsiz satır atlanıyor', adlar)
+    kontrol(adlar == ['Ali Yılmaz', 'Ayşe Yılmaz', 'Veli Demir', 'Fatma Demir', 'Zeynep Demir', 'Sait Bulmus', 'Hasan Kara'], 'Akıllı yapıştırma: ad + soyad birleşiyor, BÜYÜK HARF isim düzeltiliyor (ALİ → Ali, Türkçe karaktersiz SAIT → Sait), isimsiz satır atlanıyor', adlar)
     o = {x['ad']: x['odalar'] for x in v}
     kontrol(o['Ayşe Yılmaz'] == {'Mekke': {'no': '1', 'tip': 'DBL'}, 'Medine': {'no': '1', 'tip': 'DBL'}} and o['Fatma Demir']['Mekke'] == {'no': '2', 'tip': 'TRPL/KNG/EKSTRA BED'}
             and o['Zeynep Demir']['Mekke'] == {'no': '2', 'tip': 'TRPL/KNG/EKSTRA BED', 'giris': '2026-11-07'} and o['Hasan Kara']['Mekke'] == {'no': '3', 'tip': 'SNGL'},
             'Akıllı yapıştırma: birleştirilmiş oda no/tip alttakilere uygulanıyor; otel tarihinden farklı giriş kişiye özel kaydediliyor', str(o)[:200])
-    kontrol(ap.locator('#kt_onizleme .oda-uyari').count() == 0 and '3 kişiyi' not in ap.inner_text('#kt_onizleme') and '6 kişiyi ekle' in ap.inner_text('#kt_onizleme'),
-            'Akıllı yapıştırma: TRPL + ekstra yatak odasında 3 kişi uyarı vermiyor, 6 kişi eklenebilir', errs)
+    kontrol(ap.locator('#kt_onizleme .oda-uyari').count() == 0 and '3 kişiyi' not in ap.inner_text('#kt_onizleme') and '7 kişiyi ekle' in ap.inner_text('#kt_onizleme'),
+            'Akıllı yapıştırma: TRPL + ekstra yatak odasında 3 kişi uyarı vermiyor, 7 kişi eklenebilir', errs)
     # kolonu elle değiştir: TİPİ → Kullanma; seçim hatırlanır
     ap.select_option('#kt_onizleme .kolon-sec[data-i="2"]', 'yok'); ap.wait_for_timeout(200)
     v = ap.evaluate("KT.onizleme")
@@ -443,8 +444,8 @@ with sync_playwright() as p:
     ap.select_option('#kt_onizleme .kolon-sec[data-i="2"]', 'tip'); ap.wait_for_timeout(200)
     ap.evaluate("window.__islem = []"); ap.get_by_role('button', name=re.compile('kişiyi ekle')).click(); ap.wait_for_timeout(500)
     ki = [i for i in ap.evaluate('window.__islem') if i['tablo'] == 'kafile_katilimcilar' and i['tur'] == 'insert']
-    kontrol(len(ki) == 1 and len(ki[0]['veri']) == 6 and ap.locator('.katilimci-satir').count() == 6 and ap.locator('.oda-uyarilari').count() == 0 and not errs,
-            'Akıllı yapıştırma: 6 kişi odalarıyla ekleniyor, oda uyarısı yok', errs)
+    kontrol(len(ki) == 1 and len(ki[0]['veri']) == 7 and ap.locator('.katilimci-satir').count() == 7 and ap.locator('.oda-uyarilari').count() == 0 and not errs,
+            'Akıllı yapıştırma: 7 kişi odalarıyla ekleniyor, oda uyarısı yok', errs)
     # transfer listesi → program
     ap.evaluate("kafileDuzenle('k9')"); ap.wait_for_timeout(400)
     TRANSFER = ('ISMAIL COSAR TURIZM\tGELIS PC670 /DONUS PC689\tMAWEKEB\n\t\t\t\tTARIH\tSAAT\n'
