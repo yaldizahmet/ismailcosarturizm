@@ -231,8 +231,11 @@ async function renderAna() {
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
       ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
-      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>`;
-  const [{ data: g }, { data: bv }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni')]);
+      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>
+    <div id="anaDogum"></div>`;
+  const [{ data: g }, { data: bv }, { data: mus }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni'), sb.from('musteriler').select('*')]);
+  const e3 = document.getElementById('anaDogum');
+  if (e3) e3.innerHTML = dogumKartHtml(mus || []);
   const ag = (g || []).filter(k => k.aktif).length, yb = (bv || []).length;
   const e1 = document.getElementById('anaGrup'), e2 = document.getElementById('anaBasvuru');
   if (e1) e1.textContent = ag + ' aktif grup';
@@ -1047,7 +1050,7 @@ function katilimciCiz() {
       ${KT.topluOda ? topluOdaHtml() : ''}
       ${(() => { const o = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar }))); return o.length ? `<div class="oda-uyarilari" style="background:#fff4e0;border:1px solid #f0d9a8;color:#6b5413;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:10px;line-height:1.6">${o.map(x => '⚠️ ' + esc(x.metin)).join('<br>')}</div>` : ''; })()}
       ${KT.liste.length && !KT.topluOda ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
-        ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}</td>${anah.map(a => { const b = odaBilgi(x.kat.odalar, a), gc = geceSayisi(b.giris, b.cikis); return '<td' + (odaSorunlari(KT.liste.map(y => ({ ad: y.m.ad, odalar: y.kat.odalar }))).some(o => o.otel === a && o.no === b.no) ? ' class="oda-dolu" style="background:#fdecea"' : '') + '><b>' + esc(b.no || '') + '</b>' + (b.tip ? ' <span style="color:#555">· ' + esc(b.tip) + '</span>' : '') + (b.giris && b.cikis ? '<div style="font-size:11.5px;color:#777">' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (gc ? ' · ' + gc + ' gece' : '') + '</div>' : '') + '</td>'; }).join('')}
+        ${KT.liste.map((x, i) => `<tr class="katilimci-satir"><td>${i + 1}</td><td>${esc(x.m.ad)}${turdaDogum(x.m.dogum_tarihi, KT.kafile.baslangic, KT.kafile.bitis) ? ' <span class="tur-dogum" title="Doğum günü tur sırasında" style="color:#C9972B;font-weight:700;white-space:nowrap">' + turdaDogum(x.m.dogum_tarihi, KT.kafile.baslangic, KT.kafile.bitis) + '</span>' : ''}</td>${anah.map(a => { const b = odaBilgi(x.kat.odalar, a), gc = geceSayisi(b.giris, b.cikis); return '<td' + (odaSorunlari(KT.liste.map(y => ({ ad: y.m.ad, odalar: y.kat.odalar }))).some(o => o.otel === a && o.no === b.no) ? ' class="oda-dolu" style="background:#fdecea"' : '') + '><b>' + esc(b.no || '') + '</b>' + (b.tip ? ' <span style="color:#555">· ' + esc(b.tip) + '</span>' : '') + (b.giris && b.cikis ? '<div style="font-size:11.5px;color:#777">' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (gc ? ' · ' + gc + ' gece' : '') + '</div>' : '') + '</td>'; }).join('')}
           <td>${x.m.telefon ? `<a href="tel:${esc(String(x.m.telefon).replace(/[^\d+]/g, ''))}">${esc(x.m.telefon)}</a>` : ''}</td><td>${tarihGoster(x.m.dogum_tarihi)}</td>
           <td style="white-space:nowrap"><button class="btn btn-navy" style="padding:5px 10px" onclick="katilimciDuzenle(${x.kat.id})">Düzenle</button> ${rehber ? '' : `<button class="btn btn-red" style="padding:5px 10px" onclick="katilimciCikar(${x.kat.id})">Çıkar</button>`}</td></tr>`).join('')}
       </tbody></table></div>` : '<p style="color:#666;font-size:14px">Henüz kimse eklenmedi.</p>'}
@@ -1387,6 +1390,43 @@ function dogumGunuKalan(t) {
   const [, a, g] = t.split('-').map(Number);
   let d = new Date(b.getFullYear(), a - 1, g); if (d < b) d = new Date(b.getFullYear() + 1, a - 1, g);
   return Math.round((d - b) / 86400000);
+}
+// Yaklaşan doğum günleri (bugün + 7 gün). WhatsApp butonu yalnızca ileti izni ve telefonu olanlarda.
+const DOGUM_MESAJI = 'Sayın {ad}, doğum gününüzü en içten dileklerimizle kutlarız. Nice sağlıklı, huzurlu ve hayırlı yıllara… İsmail Coşar Turizm';
+function waNumara(tel) {
+  let d = String(tel || '').replace(/\D/g, '');
+  if (d.length === 10 && d[0] === '5') d = '90' + d; else if (d.length === 11 && d[0] === '0') d = '9' + d; else if (d.startsWith('00')) d = d.slice(2);
+  return d.length >= 11 ? d : '';
+}
+function yaklasanDogumlar(liste, gun) {
+  return liste.filter(m => m.dogum_tarihi && dogumGunuKalan(m.dogum_tarihi) <= gun)
+    .map(m => ({ m, kalan: dogumGunuKalan(m.dogum_tarihi) })).sort((x, y) => x.kalan - y.kalan || x.m.ad.localeCompare(y.m.ad, 'tr'));
+}
+function dogumKartHtml(liste) {
+  const l = yaklasanDogumlar(liste, 7);
+  if (!l.length) return '';
+  const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+  return `<div class="card ana-kart dogum-kart"><h3>🎂 Yaklaşan doğum günleri <span style="font-size:12px;font-weight:400;color:#888">– önümüzdeki 7 gün</span></h3>
+    ${l.map(({ m, kalan }) => {
+      const gunu = new Date(bugun.getTime() + kalan * 86400000);
+      const yas = gunu.getFullYear() - Number(m.dogum_tarihi.slice(0, 4));
+      const ne = kalan === 0 ? '<b style="color:#C9972B">bugün</b>' : kalan === 1 ? 'yarın' : gunu.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+      const no = m.ileti_izni ? waNumara(m.telefon) : '';
+      return `<div class="dogum-satir" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:1px solid #eee">
+        <div><b>${esc(m.ad)}</b> <span style="color:#666">· ${ne}${yas > 0 && yas < 120 ? ' · ' + yas + ' yaşına giriyor' : ''}</span></div>
+        ${no ? `<a class="btn dogum-wa" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${no}?text=${encodeURIComponent(DOGUM_MESAJI.replace('{ad}', m.ad))}">💬 WhatsApp ile kutla</a>`
+             : `<span style="font-size:12px;color:#999">${m.ileti_izni ? 'telefon yok' : 'ileti izni yok'}</span>`}</div>`;
+    }).join('')}</div>`;
+}
+// Doğum günü tur tarihlerine denk geliyorsa "🎂 gg.aa"
+function turdaDogum(dt, bas, bit) {
+  if (!dt || !bas) return '';
+  bit = bit || bas;
+  for (let y = Number(bas.slice(0, 4)); y <= Number(bit.slice(0, 4)); y++) {
+    const g = y + dt.slice(4);
+    if (g >= bas && g <= bit) return '🎂 ' + kisaTarih(g);
+  }
+  return '';
 }
 function musteriCiz() {
   const ara = adNorm(MU.ara), araTel = telNorm(MU.ara);

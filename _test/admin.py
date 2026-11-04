@@ -492,6 +492,33 @@ with sync_playwright() as p:
     kontrol(len(g) == 1 and len(g[0]['veri']['program']) == 3 and not errs, 'Transfer listesi: kaydedilince program gruba yazılıyor', errs)
     ap.close()
 
+    # ── Doğum günleri: ana sayfa kartı + tur sırasında 🎂 ──
+    dp = b.new_page(viewport={'width': 390, 'height': 844}); errs = []
+    dp.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    dp.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=SAHTE, headers={'content-type': 'application/javascript'}))
+    dp.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort() if 'jsdelivr' not in q.url else r.fallback())
+    dp.goto(BASE + 'admin.html', wait_until='domcontentloaded'); dp.wait_for_timeout(400)
+    dp.evaluate("""(() => { const g = n => { const d = new Date(); d.setDate(d.getDate() + n); return (1960) + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      window.__DB.musteriler = [
+        { id: 'd1', ad: 'Bugün Doğan', telefon: '0532 111 22 33', dogum_tarihi: g(0), ileti_izni: true },
+        { id: 'd2', ad: 'Yarın Doğan', telefon: '05321112234', dogum_tarihi: g(1), ileti_izni: false },
+        { id: 'd3', ad: 'Uzak Doğan', telefon: '05321112235', dogum_tarihi: g(20), ileti_izni: true },
+        { id: 'd4', ad: 'Tarihsiz Kişi', telefon: '05321112236', dogum_tarihi: null, ileti_izni: true }];
+      window.__DB.kafileler = [{ id: 'k5', kod: 'X-AAAAA', ad: 'Doğum Testi', aktif: true, baslangic: g(-2).replace('1960', String(new Date().getFullYear())), bitis: g(3).replace('1960', String(new Date().getFullYear())), oteller: [], program: [] }];
+      window.__DB.kafile_katilimcilar = [{ id: 51, kafile_id: 'k5', musteri_id: 'd1', odalar: {} }, { id: 52, kafile_id: 'k5', musteri_id: 'd3', odalar: {} }];
+      sekmeAc('ana'); })()"""); dp.wait_for_timeout(500)
+    satir = dp.locator('.dogum-kart .dogum-satir')
+    kontrol(satir.count() == 2 and 'Bugün Doğan' in satir.nth(0).inner_text() and 'bugün' in satir.nth(0).inner_text() and 'yarın' in satir.nth(1).inner_text()
+            and 'Uzak' not in dp.inner_text('#sayfa-ana'), 'Doğum günü kartı: ana sayfada önümüzdeki 7 gün, en yakını üstte', dp.inner_text('#sayfa-ana')[-200:])
+    h = dp.get_attribute('.dogum-satir a.dogum-wa', 'href') or ''
+    kontrol(dp.locator('.dogum-wa').count() == 1 and h.startswith('https://wa.me/905321112233?text=') and 'Bug%C3%BCn%20Do%C4%9Fan' in h and 'ileti izni yok' in satir.nth(1).inner_text(),
+            'Doğum günü kartı: WhatsApp butonu kişinin numarasına ve adına hazır mesajla; izni olmayanda buton yok', h[:80])
+    kontrol('yaşına giriyor' in satir.nth(0).inner_text() and dp.evaluate('document.documentElement.scrollWidth') <= 391, 'Doğum günü kartı: yaş görünüyor, telefonda taşmıyor')
+    dp.evaluate("sekmeAc('kafile'); kafileKatilimcilar('k5')"); dp.wait_for_timeout(500)
+    kontrol(dp.locator('.katilimci-satir', has_text='Bugün Doğan').locator('.tur-dogum').count() == 1 and dp.locator('.katilimci-satir', has_text='Uzak Doğan').locator('.tur-dogum').count() == 0 and not errs,
+            'Katılımcılar: doğum günü tur tarihlerine denk gelen kişide 🎂 işareti', errs)
+    dp.close()
+
     # ── Rehber rolüyle giriş: yalnızca kafilesinin katılımcı/oda listesi ──
     for vp in [{'width': 1300, 'height': 900}, {'width': 390, 'height': 844}]:
         rp = b.new_page(viewport=vp); errs = []
