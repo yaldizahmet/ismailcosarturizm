@@ -124,8 +124,11 @@ with sync_playwright() as p:
 
     # ── Kafileler (yolcu uygulaması) ──
     pg.evaluate("sekmeAc('kafile')"); pg.wait_for_timeout(400)
+    pg.evaluate("window.__DB.kullanici_rolleri.push({ user_id: 'r-1', rol: 'rehber', ad: 'Rehber Bir', kullanici_adi: 'rehber1' })")
     pg.evaluate("window.__islem = []"); errs.clear()
     pg.get_by_role('button', name=re.compile('Yeni Grup')).click(); pg.wait_for_timeout(300)
+    kontrol(pg.locator('.k_rehber').count() == 1 and not pg.is_checked('.k_rehber'), 'Grup formu: rehber hesapları işaretlenebilir listede')
+    pg.check('.k_rehber')
     kontrol(re.fullmatch(r'GRUP-[A-Z2-9]{5}', pg.input_value('#k_kod')) is not None, 'Grup: yeni formda otomatik kod üretiliyor (GRUP-…)', pg.input_value('#k_kod'))
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
     kontrol(not [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert'], 'Kafile: adı boşken kaydetmiyor')
@@ -154,13 +157,21 @@ with sync_playwright() as p:
             and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112'
             and v.get('inis_sehri') == 'Cidde' and v.get('yorum_link') == 'https://g.page/r/ABC/review' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15',
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
+    rk = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
+    kontrol(len(rk) == 1 and rk[0]['veri'] == [{'kafile_id': v.get('id'), 'user_id': 'r-1'}] and v.get('id') and 'Rehber: Rehber Bir' in pg.inner_text('.kafile-item .grup-rehber'),
+            'Grup formu: işaretlenen rehber yeni gruba atanıyor ve listede adı görünüyor', str(rk)[:120])
     kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile') and pg.inner_text('.kafile-item .abone-sayisi') == '0', 'Kafile: listede görünüyor (bildirim açık telefon sayısıyla)')
     href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''
     kontrol('kafile%2F%23' + kod in href, 'Kafile: Paylaş bağlantısı kodlu uygulama adresini içeriyor')
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca" and pg.input_value('#k_tur_turu') == 'kultur' and pg.input_value('#k_acil_tel') == '112', 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
+    kontrol(pg.is_checked('.k_rehber'), 'Grup formu: düzenlerken atanmış rehber işaretli geliyor')
+    pg.uncheck('.k_rehber')
     pg.fill('#k_ad', 'Kasım 2026 Umre Kafilesi (güncel)'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    rs = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'delete']
+    kontrol(len(rs) == 1 and ['user_id', 'r-1'] in rs[0]['filtre'] and 'rehber hesabı atanmadı' in pg.inner_text('.kafile-item .grup-rehber'), 'Grup formu: işaret kaldırılınca rehber gruptan çıkarılıyor')
+    pg.evaluate("window.__DB.kullanici_rolleri = window.__DB.kullanici_rolleri.filter(function(x){ return x.user_id !== 'r-1'; })")
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
     kontrol(len(g) == 1 and g[0]['tablo'] == 'kafileler' and g[0]['veri']['ad'].endswith('(güncel)') and len(g[0]['veri']['program']) == 2, 'Kafile: düzenle → kaydet doğru kafileyi güncelliyor', errs)
     pg.evaluate("window.__islem = []")

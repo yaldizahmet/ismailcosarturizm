@@ -599,11 +599,15 @@ function kafilePaylasMetni(k) {
 async function renderKafileler() {
   const el = document.getElementById('sayfa-kafile');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
-  const [{ data, error }, { data: aboneler }, { data: katlar }] = await Promise.all([
+  const [{ data, error }, { data: aboneler }, { data: katlar }, { data: atamalar }, { data: rehberRol }] = await Promise.all([
     sb.from('kafileler').select('*').order('baslangic', { ascending: false }),
     sb.from('bildirim_abonelikleri').select('kafile_id'),
-    sb.from('kafile_katilimcilar').select('kafile_id')
+    sb.from('kafile_katilimcilar').select('kafile_id'),
+    ROL === 'admin' ? sb.from('kafile_rehberleri').select('*') : Promise.resolve({ data: [] }),
+    ROL === 'admin' ? sb.from('kullanici_rolleri').select('*').eq('rol', 'rehber') : Promise.resolve({ data: [] })
   ]);
+  const rehberAdi = {}; (rehberRol || []).forEach(x => rehberAdi[x.user_id] = x.ad || x.kullanici_adi);
+  const grupRehber = id => (atamalar || []).filter(a => a.kafile_id === id).map(a => rehberAdi[a.user_id]).filter(Boolean);
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const aboneSay = {}; (aboneler || []).forEach(a => { aboneSay[a.kafile_id] = (aboneSay[a.kafile_id] || 0) + 1; });
   const katSay = {}; (katlar || []).forEach(a => { katSay[a.kafile_id] = (katSay[a.kafile_id] || 0) + 1; });
@@ -623,7 +627,7 @@ async function renderKafileler() {
     <div class="tur-item kafile-item">
       <div class="tur-item-info">
         <h4>${esc(k.ad)}</h4>
-        <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır ·${k.inis_sehri || k.donus_sehri ? ` ✈️ İniş: ${esc(k.inis_sehri || '—')} · Dönüş: ${esc(k.donus_sehri || '—')} ·` : ''} 🔔 <span class="abone-sayisi">${aboneSay[k.id] || 0}</span> telefonda bildirim açık</p>
+        <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır ·${k.inis_sehri || k.donus_sehri ? ` ✈️ İniş: ${esc(k.inis_sehri || '—')} · Dönüş: ${esc(k.donus_sehri || '—')} ·` : ''} 🔔 <span class="abone-sayisi">${aboneSay[k.id] || 0}</span> telefonda bildirim açık · <span class="grup-rehber">🧭 ${grupRehber(k.id).length ? 'Rehber: ' + esc(grupRehber(k.id).join(', ')) : '<span style="color:#c62828">rehber hesabı atanmadı</span>'}</span></p>
       </div>
       <div class="tur-item-actions" style="flex-wrap:wrap">
         <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
@@ -712,6 +716,28 @@ function otelBlogu(i, o) {
   </div>`;
 }
 
+// Grubun rehber hesapları: formda işaretlenir, kaydedince kafile_rehberleri eşitlenir
+let KF_REHBER = { liste: [], once: [] };
+async function rehberVerisi(kafileId) {
+  const [{ data: rl }, { data: at }] = await Promise.all([
+    sb.from('kullanici_rolleri').select('*').eq('rol', 'rehber'),
+    kafileId ? sb.from('kafile_rehberleri').select('*').eq('kafile_id', kafileId) : Promise.resolve({ data: [] })
+  ]);
+  KF_REHBER = { liste: rl || [], once: (at || []).map(x => x.user_id) };
+}
+function rehberSecimHtml() {
+  const l = KF_REHBER.liste;
+  return `<div class="card"><h3>🧭 Rehber hesapları</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:8px">İşaretlenen rehber, admin paneline kendi kullanıcı adıyla girince bu grubun katılımcı ve oda listesini görür, düzeltebilir.</p>
+    ${l.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px 18px">${l.map(x => `<label style="display:flex;align-items:center;gap:6px;font-size:13.5px"><input type="checkbox" class="k_rehber" value="${esc(x.user_id)}" ${KF_REHBER.once.includes(x.user_id) ? 'checked' : ''}> ${esc(x.ad || x.kullanici_adi)} <span style="color:#999">(${esc(x.kullanici_adi || '')})</span></label>`).join('')}</div>`
+      : '<p style="font-size:13px;color:#888">Henüz rehber hesabı yok. “Rehber Hesapları” sekmesinden açabilirsiniz.</p>'}</div>`;
+}
+async function rehberEsitle(kafileId) {
+  const secili = [...document.querySelectorAll('.k_rehber:checked')].map(x => x.value);
+  const ekle = secili.filter(u => !KF_REHBER.once.includes(u)), cikar = KF_REHBER.once.filter(u => !secili.includes(u));
+  if (ekle.length) { const { error } = await sb.from('kafile_rehberleri').insert(ekle.map(u => ({ kafile_id: kafileId, user_id: u }))); if (error) throw error; }
+  for (const u of cikar) { const { error } = await sb.from('kafile_rehberleri').delete().eq('kafile_id', kafileId).eq('user_id', u); if (error) throw error; }
+}
 function kafileFormu(k) {
   const yeni = !k.id;
   const oteller = (k.oteller && k.oteller.length) ? k.oteller : [{}, {}];
@@ -749,6 +775,7 @@ function kafileFormu(k) {
       <div class="form-group" style="max-width:200px"><label>Durum</label>
         <select id="k_aktif"><option value="true" ${k.aktif !== false ? 'selected' : ''}>Aktif</option><option value="false" ${k.aktif === false ? 'selected' : ''}>Pasif</option></select></div>
     </div>
+    ${rehberSecimHtml()}
     <div class="card"><h3>Oteller</h3><div id="k_oteller">${oteller.map((o, i) => otelBlogu(i, o)).join('')}</div>
       <button type="button" class="btn btn-navy" onclick="otelEkle()">➕ Otel ekle</button></div>
     <div class="card"><h3>Gün gün program</h3>
@@ -771,12 +798,14 @@ function kafileFormu(k) {
 async function kafileYeni() {
   const { data } = await sb.from('kafileler').select('*').order('olusturma', { ascending: false });
   const son = (data || []).find(x => x.yorum_link);
+  await rehberVerisi(null);
   kafileFormu({ kod: kafileKodUret(''), aktif: true, program: [{}], yorum_link: son ? son.yorum_link : '' });
 }
 
 async function kafileDuzenle(id) {
   const { data, error } = await sb.from('kafileler').select('*').eq('id', id).single();
   if (error || !data) { toast('❌ Grup okunamadı', 'error'); return; }
+  await rehberVerisi(id);
   kafileFormu(data);
 }
 
@@ -805,8 +834,10 @@ async function kafileKaydet(id) {
   if (!k.ad) { toast('❌ Grup adı gerekli', 'error'); return; }
   if (!/^[A-Z0-9-]{4,40}$/.test(k.kod)) { toast('❌ Kod en az 4 karakter olmalı; yalnızca harf, rakam ve tire', 'error'); return; }
   if (k.yorum_link && !/^https:\/\//.test(k.yorum_link)) { toast('❌ Google yorum bağlantısı https:// ile başlamalı', 'error'); return; }
+  if (!id) k.id = yeniKimlik(); // rehber atamaları için kimlik önceden belli olsun
   const { error } = id ? await sb.from('kafileler').update(k).eq('id', id) : await sb.from('kafileler').insert(k);
   if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir grupta kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
+  try { await rehberEsitle(id || k.id); } catch (e) { toast('⚠️ Grup kaydedildi ama rehber ataması yapılamadı: ' + (e.message || e), 'error'); renderKafileler(); return; }
   toast('✅ Grup kaydedildi', 'success');
   renderKafileler();
 }
