@@ -3,7 +3,7 @@
 // ofis e-postasına gönderir. Doğum günü olan yoksa e-posta gönderilmez.
 // Kimlik doğrulama: x-bildirim-anahtar başlığı, kasadaki (vault) bildirim_anahtar ile aynı olmalı.
 // E-posta Resend ile gider; API anahtarı RESEND_API_KEY ortam sırrındadır (kodda gizli bilgi yoktur).
-// İstek gövdesi: {} → normal çalışma; {"deneme": true} → göndermeden listeyi döndürür; {"zorla": true} → liste boşsa da gönderir.
+// İstek gövdesi: {} → normal çalışma; {"deneme": true} → göndermeden listeyi döndürür; {"zorla": true} → liste boşsa da gönderir; {"kontrol": true} → yalnızca anahtar var mı söyler.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const ALICI = "ismailcosarturizm@gmail.com";
@@ -36,8 +36,9 @@ Deno.serve(async (req: Request) => {
   const { data: ayar, error: ayarHata } = await db.rpc("bildirim_ayarlari");
   if (ayarHata || !ayar?.bildirim_anahtar) return json({ hata: "ayarlar okunamadı" }, 500);
   if (!esit(req.headers.get("x-bildirim-anahtar") ?? "", ayar.bildirim_anahtar)) return json({ hata: "yetkisiz" }, 401);
-  let g: { deneme?: boolean; zorla?: boolean } = {};
+  let g: { deneme?: boolean; zorla?: boolean; kontrol?: boolean } = {};
   try { g = await req.json(); } catch { /* boş gövde */ }
+  if (g.kontrol) return json({ resend_anahtari: !!Deno.env.get("RESEND_API_KEY"), sirlar: Object.keys(Deno.env.toObject()).filter((k) => /RESEND|MAIL|SMTP/i.test(k)) });
 
   const bas = bugunTR(), bit = gunEkle(bas, 6);
   const { data: mus, error } = await db.from("musteriler").select("id, ad, telefon, dogum_tarihi, ileti_izni").not("dogum_tarihi", "is", null);
