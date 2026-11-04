@@ -1322,11 +1322,21 @@ async function katilimciTopluEkle() {
 }
 
 function odaListesiMetni() {
-  const k = KT.kafile, anah = odaAnahtarlari(k), satirlar = [k.ad + ' – oda listesi'];
+  // WhatsApp'ta okunaklı olsun: her isim ayrı satırda, odası belli olmayanlar numaralı liste
+  const k = KT.kafile, anah = odaAnahtarlari(k);
+  const tarih = k.baslangic ? kisaTarih(k.baslangic) + (k.bitis ? '–' + kisaTarih(k.bitis) : '') + ' · ' : '';
+  const odaVar = KT.liste.some(x => anah.some(a => odaBilgi(x.kat.odalar, a).no));
+  const satirlar = ['*' + k.ad + ' – ' + (odaVar ? 'oda listesi' : 'katılımcı listesi') + '*', tarih + KT.liste.length + ' kişi'];
+  if (!odaVar) {
+    satirlar.push('');
+    KT.liste.forEach((x, i) => satirlar.push((i + 1) + '. ' + x.m.ad));
+    satirlar.push('', 'Oda numaraları henüz belli değil.');
+    return satirlar.join('\n');
+  }
   anah.forEach(a => {
     const otel = (k.oteller || []).find(o => (o.sehir || o.ad) === a);
     const og = otel && geceSayisi(otel.giris, otel.cikis);
-    satirlar.push('', '🏨 ' + a + (otel && otel.ad && otel.ad !== a ? ' – ' + otel.ad : '') + (otel && otel.giris && otel.cikis ? ' (' + kisaTarih(otel.giris) + '–' + kisaTarih(otel.cikis) + (og ? ', ' + og + ' gece' : '') + ')' : ''));
+    satirlar.push('', '🏨 *' + a + (otel && otel.ad && otel.ad !== a ? ' – ' + otel.ad : '') + '*' + (otel && otel.giris && otel.cikis ? ' (' + kisaTarih(otel.giris) + '–' + kisaTarih(otel.cikis) + (og ? ', ' + og + ' gece' : '') + ')' : ''));
     const grup = {}, tip = {}, odasiz = [];
     KT.liste.forEach(x => {
       const b = odaBilgi(x.kat.odalar, a);
@@ -1335,15 +1345,21 @@ function odaListesiMetni() {
       (grup[b.no] = grup[b.no] || []).push(x.m.ad + (farkli ? ' [' + kisaTarih(b.giris) + '–' + kisaTarih(b.cikis) + (geceSayisi(b.giris, b.cikis) ? ', ' + geceSayisi(b.giris, b.cikis) + ' gece' : '') + ']' : ''));
       if (b.tip && !tip[b.no]) tip[b.no] = b.tip;
     });
-    Object.keys(grup).sort((p, q) => p.localeCompare(q, 'tr', { numeric: true })).forEach(o => satirlar.push('Oda ' + o + (tip[o] ? ' (' + tip[o] + ')' : '') + ': ' + grup[o].join(', ')));
-    if (odasiz.length) satirlar.push('Odası girilmemiş: ' + odasiz.join(', '));
+    Object.keys(grup).sort((p, q) => p.localeCompare(q, 'tr', { numeric: true })).forEach(o => {
+      satirlar.push('Oda ' + o + (tip[o] ? ' (' + tip[o] + ')' : ''));
+      grup[o].forEach(ad => satirlar.push('   • ' + ad));
+    });
+    if (odasiz.length) {
+      satirlar.push('Odası henüz belli değil (' + odasiz.length + '):');
+      odasiz.forEach(ad => satirlar.push('   • ' + ad));
+    }
   });
   return satirlar.join('\n');
 }
 function odaListesiPaylas() {
   const t = odaListesiMetni();
   window.__sonPaylas = t;
-  if (navigator.share) navigator.share({ title: KT.kafile.ad + ' – oda listesi', text: t }).catch(() => {});
+  if (navigator.share) navigator.share({ title: t.split('\n')[0].replace(/\*/g, ''), text: t }).catch(() => {});
   else odaListesiKopyala();
 }
 function odaListesiKopyala() {

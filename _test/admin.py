@@ -228,7 +228,7 @@ with sync_playwright() as p:
     kontrol(pg.locator('.katilimci-tablo b b').count() == 0 and '<b>Ç</b>' in pg.inner_text('.katilimci-tablo'), 'Güvenlik: isimdeki HTML düz yazı gösteriliyor')
     pg.get_by_role('button', name=re.compile('Oda listesini kopyala')).click(); pg.wait_for_timeout(200)
     t = pg.evaluate('window.__sonKopya') or ''
-    kontrol( '🏨 Mekke – Test Otel Mekke (10.11–15.11, 5 gece)' in t and 'Oda 512 (3 kişilik): Ayşe Kaya [11.11–15.11, 4 gece], Mehmet Kaya' in t and 'Oda 514 (2 kişilik): Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu metin kopyalanıyor', t.replace('\n', ' | ')[:160])
+    kontrol( '🏨 *Mekke – Test Otel Mekke* (10.11–15.11, 5 gece)' in t and 'Oda 512 (3 kişilik)\n   • Ayşe Kaya [11.11–15.11, 4 gece]\n   • Mehmet Kaya' in t and 'Oda 514 (2 kişilik)\n   • Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu, her isim ayrı satırda', t.replace('\n', ' | ')[:160])
     pg.evaluate("window.__islem = []")
     pg.locator('.katilimci-satir', has_text='Mehmet').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
     kontrol(pg.input_value('#kt_ad') == 'Mehmet Kaya' and pg.input_value('#kt_kart .kt_oda') == '512', 'Katılımcılar: düzenleme formu kayıtlı bilgilerle açılıyor')
@@ -526,6 +526,9 @@ with sync_playwright() as p:
         pv = rp.evaluate('window.__paylasilan') or {}
         kontrol('Oda 520' in (pv.get('text') or '') and 'Ayşe Kaya' in pv.get('text', '') and 'oda listesi' in (pv.get('title') or ''), 'Rehber: "Listeyi paylaş" telefonun paylaş menüsünü oda listesiyle açıyor', pv)
         kontrol(rp.locator('#odaGirBtn').count() == 1, 'Rehber: "Oda numaralarını gir" butonu var')
+        rp.evaluate("KT.liste.forEach(x => x.kat.odalar = {}); window.__paylasilan = null"); rp.get_by_role('button', name=re.compile('Listeyi paylaş')).click(); rp.wait_for_timeout(200)
+        pt = (rp.evaluate('window.__paylasilan') or {}).get('text', '')
+        kontrol('katılımcı listesi' in pt and '\n1. Ayşe Kaya' in pt and 'Oda numaraları henüz belli değil' in pt and '🏨' not in pt, 'Rehber: oda girilmemişse paylaşılan metin sade numaralı isim listesi', pt)
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
         rp.evaluate("sekmeAc('kafile')"); rp.wait_for_timeout(400)
         kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
