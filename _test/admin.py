@@ -527,6 +527,17 @@ with sync_playwright() as p:
     dp.evaluate("sekmeAc('kafile'); kafileKatilimcilar('k5')"); dp.wait_for_timeout(500)
     kontrol(dp.locator('.katilimci-satir', has_text='Bugün Doğan').locator('.tur-dogum').count() == 1 and dp.locator('.katilimci-satir', has_text='Uzak Doğan').locator('.tur-dogum').count() == 0 and not errs,
             'Katılımcılar: doğum günü tur tarihlerine denk gelen kişide 🎂 işareti', errs)
+    # Telefonda uygulama görünümü: alt sekme çubuğu + "Diğer" menüsü
+    kontrol(dp.is_visible('.mobil-alt') and dp.is_visible('.mobil-ust') and not dp.is_visible('.sidebar') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'kafile',
+            'Telefon: altta sekme çubuğu, üstte marka çubuğu; açık sekme işaretli')
+    dp.click('.mobil-alt [data-m="ana"]'); dp.wait_for_timeout(300)
+    kontrol(dp.is_visible('#sayfa-ana') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'ana', 'Telefon: alt çubuktan Ana Sayfa açılıyor')
+    dp.click('.mobil-alt [data-m="diger"]'); dp.wait_for_timeout(200)
+    kontrol(dp.is_visible('#mobilDiger'), 'Telefon: "Diğer" menüsü açılıyor')
+    dp.click('#mobilDiger button:has-text("Tur Listesi")'); dp.wait_for_timeout(400)
+    kontrol(dp.is_visible('#sayfa-turlar') and not dp.is_visible('#mobilDiger') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'diger', 'Telefon: Diğer → Tur Listesi açılıyor, menü kapanıyor')
+    dp.click('.mobil-alt [data-m="diger"]'); dp.wait_for_timeout(200); dp.mouse.click(195, 100); dp.wait_for_timeout(200)
+    kontrol(not dp.is_visible('#mobilDiger') and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs, 'Telefon: Diğer menüsü boşluğa basınca kapanıyor; sayfa yana taşmıyor', errs)
     dp.close()
 
     # ── Rehber rolüyle giriş: yalnızca kafilesinin katılımcı/oda listesi ──
@@ -567,6 +578,7 @@ with sync_playwright() as p:
         pt = (rp.evaluate('window.__paylasilan') or {}).get('text', '')
         kontrol('katılımcı listesi' in pt and '\n1. Ayşe Kaya' in pt and 'Oda numaraları henüz belli değil' in pt and '🏨' not in pt, 'Rehber: oda girilmemişse paylaşılan metin sade numaralı isim listesi', pt)
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
+        kontrol(not rp.is_visible('.mobil-alt'), 'Rehber: alt sekme çubuğu yok (tek ekranı var)')
         rp.evaluate("sekmeAc('kafile')"); rp.wait_for_timeout(400)
         kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
         kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafir kodunu paylaş" yazısı ortalı')

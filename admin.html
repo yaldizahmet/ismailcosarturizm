@@ -35,6 +35,7 @@ body.rol-rehber .yonetici{display:none!important}
 .ana-btnler button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 16px;border:1px solid #eee;border-radius:10px;background:#fafafa;cursor:pointer;font-size:15px;font-weight:600;color:#0B1F3A}
 .ana-btnler button:hover{border-color:#C9972B;background:#fff8ec}
 .ana-btnler small{font-size:12px;font-weight:400;color:#777}
+.ana-ikon{font-style:normal}
 .nav-item:hover,.nav-item.active{background:rgba(201,151,43,.15);color:#E4B84A}
 .main{margin-left:220px;padding:24px;min-height:100vh;flex:1;min-width:0}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
@@ -69,6 +70,20 @@ body.rol-rehber .yonetici{display:none!important}
 .loading{text-align:center;padding:40px;color:#666}
 .form-group textarea{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;outline:none}
 .mobil-yazi{display:none}
+.mobil-ust{display:none;position:sticky;top:0;z-index:100;background:#0B1F3A;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.mobil-ust img{height:34px;width:auto;background:#fff;border-radius:8px;padding:3px 8px}
+.mobil-ust span{color:#E4B84A;font-size:11px;letter-spacing:1.6px;font-weight:700;text-transform:uppercase}
+.mobil-alt{display:none;position:fixed;left:0;right:0;bottom:0;z-index:200;background:#0B1F3A;padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;box-shadow:0 -2px 10px rgba(0,0,0,.2)}
+.mobil-alt button{flex:1;background:none;border:0;color:rgba(255,255,255,.65);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;min-height:54px;cursor:pointer;position:relative;border-radius:10px}
+.mobil-alt button b{font-size:21px;font-weight:400;line-height:1}
+.mobil-alt button.active{color:#E4B84A;background:rgba(201,151,43,.14)}
+.mobil-alt .rozet{position:absolute;top:2px;left:calc(50% + 6px);background:#dc3545;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:50px}
+.mobil-perde{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:flex-end}
+.mobil-perde[hidden]{display:none}
+.mobil-sayfa{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:10px 14px calc(18px + env(safe-area-inset-bottom))}
+.mobil-sayfa .tutamak{width:40px;height:4px;border-radius:2px;background:#ccd;margin:4px auto 12px}
+.mobil-sayfa button{display:flex;align-items:center;gap:14px;width:100%;background:none;border:0;border-bottom:1px solid #f0f0f0;padding:15px 6px;font-size:16px;color:#0B1F3A;text-align:left;cursor:pointer}
+.mobil-sayfa button:last-child{border-bottom:0}
 /* TELEFON VE TABLET: menü üstte yatay şerit, formlar tek sütun */
 @media (max-width: 820px) {
   .app{flex-direction:column}
@@ -93,6 +108,25 @@ body.rol-rehber .yonetici{display:none!important}
   .login-box{width:calc(100% - 32px);padding:28px 20px}
   .toast{left:12px;right:12px;bottom:12px;text-align:center}
   .form-group[style*="max-width"]{max-width:none!important}
+  /* Uygulama görünümü: üstte marka çubuğu, altta sekme çubuğu (misafir uygulaması gibi) */
+  body{background:#eef1f5}
+  .sidebar{display:none}
+  .mobil-ust{display:flex}
+  .mobil-alt{display:flex}
+  body.rol-rehber .mobil-alt{display:none!important}
+  .main{padding:12px 12px calc(96px + env(safe-area-inset-bottom))}
+  body.rol-rehber .main{padding-bottom:40px}
+  .kullanici-serit{margin:0 0 10px}
+  .card{border-radius:16px;box-shadow:0 1px 4px rgba(11,31,58,.08)}
+  .btn{min-height:42px;border-radius:10px;font-size:14px}
+  .ana-btnler{grid-template-columns:1fr 1fr;gap:10px}
+  .ana-btnler button{align-items:center;text-align:center;justify-content:center;min-height:104px;padding:14px 8px;border-radius:14px;background:#fff;border:1px solid #e8ebf0;font-size:15px;box-shadow:0 1px 3px rgba(11,31,58,.06)}
+  .ana-kart{background:none;box-shadow:none;padding:0;overflow:visible}
+  .ana-ikon{display:block;font-style:normal;font-size:30px;margin-bottom:6px}
+  .ana-btnler small{font-size:12px;line-height:1.35}
+  .ana-kart h3{border:0;padding:4px 2px 0;margin-bottom:10px;font-size:15px}
+  .dogum-kart{background:#fff;padding:14px;box-shadow:0 1px 4px rgba(11,31,58,.08)}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
@@ -110,6 +144,24 @@ body.rol-rehber .yonetici{display:none!important}
 </div>
 
 <div class="app" id="appDiv">
+  <header class="mobil-ust"><img src="kafile/logo.png" alt="İsmail Coşar Turizm"><span>Yönetim</span></header>
+  <nav class="mobil-alt" aria-label="Menü">
+    <button type="button" data-m="ana" onclick="sekmeAc('ana')"><b>🏠</b>Ana Sayfa</button>
+    <button type="button" data-m="kafile" onclick="sekmeAc('kafile')"><b>🧳</b>Gruplar</button>
+    <button type="button" data-m="musteri" onclick="sekmeAc('musteri')"><b>🧑‍🤝‍🧑</b>Müşteriler</button>
+    <button type="button" data-m="basvuru" onclick="sekmeAc('basvuru')"><b>📥</b>Başvurular<span class="rozet" id="mobilSayac" hidden></span></button>
+    <button type="button" data-m="diger" onclick="document.getElementById('mobilDiger').hidden=false"><b>☰</b>Diğer</button>
+  </nav>
+  <div class="mobil-perde" id="mobilDiger" hidden onclick="if(event.target===this)this.hidden=true">
+    <div class="mobil-sayfa"><div class="tutamak"></div>
+      <button type="button" onclick="mobilGit('rehber')">🧭 Rehber Hesapları</button>
+      <button type="button" onclick="mobilGit('sehir')">🗺️ Şehir Rehberi</button>
+      <button type="button" onclick="mobilGit('turlar')">📋 Tur Listesi</button>
+      <button type="button" onclick="mobilGit('duyuru')">📢 Duyurular</button>
+      <button type="button" onclick="mobilGit('yorum')">💬 Yorumlar</button>
+      <button type="button" onclick="document.getElementById('mobilDiger').hidden=true;cikisYap()" style="color:#c62828">🚪 Çıkış</button>
+    </div>
+  </div>
   <div class="sidebar">
     <div class="sidebar-logo"><img src="logo.png" alt="Logo"></div>
     <button class="nav-item yonetici active" id="btn-ana" onclick="sekmeAc('ana')">🏠 Ana Sayfa</button>
@@ -155,6 +207,7 @@ async function paneliAc() {
   ROL = r ? r.rol : null;
   const ki = document.getElementById('kullaniciBilgi');
   if (ki && r) ki.textContent = '👤 ' + (r.ad || eposta.split('@')[0]) + (r.rol === 'rehber' ? ' · Rehber' + (r.kullanici_adi ? ' (' + r.kullanici_adi + ')' : '') : ' · Yönetici');
+  const mu = document.querySelector('.mobil-ust span'); if (mu) mu.textContent = ROL === 'rehber' ? 'Rehber' : 'Yönetim';
   if (ROL !== 'admin' && ROL !== 'rehber') {
     await sb.auth.signOut();
     const e = document.getElementById('loginErr'); e.textContent = 'Bu hesaba yetki tanımlanmamış.'; e.style.display = 'block';
@@ -203,8 +256,11 @@ async function cikisYap() {
   document.getElementById('appDiv').style.display = 'none';
 }
 
+function mobilGit(ad) { document.getElementById('mobilDiger').hidden = true; sekmeAc(ad); window.scrollTo(0, 0); }
 function sekmeAc(ad) {
   if (ROL === 'rehber') ad = 'kafile';
+  const anaM = { ana: 1, kafile: 1, musteri: 1, basvuru: 1 }, mAd = anaM[ad] ? ad : 'diger';
+  document.querySelectorAll('.mobil-alt button').forEach(b => b.classList.toggle('active', b.dataset.m === mAd));
   ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
@@ -226,7 +282,7 @@ function sekmeAc(ad) {
 // ── ANA SAYFA (girişte açılır): iki bölüm, Grup Yönetimi ve Site Yönetimi ──
 async function renderAna() {
   const el = document.getElementById('sayfa-ana');
-  const b = (sekme, baslik, alt) => `<button type="button" onclick="sekmeAc('${sekme}')">${baslik}<small>${alt}</small></button>`;
+  const b = (sekme, baslik, alt) => { const i = baslik.indexOf(' '); return `<button type="button" onclick="sekmeAc('${sekme}')"><span><i class="ana-ikon">${baslik.slice(0, i)}</i> ${baslik.slice(i + 1)}</span><small>${alt}</small></button>`; };
   el.innerHTML = `<div class="header"><h2>Hoş geldiniz</h2></div>
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
       ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
@@ -1814,6 +1870,7 @@ async function yeniSayacGuncelle() {
   const { count } = await sb.from('basvurular').select('id', { count: 'exact', head: true }).eq('durum', 'yeni');
   const el = document.getElementById('yeniSayac');
   if (count) { el.textContent = count; el.style.display = 'inline-block'; } else el.style.display = 'none';
+  const mr = document.getElementById('mobilSayac'); if (mr) { mr.textContent = count || ''; mr.hidden = !count; }
 }
 
 async function renderBasvurular() {
