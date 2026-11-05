@@ -888,7 +888,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (k.yon == null) yazi = 'Kıble, kuzeyden saat yönünde <b>' + Math.round(k.aci) + '°</b>. ' + (k.bekliyor ? 'Pusula hazırlanıyor… Telefonu düz tutun.' : 'Bu telefonda pusula kullanılamıyor; yönü bir pusulayla bulabilirsiniz.');
     else yazi = 'Telefonunuzu düz tutun; <b>sarı ok kıbleyi</b> gösterir. Kâbe\'ye ' + (k.mesafe >= 10 ? Math.round(k.mesafe) : k.mesafe.toFixed(1)) + ' km.';
     h += '<div class="kible"><div class="pusula"><svg id="pusulaOk" width="110" height="110" viewBox="0 0 96 96" role="img" aria-label="Kıble pusulası"><circle cx="48" cy="48" r="44" fill="#132d52" stroke="#3a5480" stroke-width="2"/>' +
-      '<g id="pusulaOkGrup"><path d="M48 12 L56 50 L48 44 L40 50 Z" fill="#E4B84A"/><path d="M48 84 L56 50 L48 56 L40 50 Z" fill="#3a5480"/></g><circle cx="48" cy="48" r="4" fill="#FFFFFF"/></svg></div>' +
+      '<g id="pusulaOkGrup"><path d="M48 8 L59 54 L48 46 L37 54 Z" fill="#E4B84A"/></g><circle cx="48" cy="48" r="4" fill="#FFFFFF"/></svg></div>' +
       '<div class="kible-yazi"><div class="etiket">KIBLE YÖNÜ</div><div id="kibleYazi">' + yazi + '</div></div></div>';
     return h;
   }

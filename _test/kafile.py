@@ -196,6 +196,7 @@ with sync_playwright() as p:
     pg.click('.alt-menu [data-sekme="vakitler"]'); pg.click('[data-eylem="kible"]'); pg.wait_for_timeout(800)
     t = pg.inner_text('#kibleYazi'); aci = re.search(r'(\d+)°', t)
     kontrol(aci is not None and 145 <= int(aci.group(1)) <= 158, 'Kıble: İstanbul\'dan yön ~152° hesaplanıyor', t[:90])
+    kontrol(pg.locator('#pusulaOkGrup path').count() == 1 and pg.get_attribute('#pusulaOkGrup path', 'fill') == '#E4B84A', 'Kıble: pusulada yalnızca sarı ok var (karıştıran arka uç yok)')
     kontrol(not errs, 'Konum/kıble sırasında JavaScript hatası yok', errs)
     c.close()
 
