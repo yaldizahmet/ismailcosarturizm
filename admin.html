@@ -150,7 +150,7 @@ body.rol-rehber .yonetici{display:none!important}
     <button type="button" data-m="kafile" onclick="sekmeAc('kafile')"><b>🧳</b>Gruplar</button>
     <button type="button" data-m="musteri" onclick="sekmeAc('musteri')"><b>🧑‍🤝‍🧑</b>Müşteriler</button>
     <button type="button" data-m="basvuru" onclick="sekmeAc('basvuru')"><b>📥</b>Başvurular<span class="rozet" id="mobilSayac" hidden></span></button>
-    <button type="button" data-m="diger" onclick="document.getElementById('mobilDiger').hidden=false"><b>☰</b>Diğer</button>
+    <button type="button" data-m="diger" onclick="document.getElementById('mobilDiger').hidden=false"><b id="mobilDigerIkon">☰</b><span id="mobilDigerAd">Diğer</span></button>
   </nav>
   <div class="mobil-perde" id="mobilDiger" hidden onclick="if(event.target===this)this.hidden=true">
     <div class="mobil-sayfa"><div class="tutamak"></div>
@@ -261,6 +261,10 @@ function sekmeAc(ad) {
   if (ROL === 'rehber') ad = 'kafile';
   const anaM = { ana: 1, kafile: 1, musteri: 1, basvuru: 1 }, mAd = anaM[ad] ? ad : 'diger';
   document.querySelectorAll('.mobil-alt button').forEach(b => b.classList.toggle('active', b.dataset.m === mAd));
+  // "Diğer" altındaki bir sayfadaysak 5. düğme o sayfanın adını gösterir (hangi ekranda olduğu belli olsun)
+  const DIGER_AD = { rehber: ['🧭', 'Rehberler'], sehir: ['🗺️', 'Şehir R.'], turlar: ['📋', 'Turlar'], ekle: ['📋', 'Turlar'], duyuru: ['📢', 'Duyurular'], yorum: ['💬', 'Yorumlar'] }[ad] || ['☰', 'Diğer'];
+  const di = document.getElementById('mobilDigerIkon'), da = document.getElementById('mobilDigerAd');
+  if (di) di.textContent = DIGER_AD[0]; if (da) da.textContent = DIGER_AD[1];
   ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);

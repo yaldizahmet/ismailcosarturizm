@@ -536,6 +536,7 @@ with sync_playwright() as p:
     kontrol(dp.is_visible('#mobilDiger'), 'Telefon: "Diğer" menüsü açılıyor')
     dp.click('#mobilDiger button:has-text("Tur Listesi")'); dp.wait_for_timeout(400)
     kontrol(dp.is_visible('#sayfa-turlar') and not dp.is_visible('#mobilDiger') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'diger', 'Telefon: Diğer → Tur Listesi açılıyor, menü kapanıyor')
+    kontrol('Turlar' in dp.inner_text('.mobil-alt [data-m="diger"]'), 'Telefon: alt çubukta "Diğer" yerine açık sayfanın adı (Turlar) görünüyor')
     dp.click('.mobil-alt [data-m="diger"]'); dp.wait_for_timeout(200); dp.mouse.click(195, 100); dp.wait_for_timeout(200)
     kontrol(not dp.is_visible('#mobilDiger') and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs, 'Telefon: Diğer menüsü boşluğa basınca kapanıyor; sayfa yana taşmıyor', errs)
     dp.close()
