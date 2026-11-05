@@ -410,8 +410,10 @@ with sync_playwright() as p:
     c.__rpc = 'kopuk'; pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(700)
     kontrol(pg.is_visible('#uygulama') and 'İnternet yok' in pg.inner_text('#ekran') and 'Mekke ziyaretleri' in pg.inner_text('#ekran'),
             'Çevrimdışı: son kaydedilen program gösteriliyor, uyarı şeridi var', errs)
+    kontrol(pg.locator('#ekran a.yonetici-giris[href="/admin.html"]').count() == 1, 'Bugün ekranının altında "Rehber / yönetici girişi" bağlantısı')
     pg.click('[data-eylem="cikis"]'); pg.wait_for_timeout(300)
     kontrol(pg.is_visible('#giris'), 'Kafileden çık: kod ekranına dönüyor')
+    kontrol(pg.is_visible('#giris a.yonetici-giris') and pg.get_attribute('#giris a.yonetici-giris', 'href') == '/admin.html', 'Kod ekranında "Rehber / yönetici girişi" bağlantısı admin paneline gidiyor')
     c.close()
     b.close()
 
