@@ -1551,6 +1551,7 @@ async function rehberIslem(govde) {
 // Rehbere gönderilecek giriş bilgisi. Şifre yalnızca hesap açılınca / şifre değişince bilinir (sonra kimse göremez).
 const REHBER_GIRIS = 'https://ismailcosarturizm.com.tr/admin.html';
 let RH_SON = null; // { ad, ka, sifre, yeni }
+let RH_ACIK = false; // "Yeni rehber hesabı" formu (rehber yoksa her zaman açık)
 function rehberGirisMetni(ad, ka, sifre) {
   return 'Merhaba ' + ad + ',\n\nİsmail Coşar Turizm rehber hesabınız ' + (sifre ? 'hazır' : 'bilgileri') + '.\n\n'
     + '🔗 Giriş adresi: ' + REHBER_GIRIS + '\n👤 Kullanıcı adı: ' + ka + '\n🔑 Şifre: ' + (sifre || 'size daha önce iletilen şifre') + '\n\n'
@@ -1584,17 +1585,17 @@ async function renderRehberler() {
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const atandi = (u, k) => (atamalar || []).some(a => a.user_id === u && a.kafile_id === k);
   el.innerHTML = `
-    <div class="header"><h2>🧭 Rehber Hesapları</h2></div>
+    <div class="header"><h2>🧭 Rehber Hesapları</h2>${(roller || []).length && !RH_ACIK ? '<button class="btn btn-gold" id="yeniRehberBtn" onclick="RH_ACIK=true;renderRehberler()">➕ Yeni rehber</button>' : ''}</div>
     ${rehberGirisKutusu()}
     <div class="card" style="font-size:13px;color:#555;line-height:1.6">🔗 Rehber giriş adresi: <b>ismailcosarturizm.com.tr/admin.html</b><br>Rehber, bu panele <b>kullanıcı adı ve şifresiyle</b> girer ve yalnızca atandığı grupların <b>katılımcı ve oda listesini</b> görüp düzeltebilir. Başvuruları, turları, duyuruları, müşteri listesinin geri kalanını göremez; kişi ekleyip çıkaramaz.</div>
-    <div class="card"><h3>➕ Yeni rehber hesabı</h3>
+    ${(roller || []).length && !RH_ACIK ? '' : `<div class="card" id="rh_kart"><h3>➕ Yeni rehber hesabı</h3>
       <div class="form-row">
         <div class="form-group"><label>Ad soyad</label><input id="rh_ad" placeholder="Ali Yılmaz"></div>
         <div class="form-group"><label>Kullanıcı adı (girişte yazacağı)</label><input id="rh_ka" placeholder="ali.yilmaz" autocapitalize="none" spellcheck="false"></div>
         <div class="form-group"><label>Şifre (en az 8 karakter)</label><input id="rh_sifre" type="text" autocomplete="off"></div>
       </div>
-      <button class="btn btn-gold" onclick="rehberOlustur()">➕ Hesap aç</button>
-    </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="rehberOlustur()">➕ Hesap aç</button>${(roller || []).length ? '<button class="btn btn-navy" onclick="RH_ACIK=false;renderRehberler()">Vazgeç</button>' : ''}</div>
+    </div>`}
     <div class="card"><h3>Rehberler (${(roller || []).length})</h3><div class="tur-list">
       ${(roller || []).map(r => `<div class="tur-item rehber-item" data-user="${esc(r.user_id)}" style="flex-direction:column;align-items:stretch">
         <div class="tur-item-info"><h4>${esc(r.ad || '')}</h4><p>Kullanıcı adı: <b>${esc(r.kullanici_adi || '')}</b></p></div>
@@ -1616,7 +1617,7 @@ async function rehberOlustur() {
   const r = await rehberIslem({ islem: 'olustur', ad, kullanici_adi: ka, sifre });
   if (!r) return;
   toast('✅ Hesap açıldı. Görebileceği grupları işaretleyin ve giriş bilgilerini gönderin.', 'success');
-  RH_SON = { ad, ka, sifre, yeni: true };
+  RH_SON = { ad, ka, sifre, yeni: true }; RH_ACIK = false;
   await renderRehberler(); window.scrollTo(0, 0);
 }
 async function rehberAta(userId, kafileId, ac) {

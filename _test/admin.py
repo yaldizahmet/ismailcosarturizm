@@ -315,6 +315,11 @@ with sync_playwright() as p:
     kontrol('admin.html' in wb and 'ali.yilmaz' in wb and 'gizli1234' not in wb, 'Rehber hesabı: listede "Giriş adresini gönder" (şifresiz)')
     pg.locator('.rehber-giris-kutu').get_by_role('button', name='Kapat').click(); pg.wait_for_timeout(300)
     kontrol(pg.locator('.rehber-giris-kutu').count() == 0, 'Rehber hesabı: bilgi kutusu kapatılınca şifre ekrandan kalkıyor')
+    kontrol(pg.locator('#rh_kart').count() == 0 and pg.locator('#yeniRehberBtn').count() == 1, 'Rehber hesabı: rehber varken "Yeni rehber hesabı" alanları kapalı, "Yeni rehber" butonu var')
+    pg.click('#yeniRehberBtn'); pg.wait_for_timeout(300)
+    kontrol(pg.is_visible('#rh_ad'), 'Rehber hesabı: "Yeni rehber" ile alanlar açılıyor')
+    pg.locator('#rh_kart').get_by_role('button', name='Vazgeç').click(); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#rh_kart').count() == 0, 'Rehber hesabı: "Vazgeç" ile alanlar kapanıyor')
     rid = pg.get_attribute('.rehber-item', 'data-user')
     pg.locator('.rehber-item .rh_kafile').first.check(); pg.wait_for_timeout(300)
     ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
