@@ -226,6 +226,13 @@ with sync_playwright() as p:
             and next(m for m in mi[0]['veri'] if m['ad'] == 'Mehmet Kaya')['dogum_tarihi'] == '1955-03-12' and pg.locator('.katilimci-satir').count() == 3,
             'Excel yapıştırma: 2 yeni kişi tek seferde ekleniyor', errs)
     kontrol(pg.locator('.katilimci-tablo b b').count() == 0 and '<b>Ç</b>' in pg.inner_text('.katilimci-tablo'), 'Güvenlik: isimdeki HTML düz yazı gösteriliyor')
+    pg.click('#ktKapatBtn'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#kt_kart').count() == 0 and pg.locator('#kisiEkleBtn').count() == 1, 'Katılımcılar: "Kapat" ile kişi ekleme alanları gizleniyor, yerine "Kişi ekle" butonu')
+    pg.evaluate("renderKafileler()"); pg.wait_for_timeout(300)
+    pg.locator('.kafile-item').get_by_role('button', name=re.compile('Katılımcılar')).click(); pg.wait_for_timeout(400)
+    kontrol(pg.locator('#kt_kart').count() == 0 and pg.locator('.katilimci-satir').count() == 3, 'Katılımcılar: liste doluyken sayfa ekleme alanları kapalı açılıyor')
+    pg.click('#kisiEkleBtn'); pg.wait_for_timeout(200)
+    kontrol(pg.is_visible('#kt_ad') and pg.locator('#kisiEkleBtn').count() == 0, 'Katılımcılar: "Kişi ekle" ile alanlar açılıyor')
     pg.get_by_role('button', name=re.compile('Oda listesini kopyala')).click(); pg.wait_for_timeout(200)
     t = pg.evaluate('window.__sonKopya') or ''
     kontrol( '🏨 *Mekke – Test Otel Mekke* (10.11–15.11, 5 gece)' in t and 'Oda 512 (3 kişilik)\n   • Ayşe Kaya [11.11–15.11, 4 gece]\n   • Mehmet Kaya' in t and 'Oda 514 (2 kişilik)\n   • Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu, her isim ayrı satırda', t.replace('\n', ' | ')[:160])

@@ -1062,11 +1062,14 @@ async function kafileKatilimcilar(id) {
     sb.from('musteriler').select('*')
   ]);
   if (!k || error) { toast('❌ ' + (error ? error.message : 'Grup okunamadı'), 'error'); renderKafileler(); return; }
+  const ayniGrup = KT.kafile && KT.kafile.id === id;
   KT.kafile = k; KT.musteriler = mus || []; KT.duzenlenen = null; KT.onizleme = []; KT.tablo = null; KT.topluOda = false;
   const mm = {}; KT.musteriler.forEach(m => mm[m.id] = m);
   const anah = odaAnahtarlari(k);
   KT.liste = (kat || []).filter(x => mm[x.musteri_id]).map(x => ({ kat: x, m: mm[x.musteri_id] }))
     .sort((a, b) => String(odaBilgi(a.kat.odalar, anah[0]).no || '~').localeCompare(String(odaBilgi(b.kat.odalar, anah[0]).no || '~'), 'tr', { numeric: true }) || adNorm(a.m.ad).localeCompare(adNorm(b.m.ad), 'tr'));
+  // "Kişi ekle" formu kapalı gelir; liste boşsa ya da ekleme sürerken (aynı grup yeniden yüklenince) açık kalır
+  KT.ekleAcik = (ayniGrup && KT.ekleAcik) || !KT.liste.length;
   katilimciCiz();
 }
 
@@ -1096,8 +1099,8 @@ function katilimciCiz() {
   document.getElementById('sayfa-kafile').innerHTML = `
     <div class="header"><h2>👥 ${esc(k.ad)} – Katılımcılar</h2><button class="btn btn-navy" onclick="renderKafileler()">← ${rehber ? 'Gruplarım' : 'Gruplar'}</button></div>
     <div class="card" style="font-size:13px;color:#555;line-height:1.6">${rehber ? 'Oda numaralarını ve kişi bilgilerini “Düzenle” ile düzeltebilirsiniz. Kişi ekleme/çıkarma için ofise haber verin.' : 'Bu liste yalnızca admin panelinde (ve bu gruba atanan rehberde) görünür; misafir uygulamasında ve sitede çıkmaz. Kişiler “Müşteriler” sekmesinde de kalır (grup silinse bile).'}</div>
-    ${rehber && !d ? '' : `<div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : ''}</div>
+    ${rehber && !d || !d && !KT.ekleAcik && !KT.onizleme.length ? '' : `<div class="card" id="kt_kart"><h3>${d ? '✏️ Kişiyi düzenle' : '➕ Kişi ekle'}</h3>${katilimciFormHtml(d)}
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" onclick="katilimciKaydet()">${d ? '💾 Kaydet' : '➕ Ekle'}</button>${d ? '<button class="btn btn-navy" onclick="KT.duzenlenen=null;katilimciCiz()">Vazgeç</button>' : KT.liste.length ? '<button class="btn btn-navy" id="ktKapatBtn" onclick="KT.ekleAcik=false;KT.onizleme=[];katilimciCiz()">Kapat</button>' : ''}</div>
       ${d ? '' : `<details style="margin-top:16px" ${KT.onizleme.length ? 'open' : ''}><summary style="cursor:pointer;font-weight:600;font-size:13.5px">📋 Excel'den toplu yapıştır</summary>
         <p style="font-size:12.5px;color:#666;margin:8px 0;line-height:1.6">Excel'deki oda listesini <b>başlık satırıyla birlikte</b> kopyalayıp aşağıya yapıştırın. Kolonlar (Adı, Soyadı, Oda no, Tipi, Giriş/Ara/Çıkış tarihi, Telefon…) başlıklarından tanınır; birleştirilmiş oda hücreleri odadaki herkese uygulanır. Tanınmayan kolonu önizlemede elle seçebilirsiniz.</p>
         <textarea id="kt_yapistir" rows="6" style="width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:6px;font:inherit;font-size:13px" placeholder="Ayşe Kaya	0532 111 22 33	12.03.1955	512	3	304	3"></textarea>
@@ -1106,7 +1109,7 @@ function katilimciCiz() {
     </div>`}
     <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h3 style="margin:0">Liste (${KT.liste.length} kişi${odaSay ? ' · ' + odaSay + ' oda' : ''})</h3>
-        ${KT.liste.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${KT.topluOda ? '' : '<button class="btn btn-navy" id="odaGirBtn" onclick="KT.topluOda=true;katilimciCiz()">🔢 Oda numaralarını gir</button>'}<button class="btn btn-gold" id="listePaylasBtn" onclick="odaListesiPaylas()">📤 Listeyi paylaş</button><button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button></div>` : ''}</div>
+        ${KT.liste.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${rehber || KT.ekleAcik || d || KT.topluOda ? '' : '<button class="btn btn-gold" id="kisiEkleBtn" onclick="KT.ekleAcik=true;katilimciCiz();window.scrollTo(0,0)">➕ Kişi ekle</button>'}${KT.topluOda ? '' : '<button class="btn btn-navy" id="odaGirBtn" onclick="KT.topluOda=true;katilimciCiz()">🔢 Oda numaralarını gir</button>'}<button class="btn btn-gold" id="listePaylasBtn" onclick="odaListesiPaylas()">📤 Listeyi paylaş</button><button class="btn btn-gold" onclick="odaListesiKopyala()">📋 Oda listesini kopyala</button></div>` : ''}</div>
       ${KT.topluOda ? topluOdaHtml() : ''}
       ${(() => { const o = odaSorunlari(KT.liste.map(x => ({ ad: x.m.ad, odalar: x.kat.odalar }))); return o.length ? `<div class="oda-uyarilari" style="background:#fff4e0;border:1px solid #f0d9a8;color:#6b5413;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:10px;line-height:1.6">${o.map(x => '⚠️ ' + esc(x.metin)).join('<br>')}</div>` : ''; })()}
       ${KT.liste.length && !KT.topluOda ? `<div style="overflow-x:auto"><table class="fiyat-tablo katilimci-tablo"><thead><tr><th>#</th><th>Ad soyad</th>${anah.map(a => '<th>Oda – ' + esc(odaEtiket(a)) + '</th>').join('')}<th>Telefon</th><th>Doğum tarihi</th><th></th></tr></thead><tbody>
