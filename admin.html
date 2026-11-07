@@ -159,6 +159,7 @@ body.rol-rehber .yonetici{display:none!important}
       <button type="button" onclick="mobilGit('turlar')">📋 Tur Listesi</button>
       <button type="button" onclick="mobilGit('duyuru')">📢 Duyurular</button>
       <button type="button" onclick="mobilGit('yorum')">💬 Yorumlar</button>
+      <button type="button" onclick="mobilGit('ziyaret')">📊 Ziyaretçiler</button>
       <button type="button" onclick="document.getElementById('mobilDiger').hidden=true;cikisYap()" style="color:#c62828">🚪 Çıkış</button>
     </div>
   </div>
@@ -175,6 +176,7 @@ body.rol-rehber .yonetici{display:none!important}
     <button class="nav-item yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
     <button class="nav-item yonetici" id="btn-duyuru" onclick="sekmeAc('duyuru')">📢 Duyurular</button>
     <button class="nav-item yonetici" id="btn-yorum" onclick="sekmeAc('yorum')">💬 Yorumlar</button>
+    <button class="nav-item yonetici" id="btn-ziyaret" onclick="sekmeAc('ziyaret')">📊 Ziyaretçiler</button>
   </div>
   <div class="main">
     <div class="kullanici-serit"><span id="kullaniciBilgi"></span><button type="button" class="kullanici-cikis" onclick="cikisYap()">Çıkış</button></div>
@@ -185,6 +187,7 @@ body.rol-rehber .yonetici{display:none!important}
   <div id="sayfa-duyuru" style="display:none"></div>
     <div id="sayfa-kafile" style="display:none"></div>
     <div id="sayfa-yorum" style="display:none"></div>
+    <div id="sayfa-ziyaret" style="display:none"></div>
     <div id="sayfa-musteri" style="display:none"></div>
     <div id="sayfa-rehber" style="display:none"></div>
     <div id="sayfa-sehir" style="display:none"></div>
@@ -262,10 +265,10 @@ function sekmeAc(ad) {
   const anaM = { ana: 1, kafile: 1, musteri: 1, basvuru: 1 }, mAd = anaM[ad] ? ad : 'diger';
   document.querySelectorAll('.mobil-alt button').forEach(b => b.classList.toggle('active', b.dataset.m === mAd));
   // "Diğer" altındaki bir sayfadaysak 5. düğme o sayfanın adını gösterir (hangi ekranda olduğu belli olsun)
-  const DIGER_AD = { rehber: ['🧭', 'Rehberler'], sehir: ['🗺️', 'Şehir R.'], turlar: ['📋', 'Turlar'], ekle: ['📋', 'Turlar'], duyuru: ['📢', 'Duyurular'], yorum: ['💬', 'Yorumlar'] }[ad] || ['☰', 'Diğer'];
+  const DIGER_AD = { rehber: ['🧭', 'Rehberler'], sehir: ['🗺️', 'Şehir R.'], turlar: ['📋', 'Turlar'], ekle: ['📋', 'Turlar'], duyuru: ['📢', 'Duyurular'], yorum: ['💬', 'Yorumlar'], ziyaret: ['📊', 'Ziyaretçi'] }[ad] || ['☰', 'Diğer'];
   const di = document.getElementById('mobilDigerIkon'), da = document.getElementById('mobilDigerAd');
   if (di) di.textContent = DIGER_AD[0]; if (da) da.textContent = DIGER_AD[1];
-  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir'].forEach(s => {
+  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir','ziyaret'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -278,6 +281,7 @@ function sekmeAc(ad) {
   if (ad === 'duyuru') renderDuyuru();
   if (ad === 'kafile') renderKafileler();
   if (ad === 'yorum') renderYorumlar();
+  if (ad === 'ziyaret') renderZiyaret();
   if (ad === 'musteri') renderMusteriler();
   if (ad === 'rehber') renderRehberler();
   if (ad === 'sehir') renderSehirRehberi();
@@ -291,11 +295,16 @@ async function renderAna() {
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
       ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
-      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}</div></div>
+      ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}${b('ziyaret', '📊 Ziyaretçiler', '<span id="anaZiyaret">Hangi sayfaya kaç kişi</span>')}</div></div>
     <div id="anaDogum"></div>`;
   const [{ data: g }, { data: bv }, { data: mus }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni'), sb.from('musteriler').select('*')]);
   const e3 = document.getElementById('anaDogum');
   if (e3) e3.innerHTML = dogumKartHtml(mus || []);
+  const bg = new Date(); bg.setHours(0, 0, 0, 0);
+  sb.from('ziyaretler').select('ziyaretci').gte('zaman', bg.toISOString()).limit(20000).then(({ data: zz, error: ze }) => {
+    const e4 = document.getElementById('anaZiyaret');
+    if (e4 && !ze) e4.textContent = 'Bugün ' + new Set((zz || []).map(x => x.ziyaretci)).size + ' ziyaretçi';
+  });
   const ag = (g || []).filter(k => k.aktif).length, yb = (bv || []).length;
   const e1 = document.getElementById('anaGrup'), e2 = document.getElementById('anaBasvuru');
   if (e1) e1.textContent = ag + ' aktif grup';
@@ -1744,6 +1753,71 @@ function adMaskele(ad) {
   return t.slice(0, i) + ' ' + soy[0] + '*'.repeat(soy.length - 1);
 }
 
+// ── Ziyaretçiler: sayac.js'in tuttuğu çerezsiz kayıtlar (ziyaretler tablosu) ──
+let ZY_GUN = 7;
+const SAYFA_ADLARI = { '/': 'Ana sayfa', '/umre.html': 'Umre turları', '/hac.html': 'Hac', '/turlar.html': 'Tüm turlar', '/iletisim.html': 'İletişim',
+  '/hakkimizda.html': 'Hakkımızda', '/belgelerimiz.html': 'Belgelerimiz', '/galeri.html': 'Galeri', '/sss.html': 'Sık sorulan sorular', '/kvkk.html': 'KVKK',
+  '/tesekkurler.html': '✅ Başvuru gönderildi (teşekkür sayfası)', '/kafile/': '📱 Misafir uygulaması', '/rehber-ilk-umre.html': 'Rehber: İlk umre',
+  '/rehber-umre-donemleri.html': 'Rehber: Umre dönemleri', '/rehber-umre-valiz-listesi.html': 'Rehber: Valiz listesi' };
+function kaynakAdi(k) {
+  k = String(k || '').toLowerCase();
+  if (!k) return 'Doğrudan / WhatsApp / yer imi';
+  if (/google/.test(k)) return 'Google';
+  if (/instagram/.test(k)) return 'Instagram';
+  if (/facebook|^fb|\.fb\./.test(k)) return 'Facebook';
+  if (/bing|yandex|duckduckgo|yahoo/.test(k)) return 'Diğer arama motorları';
+  if (/t\.co$|twitter|x\.com/.test(k)) return 'X (Twitter)';
+  if (/whatsapp|wa\.me/.test(k)) return 'WhatsApp';
+  return k;
+}
+function zyBarlar(liste) { // [{ad, deger}] → yatay çubuklar
+  const en = Math.max(1, ...liste.map(x => x.deger));
+  return liste.map(x => `<div class="zy-satir" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;margin:7px 0">
+    <div style="font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(x.ad)}">${esc(x.ad)}</div><b style="font-size:13.5px">${x.deger}${x.ek ? `<span style="font-weight:400;color:#888;font-size:12px"> ${x.ek}</span>` : ''}</b>
+    <div style="grid-column:1/-1;height:7px;background:#eef1f5;border-radius:4px"><div style="height:100%;width:${Math.max(2, Math.round(x.deger / en * 100))}%;background:#C9972B;border-radius:4px"></div></div></div>`).join('');
+}
+async function renderZiyaret() {
+  const el = document.getElementById('sayfa-ziyaret');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+  const bas = new Date(bugun.getTime() - (ZY_GUN - 1) * 86400000);
+  const [{ data, error }, { data: tl }] = await Promise.all([
+    sb.from('ziyaretler').select('zaman,sayfa,kaynak,cihaz,ziyaretci').gte('zaman', bas.toISOString()).order('zaman', { ascending: true }).limit(20000),
+    sb.from('turlar').select('id,baslik')]);
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  const z = data || [], turAd = {}; (tl || []).forEach(x => turAd[x.id] = x.baslik);
+  const sayfaAdi = s => { const m = /^\/tur-detay\.html\?id=(.+)$/.exec(s); return m ? 'Tur: ' + (turAd[m[1]] || m[1]) : (SAYFA_ADLARI[s] || s); };
+  const gunAnahtar = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  const kisiler = new Set(z.map(x => gunAnahtar(x.zaman) + x.ziyaretci));
+  const grupla = (anahtar) => { const g = {}; z.forEach(x => { const a = anahtar(x); (g[a] = g[a] || { kisi: new Set(), sayi: 0 }); g[a].kisi.add(gunAnahtar(x.zaman) + x.ziyaretci); g[a].sayi++; }); return g; };
+  // Günlük (ya da bugün için saatlik) ziyaretçi
+  const dilimler = [];
+  if (ZY_GUN === 1) for (let s = 0; s < 24; s++) dilimler.push({ ad: String(s).padStart(2, '0'), f: x => new Date(x.zaman).getHours() === s });
+  else for (let i = 0; i < ZY_GUN; i++) { const d = new Date(bas.getTime() + i * 86400000), a = gunAnahtar(d); dilimler.push({ ad: d.toLocaleDateString('tr-TR', ZY_GUN > 7 ? { day: 'numeric' } : { weekday: 'short' }), uzun: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }), f: x => gunAnahtar(x.zaman) === a }); }
+  dilimler.forEach(d => d.deger = new Set(z.filter(d.f).map(x => gunAnahtar(x.zaman) + x.ziyaretci)).size);
+  const enCok = Math.max(1, ...dilimler.map(d => d.deger));
+  const sg = grupla(x => x.sayfa), kg = grupla(x => kaynakAdi(x.kaynak)), cg = grupla(x => x.cihaz || 'bilinmiyor');
+  const sirala = g => Object.entries(g).map(([ad, v]) => ({ ad, deger: v.kisi.size, sayi: v.sayi })).sort((a, b) => b.deger - a.deger || b.sayi - a.sayi);
+  const tel = (cg.telefon ? cg.telefon.kisi.size : 0) + (cg.tablet ? cg.tablet.kisi.size : 0);
+  const kutu = (deger, etiket) => `<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(11,31,58,.08)"><div style="font-size:26px;font-weight:700;color:#0B1F3A">${deger}</div><div style="font-size:12.5px;color:#666">${etiket}</div></div>`;
+  el.innerHTML = `
+    <div class="header"><h2>📊 Ziyaretçiler</h2></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">${[[1, 'Bugün'], [7, 'Son 7 gün'], [30, 'Son 30 gün']].map(([g, a]) => `<button class="btn ${ZY_GUN === g ? 'btn-gold' : 'btn-navy'} zy-donem" onclick="ZY_GUN=${g};renderZiyaret()">${a}</button>`).join('')}</div>
+    <div class="zy-kutular" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px">
+      ${kutu(kisiler.size, 'ziyaretçi')}${kutu(z.length, 'sayfa görüntüleme')}${kutu(kisiler.size ? Math.round(tel / kisiler.size * 100) + '%' : '–', 'telefondan')}</div>
+    ${z.length ? `
+    <div class="card"><h3>${ZY_GUN === 1 ? 'Saat saat ziyaretçi' : 'Gün gün ziyaretçi'}</h3>
+      <div class="zy-grafik" style="display:flex;align-items:flex-end;gap:${ZY_GUN > 7 ? 2 : 6}px;height:150px;padding-top:18px">
+        ${dilimler.map(d => `<div title="${esc(d.uzun || d.ad + ':00')}: ${d.deger} ziyaretçi" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0">
+          ${d.deger && ZY_GUN <= 7 ? `<div style="font-size:11px;font-weight:700;margin-bottom:2px">${d.deger}</div>` : ''}
+          <div style="width:100%;max-width:38px;height:${Math.round(d.deger / enCok * 100)}%;min-height:${d.deger ? 3 : 1}px;background:${d.deger ? '#C9972B' : '#e3e7ee'};border-radius:4px 4px 0 0"></div>
+          <div style="font-size:10.5px;color:#888;margin-top:4px;white-space:nowrap">${ZY_GUN === 1 ? (+d.ad % 3 === 0 ? d.ad : '') : esc(d.ad)}</div></div>`).join('')}</div></div>
+    <div class="card"><h3>En çok bakılan sayfalar</h3><div style="font-size:12px;color:#888;margin:-4px 0 4px">ziyaretçi sayısı · (görüntüleme)</div>${zyBarlar(sirala(sg).slice(0, 15).map(x => ({ ad: sayfaAdi(x.ad), deger: x.deger, ek: x.sayi > x.deger ? '(' + x.sayi + ')' : '' })))}</div>
+    <div class="card"><h3>Nereden geldiler</h3>${zyBarlar(sirala(kg).slice(0, 10))}</div>
+    <div class="card"><h3>Cihaz</h3>${zyBarlar(sirala(cg).map(x => ({ ad: { telefon: '📱 Telefon', tablet: '📱 Tablet', bilgisayar: '💻 Bilgisayar' }[x.ad] || x.ad, deger: x.deger })))}</div>`
+    : '<div class="card" style="color:#666">Bu dönemde henüz ziyaret kaydı yok.</div>'}
+    <div class="card" style="font-size:12.5px;color:#777;line-height:1.6">Sayaç <b>7 Kasım 2026</b>'dan beri çalışıyor. Çerez kullanmaz; kim olduğu bilinmez. Aynı kişi aynı gün içinde bir kez "ziyaretçi" sayılır. Google, Facebook gibi botlar sayılmaz. WhatsApp'tan açılan bağlantılar çoğunlukla "Doğrudan" görünür.</div>`;
+}
 async function renderYorumlar() {
   const el = document.getElementById('sayfa-yorum');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';

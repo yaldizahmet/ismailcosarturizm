@@ -22,3 +22,7 @@ Ne kontrol edilir:
 - **Kesme işareti:** tur başlığında `'` ve `"` olsa da "Kayıt Ol" butonlarının çalıştığı.
 
 Veritabanı (`supabase-js`) testte `mock.js` + `db.json` ile taklit edilir; gerçek veritabanına hiçbir şey yazılmaz. `db.json` gerçek turlara benzer örnek veridir; yeni bir tur türü ya da alan eklenirse buraya da eklenmeli.
+
+## Ziyaret sayacı (`sayac.py`)
+
+`sayac.js` her site sayfasında ve misafir uygulamasında olmalı, admin panelinde olmamalı. Test, gerçek alan adını taklit ederek gönderilen kaydı yakalar (veritabanına yazmaz): sayfa adı, kaynak, cihaz; botlar, otomatik tarayıcı ve localhost sayılmaz; veritabanına ulaşılamazsa sayfa etkilenmez. Yeni bir site sayfası eklenirse `<script src="sayac.js" defer></script>` eklenmeli ve admin panelindeki `SAYFA_ADLARI` listesine okunur adı yazılmalı.

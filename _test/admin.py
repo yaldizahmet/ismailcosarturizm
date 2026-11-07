@@ -18,6 +18,7 @@ window.__DB.kullanici_rolleri = [{ user_id: 'test-uid', rol: window.__ROL || 'ad
       select: function(){ return q; },
       eq: function(c, v){ filtre.push([c, v]); satir = satir.filter(function(r){ return r[c] === v; }); return q; },
       order: function(c){ satir.sort(function(a, b){ return a[c] > b[c] ? 1 : a[c] < b[c] ? -1 : 0; }); return q; },
+      gte: function(c, v){ satir = satir.filter(function(r){ return r[c] >= v; }); return q; },
       limit: function(){ return q; }, single: function(){ tek = true; return q; }, maybeSingle: function(){ tek = true; return q; },
       insert: function(v){ mod = 'insert'; yuk = v; return q; },
       update: function(v){ mod = 'update'; yuk = v; return q; },
@@ -539,6 +540,29 @@ with sync_playwright() as p:
     dp.evaluate("sekmeAc('kafile'); kafileKatilimcilar('k5')"); dp.wait_for_timeout(500)
     kontrol(dp.locator('.katilimci-satir', has_text='Bugün Doğan').locator('.tur-dogum').count() == 1 and dp.locator('.katilimci-satir', has_text='Uzak Doğan').locator('.tur-dogum').count() == 0 and not errs,
             'Katılımcılar: doğum günü tur tarihlerine denk gelen kişide 🎂 işareti', errs)
+    # ── Ziyaretçiler sayfası ──
+    dp.evaluate("""(() => { const s = (gun, saat) => { const d = new Date(); d.setDate(d.getDate() - gun); d.setHours(saat, 10, 0, 0); return d.toISOString(); };
+      window.__DB.ziyaretler = [
+        { zaman: s(0, 9), sayfa: '/', kaynak: 'google.com', cihaz: 'telefon', ziyaretci: 'a' },
+        { zaman: s(0, 9), sayfa: '/tur-detay.html?id=TID', kaynak: '', cihaz: 'telefon', ziyaretci: 'a' },
+        { zaman: s(0, 10), sayfa: '/', kaynak: 'l.instagram.com', cihaz: 'telefon', ziyaretci: 'b' },
+        { zaman: s(0, 11), sayfa: '/tesekkurler.html', kaynak: '', cihaz: 'bilgisayar', ziyaretci: 'c' },
+        { zaman: s(2, 14), sayfa: '/', kaynak: '', cihaz: 'bilgisayar', ziyaretci: 'a' },
+        { zaman: s(20, 14), sayfa: '/umre.html', kaynak: '', cihaz: 'telefon', ziyaretci: 'd' }];
+      sekmeAc('ana'); })()""".replace('TID', 'umre-kis')); dp.wait_for_timeout(500)
+    kontrol('Bugün 3 ziyaretçi' in dp.inner_text('#anaZiyaret'), 'Ana sayfa: Ziyaretçiler kutusunda bugünkü ziyaretçi sayısı', dp.inner_text('#anaZiyaret'))
+    dp.evaluate("sekmeAc('ziyaret')"); dp.wait_for_timeout(500)
+    zt = dp.inner_text('#sayfa-ziyaret')
+    kutular = dp.locator('.zy-kutular > div').all_inner_texts()
+    kontrol(kutular[0].startswith('4') and kutular[1].startswith('5') and kutular[2].startswith('50%'), 'Ziyaretçiler: son 7 gün 4 ziyaretçi, 5 görüntüleme, %50 telefon', kutular)
+    kontrol('Ana sayfa' in zt and 'Tur: EKİM AYI UMRE PROGRAMI (2026) 14 GÜN' in zt and 'Başvuru gönderildi' in zt and 'Umre turları' not in zt, 'Ziyaretçiler: sayfalar okunur adlarla (tur detayı tur adıyla); 7 günden eski kayıt yok', zt[:300])
+    kontrol('Google' in zt and 'Instagram' in zt and 'Doğrudan' in zt and dp.locator('.zy-grafik > div').count() == 7, 'Ziyaretçiler: kaynaklar (Google, Instagram, Doğrudan) ve 7 günlük grafik')
+    dp.locator('.zy-donem', has_text='Son 30 gün').click(); dp.wait_for_timeout(500)
+    kontrol('Umre turları' in dp.inner_text('#sayfa-ziyaret') and dp.locator('.zy-grafik > div').count() == 30, 'Ziyaretçiler: "Son 30 gün" seçilince eski kayıtlar da geliyor')
+    dp.locator('.zy-donem', has_text='Bugün').click(); dp.wait_for_timeout(500)
+    kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('3') and dp.locator('.zy-grafik > div').count() == 24 and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs,
+            'Ziyaretçiler: "Bugün" saat saat; telefonda taşmıyor', errs)
+    dp.evaluate("sekmeAc('kafile')"); dp.wait_for_timeout(400)
     # Telefonda uygulama görünümü: alt sekme çubuğu + "Diğer" menüsü
     kontrol(dp.is_visible('.mobil-alt') and dp.is_visible('.mobil-ust') and not dp.is_visible('.sidebar') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'kafile',
             'Telefon: altta sekme çubuğu, üstte marka çubuğu; açık sekme işaretli')
