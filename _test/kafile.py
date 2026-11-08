@@ -96,6 +96,21 @@ with sync_playwright() as p:
     kontrol(kart.locator('a', has_text='Rehberi ara').get_attribute('href') == 'tel:+905330000000', 'Bugün: Rehberi ara → tel:+905330000000')
     kontrol(pg.locator('.icerik > .zaman-cizelge .zc-satir.gecti', has_text='Sabah namazı').count() == 1 and pg.locator('.icerik > .zaman-cizelge .zc-satir.simdi', has_text='Mekke ziyaretleri').count() == 1,
             'Bugün: geçen etkinlik soluk, sıradaki vurgulu')
+    # Programı paylaş
+    pg.evaluate("window.__pv = null; navigator.share = function(v){ window.__pv = v; return Promise.resolve(); }")
+    pg.click('[data-eylem="program-paylas"]'); pg.wait_for_timeout(200)
+    kontrol(pg.is_visible('#paylasPerde') and pg.locator('[data-kapsam="gun"]').count() == 1 and pg.locator('[data-kapsam="tum"]').count() == 1, 'Program paylaş: "Bugünün programı" ve "Tüm program" seçenekleri açılıyor')
+    pg.click('[data-kapsam="gun"]'); pg.wait_for_timeout(200)
+    pt = (pg.evaluate('window.__pv') or {}).get('text', '')
+    kontrol('Bugün · 3. Gün' in pt and '✅' in pt and any(l.startswith('✅') and 'Sabah namazı' in l for l in pt.split('\n')) and any(l.startswith('▫️') and 'Mekke ziyaretleri' in l for l in pt.split('\n'))
+            and pg.locator('#paylasPerde').count() == 0, 'Program paylaş: bugünün programı; geçen etkinlik ✅, sıradakiler ▫️', pt[:200])
+    pg.click('[data-eylem="program-paylas"]'); pg.wait_for_timeout(200); pg.click('[data-kapsam="tum"]'); pg.wait_for_timeout(200)
+    pt = (pg.evaluate('window.__pv') or {}).get('text', '')
+    kontrol('– Program*' in pt and '📍 *3. Gün' in pt and '\n*4. Gün' in pt and '▫️ 08:00' in pt and '(bugün)' in pt and 'ismailcosarturizm.com.tr' in pt and 'TEST-ABCDE' not in pt,
+            'Program paylaş: tüm program gün gün; bugün 📍, gelecek günler işaretsiz; grup kodu metinde yok', pt[:400].replace('\n', ' | '))
+    pg.evaluate("delete navigator.share; navigator.share = undefined; window.__sonPaylasim = null")
+    pg.click('[data-eylem="program-paylas"]'); pg.wait_for_timeout(200); pg.click('[data-kapsam="gun"]'); pg.wait_for_timeout(400)
+    kontrol(pg.evaluate('window.__sonPaylasim') and 'kopyalandı' in pg.inner_text('#bildirim') and not errs, 'Program paylaş: paylaş menüsü olmayan cihazda kopyalayıp haber veriyor', errs)
     kontrol('SON DUYURU' in m.upper() and pg.is_visible('#menuNokta'), 'Bugün: son duyuru kartı ve okunmamış duyuru işareti var')
     pg.click('details.tum summary'); pg.wait_for_timeout(200)
     kontrol(pg.locator('details.tum .gun-baslik').count() == 2 and '4. GÜN' in pg.inner_text('details.tum').upper(), 'Bugün: "Tüm program" 2 günü gün numarasıyla listeliyor')
