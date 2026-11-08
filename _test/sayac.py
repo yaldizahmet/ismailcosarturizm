@@ -38,6 +38,10 @@ kontrol(not bozuk, 'Yapısal veri (JSON-LD) tüm sayfalarda geçerli', bozuk)
 ana = open(os.path.join(KOK, 'index.html'), encoding='utf-8').read()
 bt = re.search(r'<title>(.*?)</title>', ana, re.S).group(1); ac_ = re.search(r'<meta name="description" content="(.*?)"', ana).group(1)
 kontrol(30 <= len(bt) <= 65 and 50 <= len(ac_) <= 170, 'Ana sayfa: başlık 30–65, açıklama 50–170 karakter', (len(bt), len(ac_)))
+import html as _h
+uzun = [(os.path.basename(f), len(_h.unescape(re.search(r'<title>(.*?)</title>', open(f, encoding='utf-8').read(), re.S).group(1))))
+        for f in sorted(glob.glob(os.path.join(KOK, '*.html')))]
+kontrol(all(n <= 65 for _, n in uzun), 'Tüm sayfa başlıkları 65 karakteri geçmiyor (Google\'da kesilmesin)', [x for x in uzun if x[1] > 65])
 
 MASA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 def ac(b, yol, ua=MASA, referrer=None, webdriver_gizle=True, yerel=False):
