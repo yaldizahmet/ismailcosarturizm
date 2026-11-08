@@ -22,6 +22,23 @@ for f in sorted(glob.glob(os.path.join(KOK, '*.html'))) + [os.path.join(KOK, 'ka
     if (ad == 'admin.html') == bool(re.search(r'<script[^>]+src="[^"]*sayac\.js"', t)): eksik.append(ad)
 kontrol(not eksik, 'Sayaç: tüm site sayfalarında ve misafir uygulamasında var, admin panelinde yok', eksik)
 
+# 2) Arama motoru / yapay zekâ etiketleri
+sys.path.insert(0, os.path.join(KOK, '_araclar'))
+import sss_ld
+sss = open(os.path.join(KOK, 'sss.html'), encoding='utf-8').read()
+m = re.search(r'<!-- SSS-LD:BAS -->\s*<script type="application/ld\+json">(.*?)</script>', sss, re.S)
+kontrol(m is not None and json.loads(m.group(1)) == sss_ld.ld(sss) and len(sss_ld.sorular(sss)) > 100,
+        'SSS: soru-cevap etiketi (FAQPage) sayfadaki sorularla birebir aynı (soru değişince: python3 _araclar/sss_ld.py)')
+bozuk = []
+for f in sorted(glob.glob(os.path.join(KOK, '*.html'))):
+    for j in re.findall(r'<script type="application/ld\+json">(.*?)</script>', open(f, encoding='utf-8').read(), re.S):
+        try: json.loads(j)
+        except Exception: bozuk.append(os.path.basename(f))
+kontrol(not bozuk, 'Yapısal veri (JSON-LD) tüm sayfalarda geçerli', bozuk)
+ana = open(os.path.join(KOK, 'index.html'), encoding='utf-8').read()
+bt = re.search(r'<title>(.*?)</title>', ana, re.S).group(1); ac_ = re.search(r'<meta name="description" content="(.*?)"', ana).group(1)
+kontrol(30 <= len(bt) <= 65 and 50 <= len(ac_) <= 170, 'Ana sayfa: başlık 30–65, açıklama 50–170 karakter', (len(bt), len(ac_)))
+
 MASA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 def ac(b, yol, ua=MASA, referrer=None, webdriver_gizle=True, yerel=False):
     ctx = b.new_context(user_agent=ua)

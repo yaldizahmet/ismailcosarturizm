@@ -26,3 +26,5 @@ Veritabanı (`supabase-js`) testte `mock.js` + `db.json` ile taklit edilir; ger�
 ## Ziyaret sayacı (`sayac.py`)
 
 `sayac.js` her site sayfasında ve misafir uygulamasında olmalı, admin panelinde olmamalı. Test, gerçek alan adını taklit ederek gönderilen kaydı yakalar (veritabanına yazmaz): sayfa adı, kaynak, cihaz; botlar, otomatik tarayıcı ve localhost sayılmaz; veritabanına ulaşılamazsa sayfa etkilenmez. Yeni bir site sayfası eklenirse `<script src="sayac.js" defer></script>` eklenmeli ve admin panelindeki `SAYFA_ADLARI` listesine okunur adı yazılmalı.
+
+Aynı dosya ayrıca SSS sayfasındaki soru-cevap etiketinin (FAQPage) görünen sorularla aynı olduğunu, JSON-LD bloklarının geçerli olduğunu ve ana sayfa başlık/açıklama uzunluklarını kontrol eder. SSS'ye soru eklenir ya da değişirse `python3 _araclar/sss_ld.py` çalıştırın.
