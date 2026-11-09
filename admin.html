@@ -373,12 +373,12 @@ function turDuyurCiz() {
     <div class="header"><h2>📣 Turu duyur</h2><button class="btn btn-navy" onclick="renderTurlar()">← Tur Listesi</button></div>
     <div class="card"><h3>${esc(TD.tur.icon || '')} ${esc(TD.tur.baslik)}</h3>
       <div class="form-group"><label>Mesaj <span style="font-weight:400;color:#888">– <b>{ad}</b> yazan yere kişinin adı gelir</span></label>
-        <textarea id="td_mesaj" rows="9" style="width:100%">${esc(TD.mesaj)}</textarea></div>
+        <textarea id="td_mesaj" rows="9" style="width:100%;font-family:inherit;font-size:15px;line-height:1.5;padding:10px 12px;border:1.5px solid #dde;border-radius:10px">${esc(TD.mesaj)}</textarea></div>
       <div style="font-size:12.5px;color:#777;line-height:1.6">Mesajlar otomatik gitmez: her kişi için butona basınca WhatsApp hazır mesajla açılır, siz "Gönder"e basarsınız. Yalnızca <b>ileti izni</b> olan ve telefonu kayıtlı müşteriler listelenir${TD.izinsiz || TD.telsiz ? ` (${TD.toplam} müşteriden ${TD.izinsiz} kişi izinsiz, ${TD.telsiz} kişi telefonsuz olduğu için listede yok)` : ''}.</div></div>
     <div class="card"><h3><span id="td_sayi">${TD.liste.length} kişi · ${TD.liste.filter(x => g.includes(x.m.id)).length} gönderildi</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-        <input type="search" id="td_ara" placeholder="🔍 İsim ara" value="${esc(TD.ara)}" oninput="TD.ara=this.value;turDuyurCiz();const a=document.getElementById('td_ara');a.focus();a.setSelectionRange(a.value.length,a.value.length)" style="flex:1;min-width:150px">
-        <select id="td_filtre" onchange="TD.filtre=this.value;turDuyurCiz()" style="flex:1;min-width:150px"><option value="">Tüm müşteriler</option>${kullanilan.map(k => `<option value="${esc(k)}"${TD.filtre === k ? ' selected' : ''}>${esc(TD.kafAd[k])} grubundakiler</option>`).join('')}</select></div>
+        <input type="search" id="td_ara" placeholder="🔍 İsim ara" value="${esc(TD.ara)}" oninput="TD.ara=this.value;turDuyurCiz();const a=document.getElementById('td_ara');a.focus();a.setSelectionRange(a.value.length,a.value.length)" style="flex:1;min-width:150px;padding:10px 12px;border:1.5px solid #dde;border-radius:10px;font-size:15px">
+        <select id="td_filtre" onchange="TD.filtre=this.value;turDuyurCiz()" style="flex:1;min-width:150px;padding:10px 12px;border:1.5px solid #dde;border-radius:10px;font-size:15px;background:#fff"><option value="">Tüm müşteriler</option>${kullanilan.map(k => `<option value="${esc(k)}"${TD.filtre === k ? ' selected' : ''}>${esc(TD.kafAd[k])} grubundakiler</option>`).join('')}</select></div>
       ${kalan.map(x => satir(x, false)).join('')}${giden.map(x => satir(x, true)).join('')}
       ${gor.length ? '' : '<p style="color:#666;font-size:14px">Bu seçime uyan müşteri yok.</p>'}</div>`;
 }
