@@ -116,6 +116,7 @@ with sync_playwright() as p:
     kontrol(pg.locator('details.tum .gun-baslik').count() == 2 and '4. GÜN' in pg.inner_text('details.tum').upper(), 'Bugün: "Tüm program" 2 günü gün numarasıyla listeliyor')
     kontrol(not tasma(pg), 'Bugün: telefonda yatay taşma yok')
     kontrol(pg.locator('#yorumKart').count() == 0, 'Google yorumu: tur devam ederken Bugün ekranında yorum kartı yok')
+    kontrol(pg.locator('#anketKart').count() == 0, 'Anket: tur devam ederken anket kartı yok')
 
     # ── Duyurular ──
     pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(300)
@@ -323,6 +324,24 @@ with sync_playwright() as p:
     kontrol(pg.get_attribute('.yorum-satir', 'href') == 'https://g.page/r/TEST/review', 'Google yorumu: Rehber ekranında grubun yorum bağlantısı')
     pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(200)
     kontrol(pg.locator('#yorumKart a').get_attribute('href') == 'https://g.page/r/TEST/review' and 'Google' in pg.inner_text('#yorumKart'), 'Google yorumu: dönüş günü Bugün ekranında "Google\'da yorum yap" kartı')
+    # Tur sonu anketi (dönüş günü)
+    anketler = []
+    c.route('**/rest/v1/rpc/anket_gonder', lambda route, req: (anketler.append(json.loads(req.post_data)), route.fulfill(status=200, body='true', headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})))
+    kontrol(pg.locator('#anketKart .yildiz').count() == 15 and 'isimsiz' in pg.inner_text('#anketKart'), 'Anket: dönüş günü Bugün ekranında 3 soru × 5 yıldız')
+    pg.click('#anketKart [data-eylem="anket-gonder"]'); pg.wait_for_timeout(200)
+    kontrol(not anketler and 'yıldız verin' in pg.inner_text('#bildirim'), 'Anket: yıldız verilmeden gönderilmiyor, uyarı çıkıyor')
+    pg.fill('#anketYorum', 'Her şey güzeldi'); pg.evaluate("document.getElementById('anketYorum').focus()")
+    for soru, puan in [('rehber', 5), ('otel', 3), ('genel', 4)]: pg.click(f'.yildiz[data-soru="{soru}"][data-puan="{puan}"]')
+    kontrol(pg.locator('.yildiz.dolu').count() == 12 and pg.input_value('#anketYorum') == 'Her şey güzeldi', 'Anket: yıldızlar işaretleniyor, yazılan yorum kaybolmuyor')
+    pg.click('#anketKart [data-eylem="anket-gonder"]'); pg.wait_for_timeout(400)
+    a0 = anketler[0] if anketler else {}
+    kontrol(len(anketler) == 1 and a0.get('p_kod') == 'TEST-KULTR' and (a0.get('p_rehber'), a0.get('p_otel'), a0.get('p_genel')) == (5, 3, 4) and a0.get('p_yorum') == 'Her şey güzeldi' and len(a0.get('p_cihaz', '')) >= 8
+            and 'teşekkür' in pg.inner_text('#anketKart').lower() and pg.locator('#anketKart .yildiz').count() == 0, 'Anket: gönderiliyor (kod, puanlar, yorum, isimsiz cihaz kimliği); teşekkür mesajı çıkıyor', a0)
+    kontrol(pg.locator('#yorumKart').count() == 1, 'Anket: Google yorum kartı puandan bağımsız herkese görünüyor')
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(500)
+    kontrol(pg.locator('#anketKart .yildiz').count() == 0 and 'ulaştı' in pg.inner_text('#anketKart'), 'Anket: uygulama yeniden açılınca tekrar sorulmuyor')
+    pg.click('[data-eylem="anket-duzelt"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('.yildiz.dolu').count() == 12 and not errs, 'Anket: "Değiştir" ile önceki yanıt düzenlenebiliyor', errs)
     pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
     kontrol(pg.locator('.sehir-sec button').all_inner_texts() == ['Saraybosna', 'Mostar'] and 'Sarı Tabya' in pg.inner_text('#ekran'), 'Şehir rehberi: "Bosna" yazılan otel Saraybosna ile eşleşiyor; iki şehir seçilebiliyor', errs)
     pg.click('.sehir-sec button:has-text("Mostar")'); pg.wait_for_timeout(200)

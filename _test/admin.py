@@ -565,6 +565,37 @@ with sync_playwright() as p:
     kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('3') and dp.locator('.zy-grafik > div').count() == 24 and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs,
             'Ziyaretçiler: "Bugün" saat saat; telefonda taşmıyor', errs)
     dp.evaluate("sekmeAc('kafile')"); dp.wait_for_timeout(400)
+    # ── Turu eski müşterilere duyur ──
+    dp.evaluate("window.__acilan = []; window.open = function(u){ window.__acilan.push(u); return null; }; localStorage.clear(); sekmeAc('turlar')"); dp.wait_for_timeout(500)
+    dp.locator('#sayfa-turlar .tur-item', has_text='umre-kis').locator('.tur-duyur-btn').click(); dp.wait_for_timeout(500)
+    tdm = dp.input_value('#td_mesaj'); tdt = dp.inner_text('#sayfa-turlar')
+    kontrol(dp.locator('.td-satir').count() == 3 and 'Yarın Doğan' not in tdt and '1 kişi izinsiz' in tdt and '{ad}' in tdm and 'tur-detay.html?id=umre-kis' in tdm,
+            'Tur duyurusu: yalnızca ileti izni ve telefonu olan müşteriler listeleniyor; hazır mesajda tur bağlantısı var', tdt[:200])
+    dp.fill('#td_mesaj', 'Merhaba {ad}, yeni tur!')
+    dp.locator('.td-satir', has_text='Bugün Doğan').locator('.td-gonder').click(); dp.wait_for_timeout(300)
+    acilan = dp.evaluate('window.__acilan')
+    kontrol(len(acilan) == 1 and acilan[0] == 'https://wa.me/905321112233?text=Merhaba%20Bug%C3%BCn%20Do%C4%9Fan%2C%20yeni%20tur!',
+            'Tur duyurusu: "WhatsApp ile gönder" kişinin numarasına, adı yerleştirilmiş (düzenlenmiş) mesajla açılıyor', acilan)
+    kontrol('3 kişi · 1 gönderildi' in dp.inner_text('#td_sayi') and 'Gönderildi' in dp.locator('.td-satir', has_text='Bugün Doğan').inner_text() and dp.locator('.td-satir').last.get_attribute('data-id') == 'd1'
+            and dp.input_value('#td_mesaj') == 'Merhaba {ad}, yeni tur!', 'Tur duyurusu: gönderilen kişi işaretlenip sona alınıyor; yazılan mesaj korunuyor')
+    dp.select_option('#td_filtre', 'k5'); dp.wait_for_timeout(200)
+    kontrol(dp.locator('.td-satir').count() == 2 and 'Tarihsiz' not in dp.inner_text('#sayfa-turlar'), 'Tur duyurusu: gruba göre süzülebiliyor')
+    dp.evaluate("renderTurlar()"); dp.wait_for_timeout(400)
+    dp.locator('#sayfa-turlar .tur-item', has_text='umre-kis').locator('.tur-duyur-btn').click(); dp.wait_for_timeout(500)
+    kontrol('1 gönderildi' in dp.inner_text('#td_sayi') and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs, 'Tur duyurusu: kime gönderildiği hatırlanıyor; telefonda taşmıyor', errs)
+    # ── Tur sonu anket sonuçları ──
+    dp.evaluate("""window.__DB.kafile_anketler = [
+        { id: 1, kafile_id: 'k5', cihaz: 'c1', rehber: 5, otel: 3, genel: 5, yorum: 'Rehber <b>çok</b> ilgiliydi', olusturma: new Date().toISOString() },
+        { id: 2, kafile_id: 'k5', cihaz: 'c2', rehber: 4, otel: 2, genel: 4, yorum: null, olusturma: new Date().toISOString() },
+        { id: 3, kafile_id: 'baska', cihaz: 'c3', rehber: 1, otel: 1, genel: 1, yorum: 'başka grup', olusturma: new Date().toISOString() }];
+      sekmeAc('kafile')"""); dp.wait_for_timeout(500)
+    kontrol('(2 · 4,5★)' in dp.inner_text('.kafile-item .anket-btn'), 'Anket: Gruplar listesinde yanıt sayısı ve genel ortalama', dp.inner_text('.kafile-item .anket-btn'))
+    dp.click('.kafile-item .anket-btn'); dp.wait_for_timeout(500)
+    at = dp.inner_text('#sayfa-kafile'); ortlar = dp.locator('.anket-ort b').all_inner_texts()
+    kontrol('2 yanıt' in at and [o.split()[0] for o in ortlar] == ['4,5', '2,5', '4,5'] and dp.locator('.anket-yorum-satir').count() == 1 and 'başka grup' not in at
+            and '<b>çok</b>' in at and dp.locator('.anket-yorum-satir b').count() == 0 and dp.evaluate('document.documentElement.scrollWidth') <= 391 and not errs,
+            'Anket: soru soru ortalama, yazılan yorumlar (HTML düz yazı), yalnızca o grubun yanıtları', [ortlar, errs])
+    dp.evaluate("sekmeAc('kafile')"); dp.wait_for_timeout(400)
     # Telefonda uygulama görünümü: alt sekme çubuğu + "Diğer" menüsü
     kontrol(dp.is_visible('.mobil-alt') and dp.is_visible('.mobil-ust') and not dp.is_visible('.sidebar') and dp.locator('.mobil-alt button.active').get_attribute('data-m') == 'kafile',
             'Telefon: altta sekme çubuğu, üstte marka çubuğu; açık sekme işaretli')
@@ -618,6 +649,7 @@ with sync_playwright() as p:
         kontrol('katılımcı listesi' in pt and '\n1. Ayşe Kaya' in pt and 'Oda numaraları henüz belli değil' in pt and '🏨' not in pt, 'Rehber: oda girilmemişse paylaşılan metin sade numaralı isim listesi', pt)
         kontrol(rp.evaluate('document.documentElement.scrollWidth') <= vp['width'] + 1, 'Rehber: sayfa yana taşmıyor')
         kontrol(not rp.is_visible('.mobil-alt'), 'Rehber: alt sekme çubuğu yok (tek ekranı var)')
+        kontrol(rp.locator('.anket-btn').count() == 0, 'Rehber: anket sonuçları butonu yok')
         rp.evaluate("sekmeAc('kafile')"); rp.wait_for_timeout(400)
         kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
         kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafir kodunu paylaş" yazısı ortalı')

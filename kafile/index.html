@@ -92,6 +92,12 @@ a{color:#8A6516}
 .bolum-baslik{font-family:var(--ff-b);font-size:20px;font-weight:700;margin-top:6px}
 .baslik-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
 .baslik-satir .bolum-baslik{margin:0}
+.anket-soru{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}
+.anket-soru > span{font-size:16px;font-weight:600}
+.yildizlar{display:flex;gap:2px}
+.yildiz{border:0;background:none;font-size:32px;line-height:1;padding:4px 3px;min-width:40px;min-height:44px;color:#cfc6b0;cursor:pointer;font-family:inherit}
+.yildiz.dolu{color:#C9972B}
+.anket-yorum{width:100%;border:1.5px solid #e0d6bd;border-radius:12px;padding:10px 12px;font-size:16px;font-family:inherit;min-height:70px;resize:vertical;background:#fff;color:var(--yazi)}
 .btn-kucuk{border:1.5px solid var(--gold);background:#fff;color:var(--navy);border-radius:50px;padding:8px 14px;font-size:14px;font-weight:700;min-height:40px;white-space:nowrap;cursor:pointer}
 .zaman-cizelge{display:flex;flex-direction:column}
 .zc-satir{display:grid;grid-template-columns:52px 18px 1fr;align-items:start;column-gap:10px;padding:8px 8px 12px;border-radius:12px}
@@ -440,7 +446,9 @@ details.tum[open] summary::after{content:'▴'}
     var menu = document.querySelector('.alt-menu'); if (menu) menu.hidden = !!S.karsilama;
     var f = S.karsilama ? karsilamaEkrani : { bugun: bugunEkrani, duyurular: duyurularEkrani, rehber: rehberEkrani, vakitler: vakitlerEkrani, acil: acilEkrani }[S.sekme] || bugunEkrani;
     var acikMi = !!(e.querySelector('details.tum') && e.querySelector('details.tum').open); // yenilemede "Tüm program" açık kalsın
+    var ay = $('anketYorum'), ayOdak = !!ay && document.activeElement === ay; if (ay && anket) anket.yorum = ay.value; // yazılan anket yorumu yenilemede kaybolmasın
     e.innerHTML = f().replace('<header class="bas">', '<header class="bas">' + MARKA); // her ekranın üstünde şirket logosu
+    if (ayOdak && $('anketYorum')) { var yy = $('anketYorum'); yy.focus(); try { yy.setSelectionRange(yy.value.length, yy.value.length); } catch (x) {} }
     if (acikMi && e.querySelector('details.tum')) e.querySelector('details.tum').open = true;
     if (S.sekme === 'duyurular') okunduYap();
     var var_ = okunmamisVar();
@@ -507,6 +515,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (S.iosIpucu && /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone) h += '<div class="yukle-kart"><p>Uygulama olarak kurmak için alttaki <b>Paylaş</b> simgesine, sonra <b>Ana Ekrana Ekle</b>\'ye dokunun.</p><button type="button" class="kapat" data-eylem="ios-kapat" aria-label="Kapat">×</button></div>';
 
     h += bildirimKarti('bugun');
+    if (v.bitis && gunSayisi(v.bitis, bugun) >= 0) h += anketKarti();
     if (v.bitis && gunSayisi(v.bitis, bugun) >= 0) h += '<div class="altin-kart" id="yorumKart" style="flex-direction:column;align-items:stretch;gap:8px"><div class="kart-etiket">⭐ Yolculuğunuzdan memnun kaldınız mı?</div>' +
       '<p style="margin:0;font-size:15px;line-height:1.5">Google\'da birkaç cümlelik yorumunuz, bizi tanımayan misafirlerin karar vermesine çok yardımcı olur.</p>' +
       '<a class="btn-dolu" href="' + esc(yorumLink()) + '" target="_blank" rel="noopener">⭐ Google\'da yorum yap</a></div>';
@@ -559,6 +568,39 @@ details.tum[open] summary::after{content:'▴'}
     h += '<a href="/admin.html" class="cikis yonetici-giris" style="font-size:13px;text-align:center">🧭 Rehber / yönetici girişi</a></div>';
     return h;
   }
+
+  // ── Tur sonu memnuniyet anketi (isimsiz; dönüş gününden itibaren Bugün ekranında) ──
+  var ANKET_SORU = [['rehber', 'Rehberimiz'], ['otel', 'Oteller'], ['genel', 'Genel memnuniyet']];
+  var anket = null; // doldurulurken: { rehber, otel, genel, yorum, gonderiliyor }
+  function anketCihaz() { var c = oku('kafile-cihaz', ''); if (!c) { c = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12); yaz('kafile-cihaz', c); } return c; }
+  function anketKarti() {
+    var gonderilen = oku('kafile-anket-' + S.kod, null);
+    if (gonderilen && !anket) return '<div class="altin-kart" id="anketKart"><div class="kart-etiket">📝 Anket</div><p style="margin:0;font-size:15px;line-height:1.5">Değerlendirmeniz bize ulaştı, teşekkür ederiz.</p>' +
+      '<button type="button" class="btn-kucuk" data-eylem="anket-duzelt" style="align-self:flex-start">Değiştir</button></div>';
+    if (!anket) anket = { rehber: 0, otel: 0, genel: 0, yorum: '' };
+    var h = '<div class="altin-kart" id="anketKart"><div class="kart-etiket">📝 Yolculuğunuz nasıldı?</div><p style="margin:0 0 4px;font-size:15px;line-height:1.5">Üç kısa soru. Yanıtınız isimsizdir; yalnızca firmamız görür.</p>';
+    ANKET_SORU.forEach(function (s) {
+      h += '<div class="anket-soru"><span>' + s[1] + '</span><div class="yildizlar" role="group" aria-label="' + s[1] + '">';
+      for (var i = 1; i <= 5; i++) h += '<button type="button" class="yildiz' + (anket[s[0]] >= i ? ' dolu' : '') + '" data-eylem="anket-puan" data-soru="' + s[0] + '" data-puan="' + i + '" aria-label="' + i + ' yıldız">★</button>';
+      h += '</div></div>';
+    });
+    h += '<textarea class="anket-yorum" id="anketYorum" maxlength="1000" placeholder="Eklemek istediğiniz bir şey var mı? (isteğe bağlı)">' + esc(anket.yorum) + '</textarea>' +
+      '<button type="button" class="btn-dolu" data-eylem="anket-gonder"' + (anket.gonderiliyor ? ' disabled' : '') + '>' + (anket.gonderiliyor ? 'Gönderiliyor…' : 'Gönder') + '</button></div>';
+    return h;
+  }
+  function anketYenile() { var k = $('anketKart'); if (k) k.outerHTML = anketKarti(); }
+  function anketPuan(soru, puan) { var y = $('anketYorum'); if (y) anket.yorum = y.value; anket[soru] = puan; anketYenile(); }
+  function anketGonder() {
+    var y = $('anketYorum'); if (y) anket.yorum = y.value;
+    if (!anket.rehber || !anket.otel || !anket.genel) { bildir('Lütfen üç soruya da yıldız verin.'); return; }
+    anket.gonderiliyor = true; anketYenile();
+    var g = { rehber: anket.rehber, otel: anket.otel, genel: anket.genel, yorum: anket.yorum };
+    rpc('anket_gonder', { p_kod: S.kod, p_cihaz: anketCihaz(), p_rehber: g.rehber, p_otel: g.otel, p_genel: g.genel, p_yorum: g.yorum }).then(function (ok) {
+      if (ok !== true) throw new Error('kabul edilmedi');
+      yaz('kafile-anket-' + S.kod, g); anket = null; anketYenile(); bildir('Teşekkür ederiz, değerlendirmeniz ulaştı.');
+    }).catch(function () { anket.gonderiliyor = false; anketYenile(); bildir('Gönderilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.'); });
+  }
+  function anketDuzelt() { var g = oku('kafile-anket-' + S.kod, null) || {}; anket = { rehber: g.rehber || 0, otel: g.otel || 0, genel: g.genel || 0, yorum: g.yorum || '' }; anketYenile(); }
 
   // ── Programı paylaş: o günü ya da tüm programı yazı olarak (geçenler ✅) ──
   function programGunu() { // Bugün sayfasında gösterilen gün: bugün, bugün yoksa sıradaki program günü
@@ -1104,6 +1146,9 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'hazir-gorsel') { var mh = mekanBul(t.getAttribute('data-id')); if (mh) fotoPaylas(mh, null); }
     else if (ey === 'paylas-kapat') paylasimKapat();
     else if (ey === 'program-paylas') programPaylasAc();
+    else if (ey === 'anket-puan') anketPuan(t.getAttribute('data-soru'), Number(t.getAttribute('data-puan')));
+    else if (ey === 'anket-gonder') anketGonder();
+    else if (ey === 'anket-duzelt') anketDuzelt();
     else if (ey === 'program-gonder') programGonder(t.getAttribute('data-kapsam'));
     else if (ey === 'karsilama-bitti') { S.karsilama = false; yaz('kafile-karsilandi-' + S.kod, true); S.sekme = 'bugun'; ciz(); window.scrollTo(0, 0); }
     else if (ey === 'ios-kapat') { S.iosIpucu = false; yaz('kafile-ios-kapat', true); ciz(); }
