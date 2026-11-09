@@ -234,7 +234,9 @@ with sync_playwright() as p:
     kontrol(pg.locator('#kt_kart').count() == 0 and pg.locator('.katilimci-satir').count() == 3, 'Katılımcılar: liste doluyken sayfa ekleme alanları kapalı açılıyor')
     pg.click('#kisiEkleBtn'); pg.wait_for_timeout(200)
     kontrol(pg.is_visible('#kt_ad') and pg.locator('#kisiEkleBtn').count() == 0, 'Katılımcılar: "Kişi ekle" ile alanlar açılıyor')
-    pg.get_by_role('button', name=re.compile('Oda listesini kopyala')).click(); pg.wait_for_timeout(200)
+    kontrol(pg.get_by_role('button', name=re.compile('Oda listesini kopyala')).count() == 0, 'Katılımcılar: ayrı "kopyala" butonu yok, tek "Listeyi paylaş" var')
+    pg.evaluate("navigator.share = undefined")
+    pg.get_by_role('button', name=re.compile('Listeyi paylaş')).click(); pg.wait_for_timeout(200)
     t = pg.evaluate('window.__sonKopya') or ''
     kontrol( '🏨 *Mekke – Test Otel Mekke* (10.11–15.11, 5 gece)' in t and 'Oda 512 (3 kişilik)\n   • Ayşe Kaya [11.11–15.11, 4 gece]\n   • Mehmet Kaya' in t and 'Oda 514 (2 kişilik)\n   • Hasan <b>Ç</b>' in t, 'Oda listesi: odaya göre gruplu, her isim ayrı satırda', t.replace('\n', ' | ')[:160])
     pg.evaluate("window.__islem = []")
