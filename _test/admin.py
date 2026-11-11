@@ -569,8 +569,10 @@ with sync_playwright() as p:
     dp.evaluate("window.__acilan = []; window.open = function(u){ window.__acilan.push(u); return null; }; localStorage.clear(); sekmeAc('turlar')"); dp.wait_for_timeout(500)
     dp.locator('#sayfa-turlar .tur-item', has_text='umre-kis').locator('.tur-duyur-btn').click(); dp.wait_for_timeout(500)
     tdm = dp.input_value('#td_mesaj'); tdt = dp.inner_text('#sayfa-turlar')
-    kontrol(dp.locator('.td-satir').count() == 3 and 'Yarın Doğan' not in tdt and '1 kişi izinsiz' in tdt and '{ad}' in tdm and 'tur-detay.html?id=umre-kis' in tdm,
+    kontrol(dp.locator('.td-satir').count() == 3 and 'Yarın Doğan' not in tdt and '1 kişi izinsiz' in tdt and '{ad}' in tdm and 'ismailcosarturizm.com.tr/t/umre-kis.html' in tdm,
             'Tur duyurusu: yalnızca ileti izni ve telefonu olan müşteriler listeleniyor; hazır mesajda tur bağlantısı var', tdt[:200])
+    dp.click('.td-link-insta'); dp.wait_for_timeout(200)
+    kontrol(dp.evaluate('window.__sonKopya') == 'https://ismailcosarturizm.com.tr/t/umre-kis.html?utm_source=instagram', 'Tur duyurusu: paylaşım bağlantısı (Instagram için işaretli) kopyalanıyor', dp.evaluate('window.__sonKopya'))
     dp.fill('#td_mesaj', 'Merhaba {ad}, yeni tur!')
     dp.locator('.td-satir', has_text='Bugün Doğan').locator('.td-gonder').click(); dp.wait_for_timeout(300)
     acilan = dp.evaluate('window.__acilan')

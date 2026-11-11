@@ -34,3 +34,7 @@ Aynı dosya ayrıca SSS sayfasındaki soru-cevap etiketinin (FAQPage) görünen 
 - `kafile.py`: tur sonu anketi (dönüş günü kartı, yıldız zorunluluğu, gönderim, tekrar sormama, Değiştir).
 - `admin.py`: Gruplar → Anket sonuçları (ortalama, yorumlar; rehber görmez) ve Tur Listesi → 📣 Duyur (yalnızca ileti izni + telefonu olanlar, {ad} yerleştirme, gönderildi işareti).
 - Haftalık özet e-postası `_supabase/functions/dogum-gunu-mail` içinde; `{"deneme": true}` gövdesiyle çağrılınca göndermeden metni döndürür.
+
+## Tur paylaşım sayfaları
+
+`t/<id>.html` ve `t/<id>.jpg` dosyalarını `.github/workflows/tur-onizleme.yml` saatte bir yeniden üretir (elle düzenlemeyin). Üreten betik `_araclar/tur_onizleme.py`. `sayac.py` her sayfanın önizleme etiketlerini, doğru tura yönlendirmesini ve site haritasını kontrol eder.

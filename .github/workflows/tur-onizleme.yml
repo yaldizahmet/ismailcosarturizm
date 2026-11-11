@@ -1,0 +1,55 @@
+# Tur paylaşım sayfalarını (t/<id>.html + .jpg) ve site haritasındaki tur bağlantılarını günceller.
+# Admin panelinden tur eklenince/değişince en geç bir saat içinde yansır. Değişiklik yoksa commit atmaz.
+name: Tur önizlemeleri
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['_araclar/tur_onizleme.py', '.github/workflows/tur-onizleme.yml']
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: tur-onizleme
+  cancel-in-progress: false
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Turları ve fotoğrafları indir
+        env:
+          SB: https://wpkjxwbvewwgdclbsdya.supabase.co
+          KEY: sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK   # sitede zaten açık olan genel anahtar
+        run: |
+          set -e
+          curl -fsS "$SB/rest/v1/turlar?select=id,aktif,kategori,baslik,tarih,donus_tarihi,sure,fiyat,para_birimi,konum,gorsel&aktif=eq.true" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -o /tmp/turlar.json
+          python3 -c "import json; d=json.load(open('/tmp/turlar.json')); assert isinstance(d, list); print(len(d), 'aktif tur')"
+          mkdir -p /tmp/gorsel
+          python3 - <<'PY'
+          import json, re, urllib.request
+          for t in json.load(open('/tmp/turlar.json')):
+              u = t.get('gorsel') or ''
+              if re.fullmatch(r'[A-Za-z0-9_-]{1,80}', str(t.get('id'))) and u.startswith('https://wpkjxwbvewwgdclbsdya.supabase.co/storage/'):
+                  try:
+                      with urllib.request.urlopen(u, timeout=30) as r: open('/tmp/gorsel/%s.jpg' % t['id'], 'wb').write(r.read())
+                  except Exception as e: print('indirilemedi', t['id'], e)
+          PY
+      - name: Sayfaları üret
+        run: |
+          pip install --quiet pillow
+          python3 _araclar/tur_onizleme.py /tmp/turlar.json /tmp/gorsel
+      - name: Değiştiyse kaydet ve siteyi yeniden yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A t sitemap.xml
+          if git diff --cached --quiet; then echo "değişiklik yok"; exit 0; fi
+          git config user.name "tur-onizleme"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Tur önizlemeleri güncellendi"
+          git push
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "yayın isteği gönderilemedi (bir sonraki yayında güncellenir)"

@@ -43,6 +43,21 @@ uzun = [(os.path.basename(f), len(_h.unescape(re.search(r'<title>(.*?)</title>',
         for f in sorted(glob.glob(os.path.join(KOK, '*.html')))]
 kontrol(all(n <= 65 for _, n in uzun), 'Tüm sayfa başlıkları 65 karakteri geçmiyor (Google\'da kesilmesin)', [x for x in uzun if x[1] > 65])
 
+# 3) Tur paylaşım sayfaları (t/<id>.html): önizleme etiketleri ve doğru tura yönlendirme
+import xml.dom.minidom
+tsay = sorted(glob.glob(os.path.join(KOK, 't', '*.html'))); kotu = []
+for f in tsay:
+    i = os.path.basename(f)[:-5]; s = open(f, encoding='utf-8').read(); hedef = f'https://ismailcosarturizm.com.tr/tur-detay.html?id={i}'
+    gerek = ['property="og:title"', 'property="og:description"', 'property="og:image" content="https://ismailcosarturizm.com.tr/', 'name="robots" content="noindex',
+             f'<link rel="canonical" href="{hedef}">', f'url={hedef}"', f'location.replace("{hedef}"']
+    if any(g not in s for g in gerek): kotu.append(i)
+kontrol(len(tsay) >= 1 and not kotu, f'Tur paylaşım sayfaları ({len(tsay)} adet): önizleme etiketleri var, doğru tura yönlendiriyor', kotu)
+try:
+    sm = xml.dom.minidom.parse(os.path.join(KOK, 'sitemap.xml')); locs = [n.firstChild.data for n in sm.getElementsByTagName('loc')]
+    kontrol(all(f'https://ismailcosarturizm.com.tr/tur-detay.html?id={os.path.basename(f)[:-5]}' in locs for f in tsay) and len(locs) == len(set(locs)),
+            'Site haritası geçerli; her yayındaki tur içinde, tekrar yok', len(locs))
+except Exception as e: kontrol(False, 'Site haritası geçerli XML', e)
+
 MASA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 def ac(b, yol, ua=MASA, referrer=None, webdriver_gizle=True, yerel=False):
     ctx = b.new_context(user_agent=ua)
@@ -91,6 +106,21 @@ with sync_playwright() as p:
     ctx.close()
     ctx, pg, g, errs = ac(b, '/index.html', yerel=True)
     kontrol(not g, 'Sayaç: bilgisayardaki denemelerde (localhost) çalışmıyor', g)
+    ctx.close()
+    # Tur detayında "Bu turu paylaş": t/<id>.html bağlantısı
+    tid = json.load(open(os.path.join(KOK, '_test', 'db.json'), encoding='utf-8'))['turlar'][0]['id']
+    ctx, pg, g, errs = ac(b, '/tur-detay.html?id=' + tid)
+    pg.evaluate("window.__pv = null; navigator.share = function(v){ window.__pv = v; return Promise.resolve(); }")
+    pg.click('#turPaylas'); pg.wait_for_timeout(200)
+    pv = pg.evaluate('window.__pv') or {}
+    kontrol(pv.get('url') == f'https://ismailcosarturizm.com.tr/t/{tid}.html' and pv.get('title') and not errs, 'Tur detayı: "Bu turu paylaş" önizlemeli bağlantıyı (t/…html) paylaşıyor', [pv, errs])
+    pg.evaluate("navigator.share = undefined"); pg.click('#turPaylas'); pg.wait_for_timeout(300)
+    kontrol('kopyalandı' in pg.inner_text('#turPaylas'), 'Tur detayı: paylaş menüsü olmayan cihazda bağlantı kopyalanıyor')
+    ctx.close()
+    # Paylaşım sayfası açılınca tura geçiyor (utm korunuyor)
+    ctx, pg, g, errs = ac(b, f'/t/{os.path.basename(tsay[0])[:-5]}.html?utm_source=instagram')
+    pg.wait_for_timeout(800)
+    kontrol('/tur-detay.html?id=' + os.path.basename(tsay[0])[:-5] in pg.url and any(x.get('p_kaynak') == 'instagram' for x in g), 'Paylaşım sayfası açılınca tur detayına geçiyor; Instagram kaynağı sayaca ulaşıyor', [pg.url, g])
     ctx.close()
     # Veritabanına ulaşılamazsa site etkilenmiyor
     ctx = b.new_context(user_agent=MASA); pg = ctx.new_page(); errs = []

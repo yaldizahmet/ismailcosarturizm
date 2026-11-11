@@ -357,7 +357,7 @@ async function turDuyur(id) {
   TD = { tur, kafAd, filtre: '', ara: '', toplam: hepsi.length, izinsiz: hepsi.filter(m => !m.ileti_izni).length, telsiz: hepsi.filter(m => m.ileti_izni && !waNumara(m.telefon)).length,
     liste: hepsi.filter(m => m.ileti_izni && waNumara(m.telefon)).map(m => ({ m, gruplar: gruplar[m.id] || [] })).sort((a, b) => a.m.ad.localeCompare(b.m.ad, 'tr')),
     mesaj: 'Sayın {ad}, yeni turumuzu duyurmak isteriz:\n\n*' + tur.baslik + '*\n📅 ' + turTarihYaz(tur.tarih) + (tur.donus_tarihi ? ' – ' + turTarihYaz(tur.donus_tarihi) : '') +
-      '\n\nAyrıntılar: https://ismailcosarturizm.com.tr/tur-detay.html?id=' + encodeURIComponent(tur.id) + '\n\nİsmail Coşar Turizm\n(Bu tür duyuruları almak istemezseniz yazmanız yeterlidir.)' };
+      '\n\nAyrıntılar: https://ismailcosarturizm.com.tr/t/' + encodeURIComponent(tur.id) + '.html' + '\n\nİsmail Coşar Turizm\n(Bu tür duyuruları almak istemezseniz yazmanız yeterlidir.)' };
   turDuyurCiz();
 }
 function turDuyurCiz() {
@@ -372,6 +372,12 @@ function turDuyurCiz() {
   el.innerHTML = `
     <div class="header"><h2>📣 Turu duyur</h2><button class="btn btn-navy" onclick="renderTurlar()">← Tur Listesi</button></div>
     <div class="card"><h3>${esc(TD.tur.icon || '')} ${esc(TD.tur.baslik)}</h3>
+      <div class="td-baglanti" style="background:#f6f8fa;border-radius:10px;padding:12px;margin-bottom:14px">
+        <div style="font-size:12.5px;color:#666;margin-bottom:6px">🔗 <b>Paylaşım bağlantısı</b> – WhatsApp ve Instagram'da turun fotoğrafı ve adıyla görünür</div>
+        <div style="font-family:monospace;font-size:13px;word-break:break-all;margin-bottom:8px">${esc(turPaylasimLinki(TD.tur.id))}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-navy td-link" onclick="metinKopyala(turPaylasimLinki(TD.tur.id))">📋 Kopyala</button>
+          <button class="btn btn-navy td-link-insta" onclick="metinKopyala(turPaylasimLinki(TD.tur.id, 'instagram'))" title="Ziyaretçiler sayfasında Instagram'dan gelenler ayrı görünsün">📋 Instagram için kopyala</button></div></div>
       <div class="form-group"><label>Mesaj <span style="font-weight:400;color:#888">– <b>{ad}</b> yazan yere kişinin adı gelir</span></label>
         <textarea id="td_mesaj" rows="9" style="width:100%;font-family:inherit;font-size:15px;line-height:1.5;padding:10px 12px;border:1.5px solid #dde;border-radius:10px">${esc(TD.mesaj)}</textarea></div>
       <div style="font-size:12.5px;color:#777;line-height:1.6">Mesajlar otomatik gitmez: her kişi için butona basınca WhatsApp hazır mesajla açılır, siz "Gönder"e basarsınız. Yalnızca <b>ileti izni</b> olan ve telefonu kayıtlı müşteriler listelenir${TD.izinsiz || TD.telsiz ? ` (${TD.toplam} müşteriden ${TD.izinsiz} kişi izinsiz, ${TD.telsiz} kişi telefonsuz olduğu için listede yok)` : ''}.</div></div>
@@ -382,6 +388,7 @@ function turDuyurCiz() {
       ${kalan.map(x => satir(x, false)).join('')}${giden.map(x => satir(x, true)).join('')}
       ${gor.length ? '' : '<p style="color:#666;font-size:14px">Bu seçime uyan müşteri yok.</p>'}</div>`;
 }
+function turPaylasimLinki(id, kaynak) { return 'https://ismailcosarturizm.com.tr/t/' + encodeURIComponent(id) + '.html' + (kaynak ? '?utm_source=' + kaynak : ''); }
 function turDuyurGonder(mid) {
   const x = TD.liste.find(y => y.m.id === mid); if (!x) return;
   TD.mesaj = document.getElementById('td_mesaj').value;

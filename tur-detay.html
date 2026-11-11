@@ -66,6 +66,7 @@ body{font-family:var(--ff-body);background:var(--cream);color:var(--text-dark)}
 .sidebar-info-label{color:var(--text-muted)}
 .sidebar-info-value{font-weight:600;color:var(--navy)}
 .btn-kayit{display:block;width:100%;padding:14px;background:var(--gold);color:var(--navy);font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:var(--ff-body);text-align:center;margin-bottom:10px}
+.btn-paylas{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;margin-top:10px;background:#fff;color:var(--navy,#0B1F3A);border:1.5px solid #C9972B;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;font-family:inherit}
 .btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:#25D366;color:#fff;font-size:14px;font-weight:600;border-radius:10px;text-decoration:none}
 .kontenjan{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:50px;margin-bottom:16px}
 .k-var{background:#e8f5e9;color:#2e7d32}
@@ -382,10 +383,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     </div>
     <span class="kontenjan ${kMap[tur.kontenjan]||'k-var'}" style="margin-bottom:16px;display:inline-flex">${kLabel[tur.kontenjan]||'Yer Var'}</span>
     ${turGuncel(tur) ? `<button class="btn-kayit" onclick="kayitModalAc('${tur.baslik.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">📋 Hemen Kayıt Ol</button>` : `<div style="background:#f1f5f9;border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.6;color:var(--text-mid);margin-bottom:10px">Bu programın kalkış tarihi geçmiştir. Güncel programlarımız için <a href="${tur.kategori==='umre'?'umre.html':tur.kategori==='hac'?'hac.html':'turlar.html'}" style="color:var(--gold);font-weight:700">buraya tıklayın</a>.</div>`}
-    <a href="https://wa.me/905331980781?text=Merhaba, ${encodeURIComponent(tur.baslik)} hakkında bilgi almak istiyorum." class="btn-whatsapp" target="_blank">💬 WhatsApp'tan Yaz</a>`;
+    <a href="https://wa.me/905331980781?text=Merhaba, ${encodeURIComponent(tur.baslik)} hakkında bilgi almak istiyorum." class="btn-whatsapp" target="_blank">💬 WhatsApp'tan Yaz</a>
+    <button type="button" class="btn-paylas" id="turPaylas" onclick="turPaylas()">📤 Bu turu paylaş</button>`;
+  window.__tur = tur;
 
   document.getElementById('tur-detay').style.display = 'block';
 });
+
+// Paylaşım bağlantısı: t/<id>.html — WhatsApp/Instagram önizlemesinde turun adı ve fotoğrafı görünsün
+function turPaylas() {
+  const t = window.__tur; if (!t) return;
+  const url = 'https://ismailcosarturizm.com.tr/t/' + encodeURIComponent(t.id) + '.html';
+  window.__sonPaylas = url;
+  if (navigator.share) { navigator.share({ title: t.baslik, url }).catch(() => {}); return; }
+  const b = document.getElementById('turPaylas'), bitti = () => { if (b) { b.textContent = '✅ Bağlantı kopyalandı'; setTimeout(() => { b.textContent = '📤 Bu turu paylaş'; }, 2500); } };
+  const yedek = () => { const a = document.createElement('textarea'); a.value = url; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); bitti(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(bitti, yedek); else yedek();
+}
 
 function kayitModalAc(turAdi) {
   document.getElementById('kayitProgramAdi').textContent = '📋 ' + turAdi;
