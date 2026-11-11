@@ -80,7 +80,7 @@
   </url>
   <!-- TURLAR (otomatik: _araclar/tur_onizleme.py) -->
   <url>
-    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=umre-yaz-aile</loc>
+    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=endulus-2025</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -90,12 +90,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=tur-1791468183245</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=tur-1791154539167</loc>
+    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=umre-yaz-aile</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -105,7 +100,12 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=endulus-2025</loc>
+    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=tur-1791154539167</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=tur-1791468183245</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
