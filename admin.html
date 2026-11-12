@@ -1868,6 +1868,7 @@ function zyBarlar(liste) { // [{ad, deger}] → yatay çubuklar
     <div style="font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(x.ad)}">${esc(x.ad)}</div><b style="font-size:13.5px">${x.deger}${x.ek ? `<span style="font-weight:400;color:#888;font-size:12px"> ${x.ek}</span>` : ''}</b>
     <div style="grid-column:1/-1;height:7px;background:#eef1f5;border-radius:4px"><div style="height:100%;width:${Math.max(2, Math.round(x.deger / en * 100))}%;background:#C9972B;border-radius:4px"></div></div></div>`).join('');
 }
+let ZY_VERI = null, ZY_SECILI = null; // son çekilen kayıtlar; grafikte seçili gün/saat (dokununca)
 async function renderZiyaret() {
   const el = document.getElementById('sayfa-ziyaret');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
@@ -1877,36 +1878,55 @@ async function renderZiyaret() {
     sb.from('ziyaretler').select('zaman,sayfa,kaynak,cihaz,ziyaretci').gte('zaman', bas.toISOString()).order('zaman', { ascending: true }).limit(20000),
     sb.from('turlar').select('id,baslik')]);
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
-  const z = data || [], turAd = {}; (tl || []).forEach(x => turAd[x.id] = x.baslik);
+  const turAd = {}; (tl || []).forEach(x => turAd[x.id] = x.baslik);
+  ZY_VERI = { z: data || [], turAd, bas, gun: ZY_GUN }; ZY_SECILI = null;
+  zyCiz();
+}
+function zySec(i) { ZY_SECILI = ZY_SECILI === i ? null : i; zyCiz(); }
+function zyCiz() {
+  const el = document.getElementById('sayfa-ziyaret');
+  if (!ZY_VERI) return;
+  const { z, turAd, bas, gun } = ZY_VERI;
   const sayfaAdi = s => { const m = /^\/tur-detay\.html\?id=(.+)$/.exec(s); return m ? 'Tur: ' + (turAd[m[1]] || m[1]) : (SAYFA_ADLARI[s] || s); };
   const gunAnahtar = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
-  const kisiler = new Set(z.map(x => gunAnahtar(x.zaman) + x.ziyaretci));
-  const grupla = (anahtar) => { const g = {}; z.forEach(x => { const a = anahtar(x); (g[a] = g[a] || { kisi: new Set(), sayi: 0 }); g[a].kisi.add(gunAnahtar(x.zaman) + x.ziyaretci); g[a].sayi++; }); return g; };
-  // Günlük (ya da bugün için saatlik) ziyaretçi
+  // Günlük (ya da bugün için saatlik) dilimler — grafik her zaman tüm dönemi gösterir
   const dilimler = [];
-  if (ZY_GUN === 1) for (let s = 0; s < 24; s++) dilimler.push({ ad: String(s).padStart(2, '0'), f: x => new Date(x.zaman).getHours() === s });
-  else for (let i = 0; i < ZY_GUN; i++) { const d = new Date(bas.getTime() + i * 86400000), a = gunAnahtar(d); dilimler.push({ ad: d.toLocaleDateString('tr-TR', ZY_GUN > 7 ? { day: 'numeric' } : { weekday: 'short' }), uzun: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }), f: x => gunAnahtar(x.zaman) === a }); }
+  if (gun === 1) for (let s = 0; s < 24; s++) dilimler.push({ ad: String(s).padStart(2, '0'), uzun: 'Bugün ' + String(s).padStart(2, '0') + ':00–' + String(s + 1).padStart(2, '0') + ':00', f: x => new Date(x.zaman).getHours() === s });
+  else for (let i = 0; i < gun; i++) { const d = new Date(bas.getTime() + i * 86400000), a = gunAnahtar(d); dilimler.push({ ad: d.toLocaleDateString('tr-TR', gun > 7 ? { day: 'numeric' } : { weekday: 'short' }), uzun: d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }), f: x => gunAnahtar(x.zaman) === a }); }
   dilimler.forEach(d => d.deger = new Set(z.filter(d.f).map(x => gunAnahtar(x.zaman) + x.ziyaretci)).size);
   const enCok = Math.max(1, ...dilimler.map(d => d.deger));
+  const secili = ZY_SECILI != null && dilimler[ZY_SECILI] ? dilimler[ZY_SECILI] : null;
+  // Kutular ve listeler: bir gün/saat seçiliyse yalnızca o dilim
+  const zz = secili ? z.filter(secili.f) : z;
+  const kisiler = new Set(zz.map(x => gunAnahtar(x.zaman) + x.ziyaretci));
+  const grupla = (anahtar) => { const g = {}; zz.forEach(x => { const a = anahtar(x); (g[a] = g[a] || { kisi: new Set(), sayi: 0 }); g[a].kisi.add(gunAnahtar(x.zaman) + x.ziyaretci); g[a].sayi++; }); return g; };
   const sg = grupla(x => x.sayfa), kg = grupla(x => kaynakAdi(x.kaynak)), cg = grupla(x => x.cihaz || 'bilinmiyor');
   const sirala = g => Object.entries(g).map(([ad, v]) => ({ ad, deger: v.kisi.size, sayi: v.sayi })).sort((a, b) => b.deger - a.deger || b.sayi - a.sayi);
   const tel = (cg.telefon ? cg.telefon.kisi.size : 0) + (cg.tablet ? cg.tablet.kisi.size : 0);
   const kutu = (deger, etiket) => `<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(11,31,58,.08)"><div style="font-size:26px;font-weight:700;color:#0B1F3A">${deger}</div><div style="font-size:12.5px;color:#666">${etiket}</div></div>`;
+  const donemAdi = { 1: 'Bugün', 7: 'Son 7 gün', 30: 'Son 30 gün' }[gun];
   el.innerHTML = `
     <div class="header"><h2>📊 Ziyaretçiler</h2></div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">${[[1, 'Bugün'], [7, 'Son 7 gün'], [30, 'Son 30 gün']].map(([g, a]) => `<button class="btn ${ZY_GUN === g ? 'btn-gold' : 'btn-navy'} zy-donem" onclick="ZY_GUN=${g};renderZiyaret()">${a}</button>`).join('')}</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">${[[1, 'Bugün'], [7, 'Son 7 gün'], [30, 'Son 30 gün']].map(([g, a]) => `<button class="btn ${gun === g ? 'btn-gold' : 'btn-navy'} zy-donem" onclick="ZY_GUN=${g};renderZiyaret()">${a}</button>`).join('')}</div>
+    <div class="zy-secim" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:10px 14px;border-radius:12px;${secili ? 'background:#0B1F3A;color:#fff' : 'background:#fff;color:#666;box-shadow:0 1px 4px rgba(11,31,58,.08)'}">
+      <span style="font-size:14px">${secili ? '📅 <b>' + esc(secili.uzun) + '</b>' : '📅 ' + donemAdi + ' toplamı' + (z.length ? ' · <span style="font-size:12.5px">bir güne dokunun, o günün rakamları gelsin</span>' : '')}</span>
+      ${secili ? '<button class="btn zy-temizle" style="background:#E4B84A;color:#0B1F3A;min-height:34px;padding:4px 12px" onclick="zySec(null)">✕ ' + donemAdi + ' toplamına dön</button>' : ''}</div>
     <div class="zy-kutular" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px">
-      ${kutu(kisiler.size, 'ziyaretçi')}${kutu(z.length, 'sayfa görüntüleme')}${kutu(kisiler.size ? Math.round(tel / kisiler.size * 100) + '%' : '–', 'telefondan')}</div>
+      ${kutu(kisiler.size, 'ziyaretçi')}${kutu(zz.length, 'sayfa görüntüleme')}${kutu(kisiler.size ? Math.round(tel / kisiler.size * 100) + '%' : '–', 'telefondan')}</div>
     ${z.length ? `
-    <div class="card"><h3>${ZY_GUN === 1 ? 'Saat saat ziyaretçi' : 'Gün gün ziyaretçi'}</h3>
-      <div class="zy-grafik" style="display:flex;align-items:flex-end;gap:${ZY_GUN > 7 ? 2 : 6}px;height:150px;padding-top:18px">
-        ${dilimler.map(d => `<div title="${esc(d.uzun || d.ad + ':00')}: ${d.deger} ziyaretçi" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0">
-          ${d.deger && ZY_GUN <= 7 ? `<div style="font-size:11px;font-weight:700;margin-bottom:2px">${d.deger}</div>` : ''}
-          <div style="width:100%;max-width:38px;height:${Math.round(d.deger / enCok * 100)}%;min-height:${d.deger ? 3 : 1}px;background:${d.deger ? '#C9972B' : '#e3e7ee'};border-radius:4px 4px 0 0"></div>
-          <div style="font-size:10.5px;color:#888;margin-top:4px;white-space:nowrap">${ZY_GUN === 1 ? (+d.ad % 3 === 0 ? d.ad : '') : esc(d.ad)}</div></div>`).join('')}</div></div>
+    <div class="card"><h3>${gun === 1 ? 'Saat saat ziyaretçi' : 'Gün gün ziyaretçi'}</h3>
+      <div class="zy-grafik" style="display:flex;align-items:flex-end;gap:${gun > 7 ? 2 : 6}px;height:150px;padding-top:18px">
+        ${dilimler.map((d, i) => { const bu = ZY_SECILI === i, soluk = secili && !bu; return `<div class="zy-dilim${bu ? ' secili' : ''}" role="button" tabindex="0" aria-pressed="${bu}" aria-label="${esc(d.uzun)}: ${d.deger} ziyaretçi" title="${esc(d.uzun)}: ${d.deger} ziyaretçi"
+            onclick="zySec(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();zySec(${i})}"
+            style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0;cursor:pointer;border-radius:6px;${bu ? 'background:rgba(11,31,58,.06)' : ''}">
+          ${d.deger && (gun <= 7 || bu) ? `<div style="font-size:11px;font-weight:700;margin-bottom:2px;color:${bu ? '#0B1F3A' : 'inherit'}">${d.deger}</div>` : ''}
+          <div style="width:100%;max-width:38px;height:${Math.round(d.deger / enCok * 100)}%;min-height:${d.deger ? 3 : 1}px;background:${!d.deger ? '#e3e7ee' : bu ? '#0B1F3A' : '#C9972B'};opacity:${soluk ? .35 : 1};border-radius:4px 4px 0 0"></div>
+          <div style="font-size:10.5px;color:${bu ? '#0B1F3A' : '#888'};font-weight:${bu ? 700 : 400};margin-top:4px;white-space:nowrap">${gun === 1 ? (+d.ad % 3 === 0 || bu ? d.ad : '') : esc(d.ad)}</div></div>`; }).join('')}</div></div>
+    ${zz.length ? `
     <div class="card"><h3>En çok bakılan sayfalar</h3><div style="font-size:12px;color:#888;margin:-4px 0 4px">ziyaretçi sayısı · (görüntüleme)</div>${zyBarlar(sirala(sg).slice(0, 15).map(x => ({ ad: sayfaAdi(x.ad), deger: x.deger, ek: x.sayi > x.deger ? '(' + x.sayi + ')' : '' })))}</div>
     <div class="card"><h3>Nereden geldiler</h3>${zyBarlar(sirala(kg).slice(0, 10))}</div>
     <div class="card"><h3>Cihaz</h3>${zyBarlar(sirala(cg).map(x => ({ ad: { telefon: '📱 Telefon', tablet: '📱 Tablet', bilgisayar: '💻 Bilgisayar' }[x.ad] || x.ad, deger: x.deger })))}</div>`
+    : '<div class="card zy-bos" style="color:#666">Bu ' + (gun === 1 ? 'saatte' : 'günde') + ' ziyaret kaydı yok.</div>'}`
     : '<div class="card" style="color:#666">Bu dönemde henüz ziyaret kaydı yok.</div>'}
     <div class="card" style="font-size:12.5px;color:#777;line-height:1.6">Sayaç <b>7 Kasım 2026</b>'dan beri çalışıyor. Çerez kullanmaz; kim olduğu bilinmez. Aynı kişi aynı gün içinde bir kez "ziyaretçi" sayılır. Google, Facebook gibi botlar sayılmaz. WhatsApp'tan açılan bağlantılar çoğunlukla "Doğrudan" görünür.</div>`;
 }

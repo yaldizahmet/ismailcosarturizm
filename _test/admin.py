@@ -559,6 +559,18 @@ with sync_playwright() as p:
     kontrol(kutular[0].startswith('4') and kutular[1].startswith('5') and kutular[2].startswith('50%'), 'Ziyaretçiler: son 7 gün 4 ziyaretçi, 5 görüntüleme, %50 telefon', kutular)
     kontrol('Ana sayfa' in zt and 'Tur: EKİM AYI UMRE PROGRAMI (2026) 14 GÜN' in zt and 'Başvuru gönderildi' in zt and 'Umre turları' not in zt, 'Ziyaretçiler: sayfalar okunur adlarla (tur detayı tur adıyla); 7 günden eski kayıt yok', zt[:300])
     kontrol('Google' in zt and 'Instagram' in zt and 'Doğrudan' in zt and dp.locator('.zy-grafik > div').count() == 7, 'Ziyaretçiler: kaynaklar (Google, Instagram, Doğrudan) ve 7 günlük grafik')
+    # grafikte bir güne dokununca o günün rakamları
+    dp.locator('.zy-dilim').nth(4).click(); dp.wait_for_timeout(300)   # 2 gün önce: yalnız 'a', ana sayfa, doğrudan, bilgisayar
+    kut = dp.locator('.zy-kutular > div').all_inner_texts(); st = dp.inner_text('#sayfa-ziyaret')
+    kontrol(kut[0].startswith('1') and kut[1].startswith('1') and kut[2].startswith('0%') and dp.locator('.zy-dilim.secili').count() == 1
+            and 'toplamına dön' in st and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').all_inner_texts()[0].startswith('Doğrudan') and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').count() == 1 and dp.locator('.zy-grafik > div').count() == 7,
+            'Ziyaretçiler: grafikte bir güne dokununca kutular ve listeler o günün rakamlarını gösteriyor', kut)
+    dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)   # kayıt olmayan gün
+    kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('0') and dp.locator('.zy-bos').count() == 1, 'Ziyaretçiler: kaydı olmayan gün seçilince "kayıt yok" yazıyor')
+    dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)
+    kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('4') and dp.locator('.zy-dilim.secili').count() == 0, 'Ziyaretçiler: aynı güne tekrar dokununca dönem toplamına dönüyor')
+    dp.locator('.zy-dilim').nth(6).click(); dp.wait_for_timeout(300); dp.click('.zy-temizle'); dp.wait_for_timeout(300)
+    kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('4') and not errs, 'Ziyaretçiler: "toplamına dön" butonu seçimi kaldırıyor', errs)
     dp.locator('.zy-donem', has_text='Son 30 gün').click(); dp.wait_for_timeout(500)
     kontrol('Umre turları' in dp.inner_text('#sayfa-ziyaret') and dp.locator('.zy-grafik > div').count() == 30, 'Ziyaretçiler: "Son 30 gün" seçilince eski kayıtlar da geliyor')
     dp.locator('.zy-donem', has_text='Bugün').click(); dp.wait_for_timeout(500)
