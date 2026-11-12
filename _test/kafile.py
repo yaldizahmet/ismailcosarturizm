@@ -355,6 +355,53 @@ with sync_playwright() as p:
     kontrol('Sarı Tabya' in pg.inner_text('#ekran') and not tasma(pg) and not errs, 'Şehir rehberi: internet yokken de son kaydedilen mekanlar görünüyor', errs)
     c.close()
 
+    # ── Haritalar (OpenStreetMap + kendi sunucumuzdaki Leaflet; harita karoları testte engelli) ──
+    HK = dict(KAFILE, oteller=[
+        {'sehir': 'Mekke', 'ad': 'Samama Test', 'giris': '2026-11-10', 'cikis': '2026-11-18', 'lat': 21.4173938, 'lng': 39.8294624, 'konum': 'https://maps.app.goo.gl/x'},
+        {'sehir': 'Medine', 'ad': 'Harmony Test', 'giris': '2026-11-18', 'cikis': '2026-11-23', 'lat': 24.4737104, 'lng': 39.6102317, 'konum': ''}])
+    def harita_baglam(veri, leaflet=True):
+        c = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', locale='tr-TR')
+        c.add_init_script(f"window.__SIMDI = '{SIMDI}';")
+        c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(veri), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+        c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+        if not leaflet: c.route('**/vendor/leaflet/leaflet.js', lambda route, req: route.abort())
+        return c
+    c = harita_baglam(HK); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    kontrol(pg.evaluate("!document.querySelector('script[src*=leaflet]')"), 'Harita: Leaflet yalnızca harita gereken ekranda yükleniyor (Bugün ekranında yok)')
+    pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(900)
+    kart = pg.locator('#otelHaritaKart')
+    kontrol(kart.count() == 1 and pg.locator('#otelHaritaKart .leaflet-marker-icon').count() == 2 and pg.locator('#otelHaritaKart .imlec-otel').count() == 1 and pg.locator('#otelHaritaKart .imlec-harem').count() == 1,
+            'Harita: Acil ekranında "Otelim nerede?" haritası; otel ve Harem işaretli', errs)
+    yazi = kart.inner_text() if kart.count() else ''
+    kontrol('Samama Test' in yazi and re.search(r"Harem'e kuş uçuşu yaklaşık (6|7)\d0 m", yazi) and 'yürüyerek' in yazi, "Harita: bugünkü otel (Mekke) seçili; Harem'e uzaklık yazıyor", yazi[:200])
+    hr = pg.eval_on_selector_all('#otelHaritaKart .ikili a', 'els => els.map(e => e.getAttribute("href"))')
+    kontrol(len(hr) == 2 and 'destination=21.417394,39.829462' in hr[0] and 'travelmode=walking' in hr[0] and 'destination=21.422500,39.826200' in hr[1], 'Harita: otele ve Harem\'e yürüyerek yol tarifi bağlantıları', str(hr))
+    pg.locator('#otelHaritaKart .imlec-otel').click(); pg.wait_for_timeout(300)
+    kontrol('Samama Test' in pg.inner_text('.leaflet-popup') and 'destination=21.417394' in (pg.get_attribute('.leaflet-popup a[target=_blank]', 'href') or ''), 'Harita: işarete dokununca ad ve yol tarifi çıkıyor')
+    pg.evaluate("document.querySelector('#otelHaritaKart .harita').__isaret = 1")
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(200); pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(300)
+    kontrol(pg.evaluate("document.querySelector('#otelHaritaKart .harita').__isaret === 1") and pg.locator('#otelHaritaKart .leaflet-marker-icon').count() == 2, 'Harita: ekranlar arasında gidip gelince harita baştan kurulmuyor')
+    pg.click('#otelHaritaKart [data-eylem="harita-otel"][data-i="1"]'); pg.wait_for_timeout(900)
+    yazi = pg.inner_text('#otelHaritaKart')
+    kontrol('Harmony Test' in yazi and "Mescid-i Nebevi'ye" in yazi and pg.get_attribute('#otelHaritaKart [data-i="1"]', 'aria-pressed') == 'true' and pg.locator('#otelHaritaKart .imlec-harem').count() == 1,
+            'Harita: Medine oteline geçilince Mescid-i Nebevi uzaklığı ve işareti', yazi[:200])
+    kontrol(not tasma(pg) and not errs, 'Harita: taşma ve JavaScript hatası yok', errs)
+    c.close()
+    c = harita_baglam(HK, leaflet=False); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(700)
+    kontrol('internet bağlantısı gerekiyor' in pg.inner_text('#otelHaritaKart') and pg.locator('#otelHaritaKart .ikili a').count() == 2 and not errs, 'Harita: yüklenemezse not çıkıyor, yol tarifi butonları duruyor', errs)
+    c.close()
+    c = harita_baglam(KAFILE); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    pg.click('.alt-menu [data-sekme="acil"]'); pg.wait_for_timeout(500)
+    kontrol(pg.locator('#otelHaritaKart').count() == 0 and pg.evaluate("!document.querySelector('script[src*=leaflet]')") and not errs, 'Harita: otellerin konumu yoksa harita kartı çıkmıyor')
+    c.close()
+    HM = [dict(MEKANLAR[0], lat=43.8592, lng=18.4366), dict(MEKANLAR[1], lat=43.8597, lng=18.4313), {'id': 4, 'sehir': 'Saraybosna', 'diger_adlar': [], 'tur': 'gezi', 'ad': 'Konumsuz Yer', 'aciklama': '', 'harita': None, 'sira': 70, 'lat': None, 'lng': None}]
+    c = harita_baglam(KULTUR); c.route('**/rest/v1/sehir_rehberi**', lambda route, req: route.fulfill(status=200, body=json.dumps(HM), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'}))
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-KULTR'); pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(1000)
+    kontrol(pg.locator('.harita-rehber .leaflet-marker-icon').count() == 2 and pg.locator('.harita-rehber .imlec-gezi').count() == 1 and pg.locator('.harita-rehber .imlec-yemek').count() == 1
+            and 'Konumsuz Yer' in pg.inner_text('#ekran') and not errs, 'Harita: şehir rehberinde konumu olan mekanlar haritada (gezi/yemek ayrı), konumsuz olan listede', errs)
+    c.close()
+
     # ── Duyuru bildirimleri (Web Push) — tarayıcının bildirim/servis-çalışanı arayüzü taklit edilir ──
     PUSH_TAKLIT = """
       window.__olaylar = [];

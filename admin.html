@@ -828,10 +828,36 @@ function geceSayisi(g, c) { if (!g || !c) return null; const n = Math.round((Dat
 function geceYazi(g, c) { const n = geceSayisi(g, c); return n ? n + ' gece' : ''; }
 function geceGoster(b) { const e = b && b.querySelector('.o_gece'); if (e) e.textContent = geceYazi(b.querySelector('.o_giris').value, b.querySelector('.o_cikis').value); }
 function otelEkle() { const k = document.getElementById('k_oteller'); k.insertAdjacentHTML('beforeend', otelBlogu(k.querySelectorAll('.otel-blok').length, {})); }
+// Otel konumu: kayıtlı enlem/boylam; Harem'e kuş uçuşu uzaklık (misafir uygulamasındaki haritayla aynı hesap)
+const HAREMLER = [{ ad: "Harem'e", lat: 21.4225, lng: 39.8262 }, { ad: "Mescid-i Nebevi'ye", lat: 24.4672, lng: 39.6111 }];
+function otelKoordinat(o) { const a = +(o && o.lat), b = +(o && o.lng); return o && o.lat != null && o.lat !== '' && isFinite(a) && isFinite(b) && Math.abs(a) <= 90 && Math.abs(b) <= 180 && !(a === 0 && b === 0) ? { lat: a, lng: b } : null; }
+function mesafeMetre(a, b, c, d) { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 12742000 * Math.asin(Math.sqrt(x)); }
+function haremUzakligiYazi(k) {
+  for (const h of HAREMLER) { const m = mesafeMetre(k.lat, k.lng, h.lat, h.lng); if (m < 8000) return ' · ' + h.ad + ' kuş uçuşu ~' + (m < 1000 ? Math.max(50, Math.round(m / 50) * 50) + ' m' : (Math.round(m / 100) / 10).toString().replace('.', ',') + ' km'); }
+  return '';
+}
+function koordinatOku(s) { const m = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(String(s || '')); return m ? otelKoordinat({ lat: +m[1], lng: +m[2] }) : null; }
+// Kaydetmeden önce: konumu değişen ya da koordinatı olmayan oteller için bağlantıdan enlem/boylam bul
+async function otelKonumlariCoz(oteller) {
+  const sorun = [];
+  for (const o of oteller) {
+    if (otelKoordinat(o) || !o.konum) continue;
+    const k = koordinatOku(o.konum);
+    if (k) { o.lat = k.lat; o.lng = k.lng; continue; }
+    if (!/^https:\/\//.test(o.konum)) { sorun.push(o.ad); continue; }
+    try {
+      const { data, error } = await sb.functions.invoke('konum-bul', { body: { islem: 'link', url: o.konum } });
+      const kk = !error && data && otelKoordinat(data);
+      if (kk) { o.lat = kk.lat; o.lng = kk.lng; } else sorun.push(o.ad);
+    } catch (e) { sorun.push(o.ad); }
+  }
+  return sorun;
+}
 function otelBlogu(i, o) {
   o = o || {};
   const v = (k) => esc(o[k]);
-  return `<div class="otel-blok" style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">
+  const koord = otelKoordinat(o);
+  return `<div class="otel-blok" data-konum="${v('konum')}" data-lat="${koord ? koord.lat : ''}" data-lng="${koord ? koord.lng : ''}" style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px">
     <div class="form-row">
       <div class="form-group"><label>Şehir</label><input class="o_sehir" value="${v('sehir') || (i === 0 ? 'Mekke' : i === 1 ? 'Medine' : '')}"></div>
       <div class="form-group"><label>Otel adı</label><input class="o_ad" value="${v('ad')}" placeholder="Boş bırakılırsa gösterilmez"></div>
@@ -842,7 +868,8 @@ function otelBlogu(i, o) {
     </div>
     <div class="form-row">
       <div class="form-group"><label>Resepsiyon telefonu</label><input class="o_tel" value="${v('tel')}" placeholder="+966 ..."></div>
-      <div class="form-group"><label>Konum linki (Google Haritalar)</label><input class="o_konum" value="${v('konum')}"></div>
+      <div class="form-group"><label>Konum linki (Google Haritalar) <span style="font-weight:400;color:#888">– ya da koordinat: 21.4189, 39.8262</span></label><input class="o_konum" value="${v('konum')}">
+        <div class="o_konum_durum" style="font-size:12.5px;margin-top:4px;color:${koord ? '#2e7d32' : '#888'}">${koord ? '📍 Uygulamadaki haritada işaretli' + haremUzakligiYazi(koord) : (o.konum ? 'Kaydedince konum haritaya işlenecek' : 'Konum girilirse misafir uygulamasında "Otelim nerede?" haritası çıkar')}</div></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Otele giriş tarihi</label><input class="o_giris" type="date" value="${v('giris')}" oninput="geceGoster(this.closest('.otel-blok'))"></div>
@@ -953,7 +980,9 @@ function kafileFormOku() {
     baslik: s.querySelector('.p_baslik').value.trim(), yer: s.querySelector('.p_yer').value.trim(), konum: s.querySelector('.p_konum').value.trim()
   })).filter(p => p.baslik).sort((a, b) => ((a.tarih || '9999') + (a.saat || '99:99')).localeCompare((b.tarih || '9999') + (b.saat || '99:99')));
   const oteller = [...document.querySelectorAll('#k_oteller .otel-blok')].map(b => {
-    const o = {}; ['sehir', 'ad', 'adres', 'adres_ar', 'tel', 'konum'].forEach(f => o[f] = b.querySelector('.o_' + f).value.trim()); if (b.querySelector('.o_giris').value) o.giris = b.querySelector('.o_giris').value; if (b.querySelector('.o_cikis').value) o.cikis = b.querySelector('.o_cikis').value; return o;
+    const o = {}; ['sehir', 'ad', 'adres', 'adres_ar', 'tel', 'konum'].forEach(f => o[f] = b.querySelector('.o_' + f).value.trim());
+    if (b.dataset.lat && o.konum === (b.dataset.konum || '')) { o.lat = +b.dataset.lat; o.lng = +b.dataset.lng; } /* konum değişmediyse kayıtlı koordinat kalsın */
+    if (b.querySelector('.o_giris').value) o.giris = b.querySelector('.o_giris').value; if (b.querySelector('.o_cikis').value) o.cikis = b.querySelector('.o_cikis').value; return o;
   }).filter(o => o.ad);
   return {
     ad: d('k_ad'), kod: d('k_kod').toLocaleUpperCase('en').replace(/\s+/g, ''),
@@ -972,10 +1001,12 @@ async function kafileKaydet(id) {
   if (!/^[A-Z0-9-]{4,40}$/.test(k.kod)) { toast('❌ Kod en az 4 karakter olmalı; yalnızca harf, rakam ve tire', 'error'); return; }
   if (k.yorum_link && !/^https:\/\//.test(k.yorum_link)) { toast('❌ Google yorum bağlantısı https:// ile başlamalı', 'error'); return; }
   if (!id) k.id = yeniKimlik(); // rehber atamaları için kimlik önceden belli olsun
+  const konumSorun = await otelKonumlariCoz(k.oteller);
   const { error } = id ? await sb.from('kafileler').update(k).eq('id', id) : await sb.from('kafileler').insert(k);
   if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir grupta kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
   try { await rehberEsitle(id || k.id); } catch (e) { toast('⚠️ Grup kaydedildi ama rehber ataması yapılamadı: ' + (e.message || e), 'error'); renderKafileler(); return; }
-  toast('✅ Grup kaydedildi', 'success');
+  if (konumSorun.length) toast('⚠️ Grup kaydedildi; ' + konumSorun.join(', ') + ' için konum bağlantısından yer bulunamadı. Haritada yere uzun basıp çıkan koordinatı (ör. 21.4189, 39.8262) konum kutusuna yazabilirsiniz.', 'error');
+  else toast('✅ Grup kaydedildi', 'success');
   renderKafileler();
 }
 
@@ -1743,6 +1774,11 @@ async function rehberSil(userId) {
 // Taslaklar uygulamada görünmez; "Yayınla" ile açılır. Uygulama, grubun otel şehirlerini şehir adı ya da "diğer adlar" ile eşleştirir.
 const SR = { liste: [], sehir: '', duzenlenen: null };
 const SR_TUR = { gezi: '📍 Gezilecek yerler', yemek: '🍽️ Yeme-içme' };
+function srKonumYazi(x) {
+  if (x.lat != null) return '📍 Uygulama haritasında' + (x.konum_kaynak === 'elle' ? ' (elle girildi)' : '');
+  if (x.konum_kaynak === 'bulunamadi') return '⚠️ Konum bulunamadı – haritada çıkmaz (Düzenle’den koordinat girebilirsiniz)';
+  return '⏳ Konum henüz yok';
+}
 function srHarita(ad, sehir) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ad + ' ' + sehir); }
 async function renderSehirRehberi() {
   const el = document.getElementById('sayfa-sehir');
@@ -1773,7 +1809,7 @@ function sehirCiz() {
       ${ornek.diger_adlar && ornek.diger_adlar.length ? `<p style="font-size:12px;color:#888;margin-bottom:10px">Eşleşen adlar: ${esc([SR.sehir].concat(ornek.diger_adlar).join(', '))}</p>` : ''}
       ${['gezi', 'yemek'].map(t => { const k = l.filter(x => x.tur === t); return `<h3 style="margin:14px 0 8px">${SR_TUR[t]} (${k.length})</h3><div class="tur-list">${k.map(x => `
         <div class="tur-item mekan-item" data-id="${x.id}"><div class="tur-item-info"><h4>${esc(x.ad)} <span class="badge ${x.yayinda ? 'badge-green' : 'badge-red'}">${x.yayinda ? 'Yayında' : 'Taslak'}</span></h4><p>${esc(x.aciklama || '')}</p>
-          <p><a href="${esc(x.harita || srHarita(x.ad, x.sehir))}" target="_blank" rel="noopener">Haritada aç ↗</a></p></div>
+          <p><a href="${esc(x.harita || srHarita(x.ad, x.sehir))}" target="_blank" rel="noopener">Haritada aç ↗</a> <span class="sr-konum" style="font-size:12px;color:${x.lat != null ? '#2e7d32' : x.konum_kaynak === 'bulunamadi' ? '#c62828' : '#888'}">${srKonumYazi(x)}</span></p></div>
           <div class="tur-item-actions"><button class="btn ${x.yayinda ? 'btn-navy' : 'btn-gold'}" onclick="sehirMekanYayin(${x.id}, ${!x.yayinda})">${x.yayinda ? 'Taslağa al' : 'Yayınla'}</button>
             <button class="btn btn-navy" onclick="sehirMekanDuzenle(${x.id})">Düzenle</button><button class="btn btn-red" onclick="sehirMekanSil(${x.id})">Sil</button></div></div>`).join('') || '<p style="color:#888;font-size:13px">Yok</p>'}</div>`; }).join('')}
       ${sehirler.length ? '' : '<p style="color:#666;font-size:14px">Henüz mekan yok. “Mekan ekle” ile başlayın.</p>'}
@@ -1791,6 +1827,7 @@ function sehirFormHtml(d) {
     </div>
     <div class="form-group"><label>Kısa açıklama</label><input id="sr_f_aciklama" value="${esc(d.aciklama || '')}" placeholder="Ne ile bilinir, ipucu"></div>
     <div class="form-group"><label>Harita bağlantısı (boş bırakılırsa ad + şehirle Google Haritalar araması)</label><input id="sr_f_harita" value="${esc(d.harita || '')}" placeholder="https://maps.app.goo.gl/..."></div>
+    <div class="form-group"><label>Uygulama haritasındaki yeri (enlem, boylam) – boşsa harita bağlantısından bulunmaya çalışılır</label><input id="sr_f_konum" value="${d.lat != null ? esc(d.lat + ', ' + d.lng) : ''}" placeholder="Ör. 43.8597, 18.4313 (Google Haritalar'da yere uzun basınca çıkar)"></div>
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="sr_f_yayinda" ${d.yayinda ? 'checked' : ''}> Yayında (uygulamada görünsün)</label>
     <div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="sehirMekanKaydet()">💾 Kaydet</button><button class="btn btn-navy" onclick="SR.duzenlenen=null;sehirCiz()">Vazgeç</button></div></div>`;
 }
@@ -1806,13 +1843,27 @@ async function sehirMekanKaydet() {
     aciklama: v('sr_f_aciklama') || null, harita: v('sr_f_harita') || null, yayinda: document.getElementById('sr_f_yayinda').checked };
   if (k.sehir.length < 2 || k.ad.length < 2) { toast('❌ Şehir ve mekan adı gerekli', 'error'); return; }
   if (k.harita && !/^https:\/\//.test(k.harita)) { toast('❌ Harita bağlantısı https:// ile başlamalı', 'error'); return; }
+  const kb = v('sr_f_konum'), eski = d.lat != null ? d.lat + ', ' + d.lng : '';
+  let konumUyari = '';
+  if (kb) {
+    const c = koordinatOku(kb);
+    if (!c) { toast('❌ Konum “enlem, boylam” biçiminde olmalı (ör. 43.8597, 18.4313)', 'error'); return; }
+    if (kb !== eski) Object.assign(k, { lat: c.lat, lng: c.lng, konum_kaynak: 'elle' });
+  } else if (eski) Object.assign(k, { lat: null, lng: null, konum_kaynak: 'bulunamadi' }); // silindi: haritadan çıkar
+  else if (k.harita && k.harita !== d.harita && !/\/maps\/search\//.test(k.harita)) {
+    try {
+      const { data: c, error: e } = await sb.functions.invoke('konum-bul', { body: { islem: 'link', url: k.harita } });
+      const kk = !e && c ? otelKoordinat(c) : null;
+      if (kk) Object.assign(k, { lat: kk.lat, lng: kk.lng, konum_kaynak: 'otomatik' }); else konumUyari = ' – bağlantıdan konum bulunamadı, haritada çıkmaz';
+    } catch (_) { konumUyari = ' – bağlantıdan konum bulunamadı, haritada çıkmaz'; }
+  }
   if (!k.harita) k.harita = srHarita(k.ad, k.sehir);
   if (!d.id) k.sira = Math.min(0, ...SR.liste.filter(x => x.sehir === k.sehir).map(x => x.sira)) - 1;
   const { error } = d.id ? await sb.from('sehir_rehberi').update(k).eq('id', d.id) : await sb.from('sehir_rehberi').insert(k);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   // Aynı şehrin diğer adları tüm mekanlarda aynı olsun
   if (SR.liste.some(x => x.sehir === k.sehir && x.id !== d.id && JSON.stringify(x.diger_adlar || []) !== JSON.stringify(k.diger_adlar))) await sb.from('sehir_rehberi').update({ diger_adlar: k.diger_adlar }).eq('sehir', k.sehir);
-  toast('✅ Kaydedildi', 'success'); SR.sehir = k.sehir; renderSehirRehberi();
+  toast(konumUyari ? '⚠️ Kaydedildi' + konumUyari : '✅ Kaydedildi', konumUyari ? 'error' : 'success'); SR.sehir = k.sehir; renderSehirRehberi();
 }
 async function sehirMekanYayin(id, ac) {
   const { error } = await sb.from('sehir_rehberi').update({ yayinda: ac }).eq('id', id);

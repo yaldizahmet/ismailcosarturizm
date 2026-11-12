@@ -37,6 +37,7 @@ window.__DB.kullanici_rolleri = [{ user_id: 'test-uid', rol: window.__ROL || 'ad
     from: Q,
     functions: { invoke: function(ad, o){ var g = o.body; window.__fn.push({ ad: ad, govde: g });
       if (g.islem === 'olustur') { var id = 'rehber-' + window.__fn.length; window.__DB.kullanici_rolleri.push({ user_id: id, rol: 'rehber', ad: g.ad, kullanici_adi: g.kullanici_adi }); return Promise.resolve({ data: { tamam: true, user_id: id }, error: null }); }
+      if (g.islem === 'link') return Promise.resolve(/IYI/.test(g.url) ? { data: { lat: 21.4174, lng: 39.8295 }, error: null } : { data: null, error: { message: 'bulunamadı' } });
       if (g.islem === 'sil') window.__DB.kullanici_rolleri = window.__DB.kullanici_rolleri.filter(function(x){ return x.user_id !== g.user_id; });
       return Promise.resolve({ data: { tamam: true }, error: null }); } },
     auth: { getSession: function(){ return Promise.resolve({ data: { session: { user: { id: 'test-uid', email: 'test@test' } } } }); },
@@ -140,6 +141,7 @@ with sync_playwright() as p:
     pg.fill('#k_baslangic', '2026-11-10'); pg.fill('#k_bitis', '2026-11-23')
     pg.fill('#k_rehber_ad', "Ali O'Hoca"); pg.fill('#k_rehber_tel', '0533 000 00 00')
     pg.locator('.o_ad').first.fill('Test Otel Mekke'); pg.locator('.o_giris').first.fill('2026-11-10'); pg.locator('.o_cikis').first.fill('2026-11-15')
+    pg.locator('.o_konum').first.fill('https://maps.app.goo.gl/IYI123')
     kontrol(pg.inner_text('.otel-blok .o_gece') == '5 gece', 'Grup: otel giriş-çıkışından gece sayısı gösteriliyor')
     pg.get_by_role('button', name=re.compile('Otel ekle')).click()
     kontrol(pg.locator('#k_oteller .otel-blok').count() == 3, 'Grup: "Otel ekle" ile üçüncü otel eklenebiliyor (kültür turları için)')
@@ -156,7 +158,7 @@ with sync_playwright() as p:
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
             and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112'
-            and v.get('inis_sehri') == 'Cidde' and v.get('yorum_link') == 'https://g.page/r/ABC/review' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15',
+            and v.get('inis_sehri') == 'Cidde' and v.get('yorum_link') == 'https://g.page/r/ABC/review' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15' and (v['oteller'][0].get('lat'), v['oteller'][0].get('lng')) == (21.4174, 39.8295),
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
     rk = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
     kontrol(len(rk) == 1 and rk[0]['veri'] == [{'kafile_id': v.get('id'), 'user_id': 'r-1'}] and v.get('id') and 'Rehber: Rehber Bir' in pg.inner_text('.kafile-item .grup-rehber'),
@@ -168,10 +170,27 @@ with sync_playwright() as p:
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca" and pg.input_value('#k_tur_turu') == 'kultur' and pg.input_value('#k_acil_tel') == '112', 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
     kontrol(pg.is_checked('.k_rehber'), 'Grup formu: düzenlerken atanmış rehber işaretli geliyor')
+    kontrol('haritada işaretli' in pg.inner_text('.otel-blok .o_konum_durum') and "Harem'e kuş uçuşu ~650 m" in pg.inner_text('.otel-blok .o_konum_durum'),
+            'Otel konumu: Google bağlantısından enlem/boylam bulunup kaydediliyor; formda Harem uzaklığıyla gösteriliyor', pg.inner_text('.otel-blok .o_konum_durum'))
     pg.uncheck('.k_rehber')
+    pg.evaluate("window.__fn = []")
     pg.fill('#k_ad', 'Kasım 2026 Umre Kafilesi (güncel)'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    gu = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafileler' and i['tur'] == 'update']
+    kontrol(gu and gu[-1]['veri']['oteller'][0].get('lat') == 21.4174 and not [f for f in pg.evaluate('window.__fn') if f['govde'].get('islem') == 'link'],
+            'Otel konumu: bağlantı değişmediyse koordinat korunuyor, tekrar sorgulanmıyor')
     rs = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'delete']
     kontrol(len(rs) == 1 and ['user_id', 'r-1'] in rs[0]['filtre'] and 'rehber hesabı atanmadı' in pg.inner_text('.kafile-item .grup-rehber'), 'Grup formu: işaret kaldırılınca rehber gruptan çıkarılıyor')
+    # konum bağlantısından yer bulunamazsa uyarı; elle koordinat yazılabiliyor
+    pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
+    pg.locator('.o_konum').first.fill('https://maps.app.goo.gl/KOTU'); pg.evaluate("window.__islem = []")
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    gu = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafileler' and i['tur'] == 'update']
+    kontrol(gu and 'lat' not in gu[-1]['veri']['oteller'][0] and 'yer bulunamadı' in pg.inner_text('body'), 'Otel konumu: bağlantıdan yer bulunamazsa grup yine kaydediliyor, uyarı çıkıyor')
+    pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
+    pg.locator('.o_konum').first.fill('21.4189, 39.8262'); pg.evaluate("window.__islem = []; window.__fn = []")
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    gu = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafileler' and i['tur'] == 'update']
+    kontrol(gu and (gu[-1]['veri']['oteller'][0].get('lat'), gu[-1]['veri']['oteller'][0].get('lng')) == (21.4189, 39.8262) and not pg.evaluate('window.__fn'), 'Otel konumu: koordinat elle yazılabiliyor')
     pg.evaluate("window.__DB.kullanici_rolleri = window.__DB.kullanici_rolleri.filter(function(x){ return x.user_id !== 'r-1'; })")
     g = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'update']
     kontrol(len(g) == 1 and g[0]['tablo'] == 'kafileler' and g[0]['veri']['ad'].endswith('(güncel)') and len(g[0]['veri']['program']) == 2, 'Kafile: düzenle → kaydet doğru kafileyi güncelliyor', errs)
@@ -339,8 +358,8 @@ with sync_playwright() as p:
 
     # ── Şehir rehberi ──
     pg.evaluate("""window.__DB.sehir_rehberi = [
-      { id: 501, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'gezi', ad: 'Sarı Tabya', aciklama: 'Manzara', harita: 'https://www.google.com/maps/search/?api=1&query=x', sira: 100, yayinda: false },
-      { id: 502, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'yemek', ad: '<b>Željo</b>', aciklama: '', harita: null, sira: 90, yayinda: false },
+      { id: 501, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'gezi', ad: 'Sarı Tabya', aciklama: 'Manzara', harita: 'https://www.google.com/maps/search/?api=1&query=x', sira: 100, yayinda: false, lat: 43.85, lng: 18.43, konum_kaynak: 'otomatik' },
+      { id: 502, sehir: 'Saraybosna', diger_adlar: ['Sarajevo'], tur: 'yemek', ad: '<b>Željo</b>', aciklama: '', harita: null, sira: 90, yayinda: false, lat: null, lng: null, konum_kaynak: 'bulunamadi' },
       { id: 503, sehir: 'Mostar', diger_adlar: [], tur: 'gezi', ad: 'Mostar Köprüsü', aciklama: '', harita: null, sira: 80, yayinda: true }];""")
     pg.evaluate("sekmeAc('sehir')"); pg.wait_for_timeout(400); errs.clear()
     kontrol(pg.input_value('#sr_sehir') == 'Mostar' and pg.locator('#sr_sehir option').count() == 2 and pg.locator('.mekan-item').count() == 1, 'Şehir rehberi (admin): şehirler listede, seçili şehrin mekanları görünüyor', errs)
@@ -365,6 +384,30 @@ with sync_playwright() as p:
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('sehir') == 'Saraybosna' and v.get('tur') == 'yemek' and v.get('yayinda') is False and v.get('harita', '').startswith('https://www.google.com/maps/search/') and v.get('sira') < 90 and v.get('diger_adlar') == ['Sarajevo'],
             'Şehir rehberi (admin): yeni mekan taslak olarak, harita aramasıyla ve listenin sonuna ekleniyor', errs)
+    # Konum (uygulama haritası): durum yazısı, elle koordinat, bağlantıdan bulma
+    pg.evaluate("window.__islem = []; window.__fn = []; SR.sehir = 'Saraybosna'; sehirCiz()"); pg.wait_for_timeout(200)
+    kontrol('Uygulama haritasında' in pg.inner_text('.mekan-item[data-id="501"] .sr-konum') and 'bulunamadı' in pg.inner_text('.mekan-item[data-id="502"] .sr-konum'),
+            'Şehir rehberi (admin): mekanın haritada olup olmadığı listede yazıyor')
+    pg.locator('.mekan-item[data-id="501"]').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
+    kontrol(pg.input_value('#sr_f_konum') == '43.85, 18.43', 'Şehir rehberi (admin): düzenle formunda mevcut koordinat görünüyor')
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and 'lat' not in g[0]['veri'] and 'konum_kaynak' not in g[0]['veri'], 'Şehir rehberi (admin): koordinata dokunulmadıysa konum değişmiyor')
+    pg.evaluate("window.__islem = []; SR.sehir = 'Saraybosna'; sehirCiz()"); pg.wait_for_timeout(200)
+    pg.locator('.mekan-item[data-id="502"]').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
+    pg.fill('#sr_f_konum', 'Saraybosna'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(200)
+    kontrol(not pg.evaluate('window.__islem'), 'Şehir rehberi (admin): geçersiz koordinat kaydedilmiyor')
+    pg.fill('#sr_f_konum', '43.8597, 18.4313'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'].get('lat') == 43.8597 and g[0]['veri'].get('lng') == 18.4313 and g[0]['veri'].get('konum_kaynak') == 'elle', 'Şehir rehberi (admin): elle girilen koordinat kaydediliyor')
+    pg.evaluate("window.__islem = []; SR.sehir = 'Saraybosna'; sehirCiz(); sehirMekanYeni()"); pg.wait_for_timeout(200)
+    pg.fill('#sr_f_ad', 'Baščaršija'); pg.fill('#sr_f_harita', 'https://maps.app.goo.gl/IYI9'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'insert']
+    kontrol(len(ek) == 1 and ek[0]['veri'].get('lat') == 21.4174 and ek[0]['veri'].get('konum_kaynak') == 'otomatik', 'Şehir rehberi (admin): Google bağlantısından konum bulunuyor', errs)
+    pg.evaluate("window.__islem = []; SR.sehir = 'Saraybosna'; sehirCiz(); sehirMekanYeni()"); pg.wait_for_timeout(200)
+    pg.fill('#sr_f_ad', 'Vrelo Bosne'); pg.fill('#sr_f_harita', 'https://maps.app.goo.gl/KOTU'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'insert']
+    kontrol(len(ek) == 1 and 'lat' not in ek[0]['veri'] and 'bulunamadı' in pg.inner_text('#toast'), 'Şehir rehberi (admin): konum bulunamazsa yine kaydediyor ve uyarıyor', errs)
     pg.evaluate("window.__islem = []"); pg.locator('.mekan-item[data-id="503"]').count()
     pg.select_option('#sr_sehir', 'Mostar'); pg.wait_for_timeout(200); pg.locator('.mekan-item[data-id="503"]').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(300)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']

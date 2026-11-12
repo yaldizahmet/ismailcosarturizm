@@ -167,6 +167,21 @@ details.tum[open] summary::after{content:'▴'}
 .btn-acil b{font-size:19px;display:block}
 .btn-acil small{font-size:15px;color:#f6d9d3}
 .btn-konum{min-height:60px;border-radius:16px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);display:flex;align-items:center;gap:14px;padding:10px 20px;font-size:16.5px;font-weight:700;width:100%;text-align:left}
+.harita-kart{background:#fff;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 4px rgba(11,31,58,.08)}
+.harita{height:270px;border-radius:14px;overflow:hidden;background:#ece7db;position:relative;z-index:0;isolation:isolate}
+.harita-rehber{height:300px;margin-bottom:6px}
+.harita-yukleniyor,.harita-yok{display:flex;align-items:center;justify-content:center;height:100%;text-align:center;padding:18px;color:var(--soluk);font-size:15px;line-height:1.5}
+.harita-not{margin:0;font-size:15.5px;line-height:1.5}
+.harita-sec{display:flex;gap:8px;flex-wrap:wrap}
+.harita-sec button{border:1.5px solid var(--gold);background:#fff;color:var(--navy);border-radius:50px;padding:7px 14px;font-size:15px;font-weight:600;min-height:40px;cursor:pointer;font-family:inherit}
+.harita-sec button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.imlec{background:none;border:0}
+.imlec span{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--navy);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.imlec span i{transform:rotate(45deg);font-style:normal;font-size:17px;line-height:1}
+.imlec-otel span{background:#b3261e}.imlec-harem span{background:#1f7a4d}.imlec-yemek span{background:var(--gold)}
+.leaflet-popup-content{font-size:15px;line-height:1.45;margin:12px 14px}
+.leaflet-popup-content b{display:block;margin-bottom:4px}
+.leaflet-popup-content a{color:#0B5CAD;font-weight:600}
 .otel-karti{background:#fff;border:1px dashed #b8ad92;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .otel-karti .ad{font-size:18px;font-weight:700}
 .otel-karti .adres{font-size:14px;color:var(--yazi2);line-height:1.5}
@@ -455,6 +470,79 @@ details.tum[open] summary::after{content:'▴'}
     $('menuNokta').hidden = !var_;
     document.querySelectorAll('.alt-menu button').forEach(function (b) { if (b.getAttribute('data-sekme') === S.sekme) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     if (S.sekme === 'vakitler') pusulaCiz();
+    haritalariKur();
+  }
+
+  // ── Haritalar: OpenStreetMap + Leaflet (Leaflet kendi sunucumuzda: vendor/leaflet). Harita yüklenemezse
+  //    (internet yok vb.) yerine kısa bir not çıkar; yol tarifi butonları her durumda çalışır. ──
+  var HAREM = [{ ad: 'Mescid-i Haram', kisa: "Harem'e", ikon: '🕋', lat: 21.4225, lng: 39.8262 }, { ad: 'Mescid-i Nebevi', kisa: "Mescid-i Nebevi'ye", ikon: '🕌', lat: 24.4672, lng: 39.6111 }];
+  var HARITALAR = {}, HARITA_NOKTA = {};
+  function konumlu(o) { return !!o && isFinite(+o.lat) && isFinite(+o.lng) && o.lat !== null && o.lng !== null && o.lat !== '' && !(+o.lat === 0 && +o.lng === 0) && Math.abs(+o.lat) <= 90 && Math.abs(+o.lng) <= 180; }
+  function mesafeM(a, b, c, d) { var r = Math.PI / 180, x = Math.pow(Math.sin((c - a) * r / 2), 2) + Math.cos(a * r) * Math.cos(c * r) * Math.pow(Math.sin((d - b) * r / 2), 2); return 12742000 * Math.asin(Math.sqrt(x)); }
+  function mesafeYaz(m) { return m < 1000 ? (Math.max(50, Math.round(m / 50) * 50)) + ' m' : (Math.round(m / 100) / 10).toString().replace('.', ',') + ' km'; }
+  function haremYakin(o) { for (var i = 0; i < HAREM.length; i++) if (mesafeM(+o.lat, +o.lng, HAREM[i].lat, HAREM[i].lng) < 8000) return HAREM[i]; return null; }
+  function yolTarifi(lat, lng) { return 'https://www.google.com/maps/dir/?api=1&destination=' + (+lat).toFixed(6) + ',' + (+lng).toFixed(6) + '&travelmode=walking'; }
+  function otelHaritaKarti(oteller) {
+    var ko = oteller.filter(konumlu);
+    if (!ko.length) return '';
+    var bugun = simdi().tarih, i = S.haritaOtel;
+    if (i == null || !ko[i]) {
+      i = 0;
+      for (var j = 0; j < ko.length; j++) if ((!ko[j].giris || ko[j].giris <= bugun) && (!ko[j].cikis || bugun < ko[j].cikis)) { i = j; break; }
+      if (!((!ko[i].giris || ko[i].giris <= bugun) && (!ko[i].cikis || bugun < ko[i].cikis))) for (var k = 0; k < ko.length; k++) if (ko[k].giris && ko[k].giris > bugun) { i = k; break; }
+    }
+    var o = ko[i], H = haremYakin(o), m = H ? mesafeM(+o.lat, +o.lng, H.lat, H.lng) : 0, anahtar = 'otel-' + i + '-' + (+o.lat).toFixed(5) + ',' + (+o.lng).toFixed(5);
+    HARITA_NOKTA[anahtar] = [{ lat: +o.lat, lng: +o.lng, ad: o.ad, tur: 'otel', link: yolTarifi(o.lat, o.lng) }].concat(H ? [{ lat: H.lat, lng: H.lng, ad: H.ad, tur: 'harem', ikon: H.ikon, link: yolTarifi(H.lat, H.lng) }] : []);
+    var h = '<div class="harita-kart" id="otelHaritaKart"><div class="kart-etiket">🗺️ Otelim nerede?</div>';
+    if (ko.length > 1) h += '<div class="harita-sec" role="group" aria-label="Otel">' + ko.map(function (x, n) {
+      return '<button type="button" data-eylem="harita-otel" data-i="' + n + '" aria-pressed="' + (n === i) + '">' + esc(x.sehir || x.ad) + '</button>'; }).join('') + '</div>';
+    h += '<div class="harita" data-harita="' + esc(anahtar) + '"><div class="harita-yukleniyor">Harita yükleniyor…</div></div>';
+    h += '<p class="harita-not"><b>' + esc(o.ad) + '</b>' + (H ? '<br>' + H.kisa + ' kuş uçuşu yaklaşık <b>' + mesafeYaz(m) + '</b> · yürüyerek ~' + Math.max(5, Math.round(m * 1.3 / 70 / 5) * 5) + ' dk' : '') + '</p>';
+    h += '<div class="ikili"><a class="btn-dolu" href="' + esc(yolTarifi(o.lat, o.lng)) + '" target="_blank" rel="noopener">🚶 Otele yol tarifi</a>' +
+      (H ? '<a class="btn-cizgi" href="' + esc(yolTarifi(H.lat, H.lng)) + '" target="_blank" rel="noopener">' + H.ikon + ' ' + H.kisa + ' yol tarifi</a>' : '<span></span>') + '</div></div>';
+    return h;
+  }
+  function leafletYukle() {
+    if (window.L && window.L.map) return Promise.resolve(window.L);
+    if (leafletYukle.p) return leafletYukle.p;
+    leafletYukle.p = new Promise(function (ok, red) {
+      if (!document.querySelector('link[data-leaflet]')) { var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'vendor/leaflet/leaflet.css'; c.setAttribute('data-leaflet', ''); document.head.appendChild(c); }
+      var s = document.createElement('script'); s.src = 'vendor/leaflet/leaflet.js';
+      s.onload = function () { window.L && window.L.map ? ok(window.L) : red(new Error('leaflet')); };
+      s.onerror = function () { leafletYukle.p = null; s.remove(); red(new Error('leaflet')); };
+      document.head.appendChild(s);
+    });
+    return leafletYukle.p;
+  }
+  function haritalariKur() {
+    var yerler = [].slice.call(document.querySelectorAll('#ekran [data-harita]'));
+    if (!yerler.length) return;
+    // Daha önce kurulmuş harita varsa aynısını yerine koy (her yenilemede baştan çizilmesin)
+    yerler = yerler.filter(function (y) { var v = HARITALAR[y.getAttribute('data-harita')]; if (!v) return true; y.replaceWith(v.el); try { v.harita.invalidateSize(); } catch (x) {} return false; });
+    if (!yerler.length) return;
+    leafletYukle().then(function (L) {
+      yerler.forEach(function (yer) {
+        var anahtar = yer.getAttribute('data-harita'), n = HARITA_NOKTA[anahtar] || [];
+        if (!yer.isConnected || !n.length || HARITALAR[anahtar]) return;
+        yer.innerHTML = '';
+        var m = L.map(yer, { scrollWheelZoom: false, zoomControl: true });
+        m.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
+        var ikon = { otel: '🏨', yemek: '🍽️', gezi: '📍' };
+        n.forEach(function (p) {
+          var i = L.divIcon({ className: 'imlec imlec-' + p.tur, html: '<span><i>' + (p.ikon || ikon[p.tur] || '📍') + '</i></span>', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -32] });
+          L.marker([p.lat, p.lng], { icon: i, title: p.ad, alt: p.ad, keyboard: true }).addTo(m)
+            .bindPopup('<b>' + esc(p.ad) + '</b><a href="' + esc(p.link) + '" target="_blank" rel="noopener">' + (p.tur === 'otel' || p.tur === 'harem' ? '🚶 Yol tarifi' : '🗺️ Haritada aç') + '</a>');
+        });
+        if (n.length === 2 && n[0].tur === 'otel' && n[1].tur === 'harem') L.polyline([[n[0].lat, n[0].lng], [n[1].lat, n[1].lng]], { color: '#0B1F3A', weight: 3, opacity: .55, dashArray: '6 8' }).addTo(m);
+        if (n.length === 1) m.setView([n[0].lat, n[0].lng], 16);
+        else m.fitBounds(n.map(function (p) { return [p.lat, p.lng]; }), { padding: [40, 40], maxZoom: 17 });
+        HARITALAR[anahtar] = { el: yer, harita: m };
+        window.__haritalar = HARITALAR;
+      });
+    }).catch(function () {
+      yerler.forEach(function (y) { if (y.isConnected) y.innerHTML = '<div class="harita-yok">Harita için internet bağlantısı gerekiyor.<br>Yol tarifi butonu yine çalışır.</div>'; });
+    });
   }
 
   function cevrimdisiSerit() {
@@ -847,7 +935,7 @@ details.tum[open] summary::after{content:'▴'}
   function mekanlariGetir() {
     if (mekanlariGetir.yuk) return;
     mekanlariGetir.yuk = true;
-    fetch(SB_URL + '/rest/v1/sehir_rehberi?select=id,sehir,diger_adlar,tur,ad,aciklama,harita,sira&yayinda=eq.true&order=sira.desc', { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }, cache: 'no-store' })
+    fetch(SB_URL + '/rest/v1/sehir_rehberi?select=id,sehir,diger_adlar,tur,ad,aciklama,harita,sira,lat,lng&yayinda=eq.true&order=sira.desc', { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }, cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (l) { if (!Array.isArray(l)) return; S.mekanlar = l; yaz('kafile-mekanlar', l); if (S.sekme === 'rehber') ciz(); })
       .catch(function () {}).then(function () { setTimeout(function () { mekanlariGetir.yuk = false; }, 60000); });
@@ -861,6 +949,13 @@ details.tum[open] summary::after{content:'▴'}
     var h = '<h2 class="bolum-baslik">Şehir rehberi</h2>';
     if (l.length > 1) h += '<div class="sehir-sec" role="group" aria-label="Şehir">' + l.map(function (x) {
       return '<button type="button" data-eylem="rehber-sehir" data-sehir="' + esc(x.ad) + '" aria-pressed="' + (x === sec) + '">' + esc(x.ad) + '</button>'; }).join('') + '</div>';
+    var konumlular = sec.mekanlar.filter(konumlu);
+    if (konumlular.length) {
+      var anahtar = 'rehber-' + sec.ad + '-' + konumlular.map(function (m) { return (+m.lat).toFixed(4) + ',' + (+m.lng).toFixed(4); }).join(';'); // konum değişirse harita yeniden kurulsun
+      HARITA_NOKTA[anahtar] = konumlular.map(function (m) { return { lat: +m.lat, lng: +m.lng, ad: m.ad, tur: m.tur === 'yemek' ? 'yemek' : 'gezi', link: haritaLink(m) }; });
+      h += '<div class="harita harita-rehber" data-harita="' + esc(anahtar) + '"><div class="harita-yukleniyor">Harita yükleniyor…</div></div>' +
+        '<p class="kucuk-not" style="margin-top:0">📍 Gezilecek yerler · 🍽️ Yeme-içme. İşarete dokunun, adı ve yol tarifi çıkar.</p>';
+    }
     [['gezi', '📍 Gezilecek yerler'], ['yemek', '🍽️ Yeme-içme']].forEach(function (t) {
       var k = sec.mekanlar.filter(function (m) { return m.tur === t[0]; });
       if (!k.length) return;
@@ -1077,6 +1172,7 @@ details.tum[open] summary::after{content:'▴'}
     else h += '<a class="btn-acil" href="tel:' + OFIS_TEL + '"><span><b>Ofisi ara</b><small>İsmail Coşar Turizm · 0533 198 07 81</small></span></a>';
     h += '<button type="button" class="btn-konum" data-eylem="konum-gonder">' + IKON.konum.replace(/"18"/g, '"26"') + 'Konumumu ' + (rehberTel ? 'rehbere' : 'ofise') + ' gönder</button>';
     h += '<div class="altin-kart"><div class="kart-etiket">Kaybolursanız</div><div style="font-size:14.5px;line-height:1.5">Bulunduğunuz yerde kalın ve rehberinizi arayın. Taksiye ya da görevliye aşağıdaki otel kartını gösterin.</div></div>';
+    h += otelHaritaKarti(oteller);
     oteller.forEach(function (o) {
       var konum = guvenliUrl(o.konum), tel = telNo(o.tel);
       h += '<div class="otel-karti"><div class="kart-etiket" style="color:var(--soluk)"><span>Otel kartı' + (o.sehir ? ' · ' + esc(o.sehir) : '') + '</span></div><div class="ad">' + esc(o.ad) + '</div>' +
@@ -1148,6 +1244,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'hazir-gorsel') { var mh = mekanBul(t.getAttribute('data-id')); if (mh) fotoPaylas(mh, null); }
     else if (ey === 'paylas-kapat') paylasimKapat();
     else if (ey === 'program-paylas') programPaylasAc();
+    else if (ey === 'harita-otel') { S.haritaOtel = Number(t.getAttribute('data-i')); ciz(); }
     else if (ey === 'anket-puan') anketPuan(t.getAttribute('data-soru'), Number(t.getAttribute('data-puan')));
     else if (ey === 'anket-gonder') anketGonder();
     else if (ey === 'anket-duzelt') anketDuzelt();
