@@ -34,7 +34,9 @@ function waNumara(tel: string) {
 const SAYFA_ADLARI: Record<string, string> = { "/": "Ana sayfa", "/umre.html": "Umre turları", "/hac.html": "Hac", "/turlar.html": "Tüm turlar", "/iletisim.html": "İletişim",
   "/hakkimizda.html": "Hakkımızda", "/belgelerimiz.html": "Belgelerimiz", "/galeri.html": "Galeri", "/sss.html": "Sık sorulan sorular", "/kvkk.html": "KVKK",
   "/tesekkurler.html": "Başvuru gönderildi (teşekkür sayfası)", "/kafile/": "Misafir uygulaması", "/rehber-ilk-umre.html": "Rehber: İlk umre",
-  "/rehber-umre-donemleri.html": "Rehber: Umre dönemleri", "/rehber-umre-valiz-listesi.html": "Rehber: Valiz listesi" };
+  "/rehber-umre-donemleri.html": "Rehber: Umre dönemleri", "/rehber-umre-valiz-listesi.html": "Rehber: Valiz listesi",
+  "/rehber-umre-belgeler.html": "Rehber: Umre belgeleri", "/rehber-ravza-ziyareti.html": "Rehber: Ravza ziyareti",
+  "/rehber-yaslilar-icin-umre.html": "Rehber: Yaşlılar için umre", "/rehber-umre-fiyatlari.html": "Rehber: Umre fiyatları" };
 function kaynakAdi(k: string | null) {
   const s = String(k || "").toLowerCase();
   if (!s) return "Doğrudan / WhatsApp";
@@ -43,6 +45,7 @@ function kaynakAdi(k: string | null) {
   if (/facebook|^fb|\.fb\./.test(s)) return "Facebook";
   return s;
 }
+function ulkeAdi(k: string) { try { return new Intl.DisplayNames(["tr"], { type: "region" }).of(k) || k; } catch { return k; } }
 const trGun = (iso: string) => new Date(new Date(iso).getTime() + 3 * 3600 * 1000).toISOString().slice(0, 10);
 const say = <T,>(dizi: T[], anahtar: (x: T) => string) => { const g: Record<string, number> = {}; for (const x of dizi) { const a = anahtar(x); g[a] = (g[a] || 0) + 1; } return Object.entries(g).sort((a, b) => b[1] - a[1]); };
 
@@ -58,7 +61,7 @@ Deno.serve(async (req: Request) => {
   const bas = bugunTR(), bit = gunEkle(bas, 6), onceki = gunEkle(bas, -7);
   const haftaBasi = new Date(onceki + "T00:00:00+03:00").toISOString(); // geçen pazartesi 00:00 (İstanbul)
   const [zy, bv, an, mu, tl, kf] = await Promise.all([
-    db.from("ziyaretler").select("zaman, sayfa, kaynak, ziyaretci").gte("zaman", haftaBasi).limit(20000),
+    db.from("ziyaretler").select("zaman, sayfa, kaynak, ziyaretci, ulke").gte("zaman", haftaBasi).limit(20000),
     db.from("basvurular").select("created_at, ad_soyad, telefon, program, hizmet, form, durum").gte("created_at", haftaBasi).order("created_at"),
     db.from("kafile_anketler").select("kafile_id, rehber, otel, genel, yorum").gte("olusturma", haftaBasi),
     db.from("musteriler").select("id, ad, telefon, dogum_tarihi, ileti_izni").not("dogum_tarihi", "is", null),
@@ -80,6 +83,12 @@ Deno.serve(async (req: Request) => {
     s.push(`${kisi} ziyaretçi · ${z.length} sayfa görüntüleme`, "", "En çok bakılan sayfalar:");
     say(z, (x) => x.sayfa).slice(0, 6).forEach(([ad, n]) => s.push(`   ${n} × ${sayfaAdi(ad)}`));
     s.push("", "Nereden geldiler: " + say(z, (x) => kaynakAdi(x.kaynak)).slice(0, 4).map(([ad, n]) => `${ad} (${n})`).join(", "));
+    const zu = z.filter((x) => x.ulke);
+    if (zu.length) {
+      const kisiUlke: Record<string, Set<string>> = {};
+      for (const x of zu) (kisiUlke[x.ulke] ??= new Set()).add(trGun(x.zaman) + x.ziyaretci);
+      s.push("Ülkeler: " + Object.entries(kisiUlke).sort((a, b) => b[1].size - a[1].size).slice(0, 6).map(([k, v]) => `${ulkeAdi(k)} (${v.size})`).join(", "));
+    }
   } else s.push("Bu hafta ziyaret kaydı yok.");
 
   // 2) Başvurular

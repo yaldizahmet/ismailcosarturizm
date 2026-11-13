@@ -1913,6 +1913,12 @@ function kaynakAdi(k) {
   if (/whatsapp|wa\.me/.test(k)) return 'WhatsApp';
   return k;
 }
+// İki harfli ülke kodu → "🇩🇪 Almanya" (kod yoksa: sayaç ülkeyi kaydetmeye başlamadan önceki kayıt)
+function ulkeAdi(k) {
+  if (!k || !/^[A-Z]{2}$/.test(k)) return 'Bilinmiyor';
+  let ad = k; try { ad = new Intl.DisplayNames(['tr'], { type: 'region' }).of(k) || k; } catch (_) {}
+  return String.fromCodePoint(...[...k].map(c => 0x1F1A5 + c.charCodeAt(0))) + ' ' + ad;
+}
 function zyBarlar(liste) { // [{ad, deger}] → yatay çubuklar
   const en = Math.max(1, ...liste.map(x => x.deger));
   return liste.map(x => `<div class="zy-satir" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;margin:7px 0">
@@ -1926,7 +1932,7 @@ async function renderZiyaret() {
   const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
   const bas = new Date(bugun.getTime() - (ZY_GUN - 1) * 86400000);
   const [{ data, error }, { data: tl }] = await Promise.all([
-    sb.from('ziyaretler').select('zaman,sayfa,kaynak,cihaz,ziyaretci').gte('zaman', bas.toISOString()).order('zaman', { ascending: true }).limit(20000),
+    sb.from('ziyaretler').select('zaman,sayfa,kaynak,cihaz,ziyaretci,ulke').gte('zaman', bas.toISOString()).order('zaman', { ascending: true }).limit(20000),
     sb.from('turlar').select('id,baslik')]);
   if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
   const turAd = {}; (tl || []).forEach(x => turAd[x.id] = x.baslik);
@@ -1951,7 +1957,7 @@ function zyCiz() {
   const zz = secili ? z.filter(secili.f) : z;
   const kisiler = new Set(zz.map(x => gunAnahtar(x.zaman) + x.ziyaretci));
   const grupla = (anahtar) => { const g = {}; zz.forEach(x => { const a = anahtar(x); (g[a] = g[a] || { kisi: new Set(), sayi: 0 }); g[a].kisi.add(gunAnahtar(x.zaman) + x.ziyaretci); g[a].sayi++; }); return g; };
-  const sg = grupla(x => x.sayfa), kg = grupla(x => kaynakAdi(x.kaynak)), cg = grupla(x => x.cihaz || 'bilinmiyor');
+  const sg = grupla(x => x.sayfa), kg = grupla(x => kaynakAdi(x.kaynak)), cg = grupla(x => x.cihaz || 'bilinmiyor'), ug = grupla(x => ulkeAdi(x.ulke));
   const sirala = g => Object.entries(g).map(([ad, v]) => ({ ad, deger: v.kisi.size, sayi: v.sayi })).sort((a, b) => b.deger - a.deger || b.sayi - a.sayi);
   const tel = (cg.telefon ? cg.telefon.kisi.size : 0) + (cg.tablet ? cg.tablet.kisi.size : 0);
   const kutu = (deger, etiket) => `<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(11,31,58,.08)"><div style="font-size:26px;font-weight:700;color:#0B1F3A">${deger}</div><div style="font-size:12.5px;color:#666">${etiket}</div></div>`;
@@ -1976,6 +1982,7 @@ function zyCiz() {
     ${zz.length ? `
     <div class="card"><h3>En çok bakılan sayfalar</h3><div style="font-size:12px;color:#888;margin:-4px 0 4px">ziyaretçi sayısı · (görüntüleme)</div>${zyBarlar(sirala(sg).slice(0, 15).map(x => ({ ad: sayfaAdi(x.ad), deger: x.deger, ek: x.sayi > x.deger ? '(' + x.sayi + ')' : '' })))}</div>
     <div class="card"><h3>Nereden geldiler</h3>${zyBarlar(sirala(kg).slice(0, 10))}</div>
+    ${zz.some(x => x.ulke) ? `<div class="card zy-ulkeler"><h3>Ülkeler</h3>${zyBarlar(sirala(ug).slice(0, 12))}</div>` : ''}
     <div class="card"><h3>Cihaz</h3>${zyBarlar(sirala(cg).map(x => ({ ad: { telefon: '📱 Telefon', tablet: '📱 Tablet', bilgisayar: '💻 Bilgisayar' }[x.ad] || x.ad, deger: x.deger })))}</div>`
     : '<div class="card zy-bos" style="color:#666">Bu ' + (gun === 1 ? 'saatte' : 'günde') + ' ziyaret kaydı yok.</div>'}`
     : '<div class="card" style="color:#666">Bu dönemde henüz ziyaret kaydı yok.</div>'}

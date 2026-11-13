@@ -588,10 +588,10 @@ with sync_playwright() as p:
     # ── Ziyaretçiler sayfası ──
     dp.evaluate("""(() => { const s = (gun, saat) => { const d = new Date(); d.setDate(d.getDate() - gun); d.setHours(saat, 10, 0, 0); return d.toISOString(); };
       window.__DB.ziyaretler = [
-        { zaman: s(0, 9), sayfa: '/', kaynak: 'google.com', cihaz: 'telefon', ziyaretci: 'a' },
-        { zaman: s(0, 9), sayfa: '/tur-detay.html?id=TID', kaynak: '', cihaz: 'telefon', ziyaretci: 'a' },
-        { zaman: s(0, 10), sayfa: '/', kaynak: 'l.instagram.com', cihaz: 'telefon', ziyaretci: 'b' },
-        { zaman: s(0, 11), sayfa: '/tesekkurler.html', kaynak: '', cihaz: 'bilgisayar', ziyaretci: 'c' },
+        { zaman: s(0, 9), sayfa: '/', kaynak: 'google.com', cihaz: 'telefon', ziyaretci: 'a', ulke: 'TR' },
+        { zaman: s(0, 9), sayfa: '/tur-detay.html?id=TID', kaynak: '', cihaz: 'telefon', ziyaretci: 'a', ulke: 'TR' },
+        { zaman: s(0, 10), sayfa: '/', kaynak: 'l.instagram.com', cihaz: 'telefon', ziyaretci: 'b', ulke: 'DE' },
+        { zaman: s(0, 11), sayfa: '/tesekkurler.html', kaynak: '', cihaz: 'bilgisayar', ziyaretci: 'c', ulke: 'TR' },
         { zaman: s(2, 14), sayfa: '/', kaynak: '', cihaz: 'bilgisayar', ziyaretci: 'a' },
         { zaman: s(20, 14), sayfa: '/umre.html', kaynak: '', cihaz: 'telefon', ziyaretci: 'd' }];
       sekmeAc('ana'); })()""".replace('TID', 'umre-kis')); dp.wait_for_timeout(500)
@@ -602,12 +602,15 @@ with sync_playwright() as p:
     kontrol(kutular[0].startswith('4') and kutular[1].startswith('5') and kutular[2].startswith('50%'), 'Ziyaretçiler: son 7 gün 4 ziyaretçi, 5 görüntüleme, %50 telefon', kutular)
     kontrol('Ana sayfa' in zt and 'Tur: EKİM AYI UMRE PROGRAMI (2026) 14 GÜN' in zt and 'Başvuru gönderildi' in zt and 'Umre turları' not in zt, 'Ziyaretçiler: sayfalar okunur adlarla (tur detayı tur adıyla); 7 günden eski kayıt yok', zt[:300])
     kontrol('Google' in zt and 'Instagram' in zt and 'Doğrudan' in zt and dp.locator('.zy-grafik > div').count() == 7, 'Ziyaretçiler: kaynaklar (Google, Instagram, Doğrudan) ve 7 günlük grafik')
+    ul = dp.locator('.zy-ulkeler .zy-satir').all_inner_texts()
+    kontrol(len(ul) == 3 and 'Türkiye' in ul[0] and '🇹🇷' in ul[0] and '2' in ul[0] and any('Almanya' in x for x in ul) and any('Bilinmiyor' in x for x in ul), 'Ziyaretçiler: ülkeler bayrak ve Türkçe adla, en çok olan üstte', ul)
     # grafikte bir güne dokununca o günün rakamları
     dp.locator('.zy-dilim').nth(4).click(); dp.wait_for_timeout(300)   # 2 gün önce: yalnız 'a', ana sayfa, doğrudan, bilgisayar
     kut = dp.locator('.zy-kutular > div').all_inner_texts(); st = dp.inner_text('#sayfa-ziyaret')
     kontrol(kut[0].startswith('1') and kut[1].startswith('1') and kut[2].startswith('0%') and dp.locator('.zy-dilim.secili').count() == 1
             and 'toplamına dön' in st and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').all_inner_texts()[0].startswith('Doğrudan') and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').count() == 1 and dp.locator('.zy-grafik > div').count() == 7,
             'Ziyaretçiler: grafikte bir güne dokununca kutular ve listeler o günün rakamlarını gösteriyor', kut)
+    kontrol(dp.locator('.zy-ulkeler').count() == 0, 'Ziyaretçiler: ülkesi bilinmeyen (eski) kayıtlarda Ülkeler kartı çıkmıyor')
     dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)   # kayıt olmayan gün
     kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('0') and dp.locator('.zy-bos').count() == 1, 'Ziyaretçiler: kaydı olmayan gün seçilince "kayıt yok" yazıyor')
     dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)
