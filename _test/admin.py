@@ -610,7 +610,7 @@ with sync_playwright() as p:
     kontrol(kut[0].startswith('1') and kut[1].startswith('1') and kut[2].startswith('0%') and dp.locator('.zy-dilim.secili').count() == 1
             and 'toplamına dön' in st and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').all_inner_texts()[0].startswith('Doğrudan') and dp.locator('.card', has_text='Nereden geldiler').locator('.zy-satir').count() == 1 and dp.locator('.zy-grafik > div').count() == 7,
             'Ziyaretçiler: grafikte bir güne dokununca kutular ve listeler o günün rakamlarını gösteriyor', kut)
-    kontrol(dp.locator('.zy-ulkeler').count() == 0, 'Ziyaretçiler: ülkesi bilinmeyen (eski) kayıtlarda Ülkeler kartı çıkmıyor')
+    kontrol(dp.locator('.zy-ulkeler .zy-ulke-yok').count() == 1 and dp.locator('.zy-ulkeler .zy-satir').count() == 0, 'Ziyaretçiler: ülkesi bilinmeyen (eski) kayıtlarda Ülkeler kartında açıklama çıkıyor')
     dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)   # kayıt olmayan gün
     kontrol(dp.locator('.zy-kutular > div').first.inner_text().startswith('0') and dp.locator('.zy-bos').count() == 1, 'Ziyaretçiler: kaydı olmayan gün seçilince "kayıt yok" yazıyor')
     dp.locator('.zy-dilim').nth(5).click(); dp.wait_for_timeout(300)
