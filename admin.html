@@ -288,6 +288,33 @@ function sekmeAc(ad) {
 }
 
 // ── ANA SAYFA (girişte açılır): iki bölüm, Grup Yönetimi ve Site Yönetimi ──
+// ── Yedek: admin oturumuyla tüm tablolar okunur, tek JSON dosyası olarak indirilir (veri bu cihazdan dışarı gitmez) ──
+const YEDEK_TABLOLAR = ['musteriler', 'kafileler', 'kafile_katilimcilar', 'kafile_rehberleri', 'kafile_duyurular', 'kafile_anketler', 'turlar', 'fiyat_tablolari',
+  'sezon_programlari', 'duyurular', 'basvurular', 'yorumlar', 'sehir_rehberi', 'sehir_merkezleri', 'kullanici_rolleri', 'bildirim_abonelikleri', 'ziyaretler'];
+async function yedekIndir(btn) {
+  const eski = btn.textContent; btn.disabled = true; btn.textContent = '⏳ Hazırlanıyor…';
+  try {
+    const y = { aciklama: 'İsmail Coşar Turizm veritabanı yedeği', alindi: new Date().toISOString(), tablolar: {} }, sorun = [];
+    for (const t of YEDEK_TABLOLAR) {
+      let tum = [];
+      for (let i = 0; ; i += 1000) {
+        const { data, error } = await sb.from(t).select('*').range(i, i + 999);
+        if (error) { sorun.push(t); tum = null; break; }
+        tum = tum.concat(data || []);
+        if (!data || data.length < 1000) break;
+      }
+      if (tum) y.tablolar[t] = tum;
+    }
+    const d = new Date(), iki = n => String(n).padStart(2, '0');
+    const ad = `ismailcosar-yedek-${d.getFullYear()}-${iki(d.getMonth() + 1)}-${iki(d.getDate())}-${iki(d.getHours())}${iki(d.getMinutes())}.json`;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(y, null, 1)], { type: 'application/json' })); a.download = ad;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+    const say = Object.values(y.tablolar).reduce((t, l) => t + l.length, 0);
+    if (sorun.length) toast('⚠️ Yedek indi ama okunamayan tablolar var: ' + sorun.join(', '), 'error');
+    else toast(`✅ Yedek indirildi: ${say} kayıt (${ad})`, 'success');
+  } catch (e) { toast('❌ Yedek alınamadı: ' + (e.message || e), 'error'); }
+  btn.disabled = false; btn.textContent = eski;
+}
 async function renderAna() {
   const el = document.getElementById('sayfa-ana');
   const b = (sekme, baslik, alt) => { const i = baslik.indexOf(' '); return `<button type="button" onclick="sekmeAc('${sekme}')"><span><i class="ana-ikon">${baslik.slice(0, i)}</i> ${baslik.slice(i + 1)}</span><small>${alt}</small></button>`; };
@@ -296,7 +323,10 @@ async function renderAna() {
       ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
       ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}${b('ziyaret', '📊 Ziyaretçiler', '<span id="anaZiyaret">Hangi sayfaya kaç kişi</span>')}</div></div>
-    <div id="anaDogum"></div>`;
+    <div id="anaDogum"></div>
+    <div class="card ana-yedek" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h3 style="margin-bottom:4px">💾 Yedek</h3>
+      <p style="font-size:13px;color:#666;line-height:1.5;margin:0">Tüm kayıtlar (müşteriler, gruplar, turlar, başvurular…) tek dosya olarak bu cihaza iner. <b>Kişisel bilgi içerir; kimseyle paylaşmayın.</b></p></div>
+      <button type="button" class="btn btn-gold" id="yedekBtn" onclick="yedekIndir(this)">💾 Yedek indir</button></div>`;
   const [{ data: g }, { data: bv }, { data: mus }] = await Promise.all([sb.from('kafileler').select('*'), sb.from('basvurular').select('*').eq('durum', 'yeni'), sb.from('musteriler').select('*')]);
   const e3 = document.getElementById('anaDogum');
   if (e3) e3.innerHTML = dogumKartHtml(mus || []);

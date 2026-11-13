@@ -19,7 +19,7 @@ window.__DB.kullanici_rolleri = [{ user_id: 'test-uid', rol: window.__ROL || 'ad
       eq: function(c, v){ filtre.push([c, v]); satir = satir.filter(function(r){ return r[c] === v; }); return q; },
       order: function(c){ satir.sort(function(a, b){ return a[c] > b[c] ? 1 : a[c] < b[c] ? -1 : 0; }); return q; },
       gte: function(c, v){ satir = satir.filter(function(r){ return r[c] >= v; }); return q; },
-      limit: function(){ return q; }, single: function(){ tek = true; return q; }, maybeSingle: function(){ tek = true; return q; },
+      limit: function(){ return q; }, range: function(a, b){ satir = satir.slice(a, b + 1); return q; }, single: function(){ tek = true; return q; }, maybeSingle: function(){ tek = true; return q; },
       insert: function(v){ mod = 'insert'; yuk = v; return q; },
       update: function(v){ mod = 'update'; yuk = v; return q; },
       delete: function(){ mod = 'delete'; return q; },
@@ -596,6 +596,14 @@ with sync_playwright() as p:
         { zaman: s(20, 14), sayfa: '/umre.html', kaynak: '', cihaz: 'telefon', ziyaretci: 'd' }];
       sekmeAc('ana'); })()""".replace('TID', 'umre-kis')); dp.wait_for_timeout(500)
     kontrol('Bugün 3 ziyaretçi' in dp.inner_text('#anaZiyaret'), 'Ana sayfa: Ziyaretçiler kutusunda bugünkü ziyaretçi sayısı', dp.inner_text('#anaZiyaret'))
+    # Yedek indir: tüm tablolar tek JSON dosyası
+    with dp.expect_download() as indir: dp.click('#yedekBtn')
+    dosya = indir.value; yd = json.load(open(dosya.path(), encoding='utf-8'))
+    tb = yd.get('tablolar', {})
+    kontrol(re.match(r'ismailcosar-yedek-\d{4}-\d{2}-\d{2}-\d{4}\.json$', dosya.suggested_filename) and len(tb.get('ziyaretler', [])) == 6 and 'musteriler' in tb and 'kafileler' in tb and len(tb) >= 15,
+            'Ana sayfa: "Yedek indir" tüm tabloları tek JSON dosyası olarak indiriyor', dosya.suggested_filename)
+    dp.wait_for_timeout(300)
+    kontrol('Yedek indirildi' in dp.inner_text('#toast') and not dp.is_disabled('#yedekBtn') and not errs, 'Ana sayfa: yedekten sonra bilgi mesajı, buton yeniden kullanılabilir', errs)
     dp.evaluate("sekmeAc('ziyaret')"); dp.wait_for_timeout(500)
     zt = dp.inner_text('#sayfa-ziyaret')
     kutular = dp.locator('.zy-kutular > div').all_inner_texts()
