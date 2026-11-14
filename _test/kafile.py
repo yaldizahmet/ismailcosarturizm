@@ -214,11 +214,23 @@ with sync_playwright() as p:
     pg.click('[data-eylem="konum-gonder"]'); pg.wait_for_timeout(1200)
     kontrol(c.__wa and 'wa.me/905330000000' in c.__wa[-1] and 'maps.google.com%2F%3Fq%3D41.0082' in c.__wa[-1], 'Acil: "Konumumu gönder" rehberin WhatsApp\'ına harita bağlantısıyla gidiyor', (c.__wa or [''])[-1][:120])
     pg.goto(URL, wait_until='domcontentloaded'); pg.wait_for_timeout(400)
-    pg.click('.alt-menu [data-sekme="vakitler"]'); pg.click('[data-eylem="kible"]'); pg.wait_for_timeout(800)
+    pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(900)
     t = pg.inner_text('#kibleYazi'); aci = re.search(r'(\d+)°', t)
-    kontrol(aci is not None and 145 <= int(aci.group(1)) <= 158, 'Kıble: İstanbul\'dan yön ~152° hesaplanıyor', t[:90])
+    kontrol(aci is not None and 145 <= int(aci.group(1)) <= 158 and pg.locator('#kibleYazi button').count() == 0, 'Kıble: Vakitler açılınca butona basmadan kendiliğinden başlıyor; İstanbul\'dan yön ~152°', t[:90])
     kontrol(pg.locator('#pusulaOkGrup path').count() == 1 and pg.get_attribute('#pusulaOkGrup path', 'fill') == '#E4B84A', 'Kıble: pusulada yalnızca sarı ok var (karıştıran arka uç yok)')
     kontrol(not errs, 'Konum/kıble sırasında JavaScript hatası yok', errs)
+    c.close()
+    # iPhone: pusula izni dokunuşla istenir → önce derece, "Pusulayı aç" ile canlı ok
+    c = baglam(b, konum={'latitude': 41.0082, 'longitude': 28.9784}); errs = []
+    c.add_init_script("""window.__izin = 0; window.DeviceOrientationEvent = window.DeviceOrientationEvent || function(){};
+      DeviceOrientationEvent.requestPermission = function(){ window.__izin++; setTimeout(function(){ ['deviceorientation', 'deviceorientationabsolute'].forEach(function(a){ var e = new Event(a); e.webkitCompassHeading = 90; window.dispatchEvent(e); }); }, 50); return Promise.resolve('granted'); };""")
+    pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(2200)
+    t = pg.inner_text('#kibleYazi')
+    kontrol(re.search(r'1[45]\d°', t) and 'Pusulayı aç' in t and pg.evaluate('window.__izin') == 0, 'Kıble (iPhone): açılınca yön derece olarak çıkıyor, pusula izni sormadan "Pusulayı aç" butonu', t[:120])
+    pg.click('#kibleYazi button'); pg.wait_for_timeout(1200)
+    t = pg.inner_text('#kibleYazi')
+    kontrol(pg.evaluate('window.__izin') == 1 and 'sarı ok kıbleyi' in t and 'rotate(6' in (pg.get_attribute('#pusulaOkGrup', 'transform') or ''), 'Kıble (iPhone): "Pusulayı aç" izni istiyor, ok canlı dönüyor', t[:120])
+    kontrol(not errs, 'Kıble (iPhone): JavaScript hatası yok', errs)
     c.close()
 
     # ── Kültür turu (Saraybosna): sayaç yok, yerel saat, yerel vakitler, yerel acil numara ──
