@@ -156,6 +156,7 @@ body.rol-rehber .yonetici{display:none!important}
     <div class="mobil-sayfa"><div class="tutamak"></div>
       <button type="button" onclick="mobilGit('rehber')">🧭 Rehber Hesapları</button>
       <button type="button" onclick="mobilGit('sehir')">🗺️ Şehir Rehberi</button>
+      <button type="button" onclick="mobilGit('yarisma')">🧠 Bilgi Yarışması</button>
       <button type="button" onclick="mobilGit('turlar')">📋 Tur Listesi</button>
       <button type="button" onclick="mobilGit('duyuru')">📢 Duyurular</button>
       <button type="button" onclick="mobilGit('yorum')">💬 Yorumlar</button>
@@ -171,6 +172,7 @@ body.rol-rehber .yonetici{display:none!important}
     <button class="nav-item yonetici" id="btn-musteri" onclick="sekmeAc('musteri')">🧑‍🤝‍🧑 Müşteriler</button>
     <button class="nav-item yonetici" id="btn-rehber" onclick="sekmeAc('rehber')">🧭 Rehber Hesapları</button>
     <button class="nav-item yonetici" id="btn-sehir" onclick="sekmeAc('sehir')">🗺️ Şehir Rehberi</button>
+    <button class="nav-item yonetici" id="btn-yarisma" onclick="sekmeAc('yarisma')">🧠 Bilgi Yarışması</button>
     <div class="nav-baslik yonetici">Site Yönetimi</div>
     <button class="nav-item yonetici" id="btn-basvuru" onclick="sekmeAc('basvuru')">📥 Başvurular <span id="yeniSayac" style="display:none;background:#dc3545;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:4px"></span></button>
     <button class="nav-item yonetici" id="btn-turlar" onclick="sekmeAc('turlar')">📋 Tur Listesi</button>
@@ -191,6 +193,7 @@ body.rol-rehber .yonetici{display:none!important}
     <div id="sayfa-musteri" style="display:none"></div>
     <div id="sayfa-rehber" style="display:none"></div>
     <div id="sayfa-sehir" style="display:none"></div>
+    <div id="sayfa-yarisma" style="display:none"></div>
   </div>
 </div>
 
@@ -265,10 +268,10 @@ function sekmeAc(ad) {
   const anaM = { ana: 1, kafile: 1, musteri: 1, basvuru: 1 }, mAd = anaM[ad] ? ad : 'diger';
   document.querySelectorAll('.mobil-alt button').forEach(b => b.classList.toggle('active', b.dataset.m === mAd));
   // "Diğer" altındaki bir sayfadaysak 5. düğme o sayfanın adını gösterir (hangi ekranda olduğu belli olsun)
-  const DIGER_AD = { rehber: ['🧭', 'Rehberler'], sehir: ['🗺️', 'Şehir R.'], turlar: ['📋', 'Turlar'], ekle: ['📋', 'Turlar'], duyuru: ['📢', 'Duyurular'], yorum: ['💬', 'Yorumlar'], ziyaret: ['📊', 'Ziyaretçi'] }[ad] || ['☰', 'Diğer'];
+  const DIGER_AD = { rehber: ['🧭', 'Rehberler'], sehir: ['🗺️', 'Şehir R.'], turlar: ['📋', 'Turlar'], ekle: ['📋', 'Turlar'], duyuru: ['📢', 'Duyurular'], yorum: ['💬', 'Yorumlar'], ziyaret: ['📊', 'Ziyaretçi'], yarisma: ['🧠', 'Yarışma'] }[ad] || ['☰', 'Diğer'];
   const di = document.getElementById('mobilDigerIkon'), da = document.getElementById('mobilDigerAd');
   if (di) di.textContent = DIGER_AD[0]; if (da) da.textContent = DIGER_AD[1];
-  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir','ziyaret'].forEach(s => {
+  ['ana','basvuru','turlar','ekle','duyuru','kafile','yorum','musteri','rehber','sehir','ziyaret','yarisma'].forEach(s => {
     document.getElementById('sayfa-' + s).style.display = s === ad ? 'block' : 'none';
     const btn = document.getElementById('btn-' + s);
     if (btn) btn.classList.toggle('active', s === ad);
@@ -282,6 +285,7 @@ function sekmeAc(ad) {
   if (ad === 'kafile') renderKafileler();
   if (ad === 'yorum') renderYorumlar();
   if (ad === 'ziyaret') renderZiyaret();
+  if (ad === 'yarisma') renderYarisma();
   if (ad === 'musteri') renderMusteriler();
   if (ad === 'rehber') renderRehberler();
   if (ad === 'sehir') renderSehirRehberi();
@@ -320,7 +324,7 @@ async function renderAna() {
   const b = (sekme, baslik, alt) => { const i = baslik.indexOf(' '); return `<button type="button" onclick="sekmeAc('${sekme}')"><span><i class="ana-ikon">${baslik.slice(0, i)}</i> ${baslik.slice(i + 1)}</span><small>${alt}</small></button>`; };
   el.innerHTML = `<div class="header"><h2>Hoş geldiniz</h2></div>
     <div class="card ana-kart"><h3>🧳 Grup Yönetimi <span style="font-size:12px;font-weight:400;color:#888">– misafir uygulaması</span></h3><div class="ana-btnler">
-      ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}</div></div>
+      ${b('kafile', '🧳 Gruplar', '<span id="anaGrup">…</span>')}${b('musteri', '🧑‍🤝‍🧑 Müşteriler', 'Katılımcılar, doğum günleri')}${b('rehber', '🧭 Rehber Hesapları', 'Rehber girişleri ve grupları')}${b('sehir', '🗺️ Şehir Rehberi', 'Kültür turları: gezilecek yerler, yeme-içme')}${b('yarisma', '🧠 Bilgi Yarışması', 'Uygulamadaki sorular ve grup sıralaması')}</div></div>
     <div class="card ana-kart"><h3>🌐 Site Yönetimi</h3><div class="ana-btnler">
       ${b('basvuru', '📥 Başvurular', '<span id="anaBasvuru">…</span>')}${b('turlar', '📋 Turlar', 'Yeni tur ekle, düzenle, kopyala')}${b('duyuru', '📢 Duyurular', 'Sitedeki duyuru bandı')}${b('yorum', '💬 Yorumlar', 'Misafir mesajları')}${b('ziyaret', '📊 Ziyaretçiler', '<span id="anaZiyaret">Hangi sayfaya kaç kişi</span>')}</div></div>
     <div id="anaDogum"></div>
@@ -737,6 +741,7 @@ async function duyuruGuncelle(id) {
 const KAFILE_URL = 'https://ismailcosarturizm.com.tr/kafile/';
 const KOD_HARF = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // karışan 0/O, 1/I yok
 const TUR_TURLERI = { umre: 'Umre', hac: 'Hac', kultur: 'Kültür turu' };
+const YARISMA_KONULARI = { umre: 'Umre', hac: 'Hac', balkan: 'Balkan', ozbekistan: 'Özbekistan' };
 
 function kafileKodUret(ad) {
   const tr = {'Ç':'C','Ğ':'G','İ':'I','I':'I','Ö':'O','Ş':'S','Ü':'U'};
@@ -964,6 +969,9 @@ function kafileFormu(k) {
         <div class="form-group"><label>Yerel acil numara (isteğe bağlı)</label><input id="k_acil_tel" value="${esc(k.acil_tel)}" placeholder="Ör. 112">
           <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında gidilen ülkenin acil numarası. Umre/Hac'da 911 ve 997 zaten gösterilir.</div></div>
       </div>
+      <div class="form-group" style="max-width:420px"><label>Bilgi yarışması (uygulamadaki Eğlence sekmesi)</label>
+        <select id="k_yarisma_konusu"><option value="" ${!k.yarisma_konusu ? 'selected' : ''}>Tur türüne göre (Umre/Hac soruları)</option>${Object.entries(YARISMA_KONULARI).map(([d, a]) => `<option value="${d}" ${k.yarisma_konusu === d ? 'selected' : ''}>${a} soruları</option>`).join('')}<option value="kapali" ${k.yarisma_konusu === 'kapali' ? 'selected' : ''}>Kapalı</option></select>
+        <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında konuyu seçin (Balkan, Özbekistan…); seçilmezse yarışma çıkmaz. Sorular: 🧠 Bilgi Yarışması sayfası.</div></div>
       <div class="form-group"><label>Google yorum bağlantısı (isteğe bağlı)</label><input id="k_yorum_link" value="${esc(k.yorum_link)}" placeholder="https://g.page/r/.../review">
         <div style="font-size:11.5px;color:#888;margin-top:4px">Misafir uygulamasında turun son günü ve sonrasında “Google'da yorum yap” butonu çıkar. Boş bırakılırsa işletmenin Google Haritalar sayfası açılır. Google İşletme Profili'ndeki “Yorum iste” bağlantısını yapıştırırsanız yorum penceresi doğrudan açılır.</div></div>
       <div class="form-group" style="max-width:200px"><label>Durum</label>
@@ -1020,7 +1028,7 @@ function kafileFormOku() {
     rehber_ad: d('k_rehber_ad'), rehber_tel: d('k_rehber_tel'),
     inis_sehri: d('k_inis_sehri') || null, donus_sehri: d('k_donus_sehri') || null,
     yorum_link: d('k_yorum_link') || null,
-    tur_turu: d('k_tur_turu'), acil_tel: d('k_acil_tel') || null,
+    tur_turu: d('k_tur_turu'), acil_tel: d('k_acil_tel') || null, yarisma_konusu: d('k_yarisma_konusu') || null,
     aktif: d('k_aktif') === 'true', oteller, program
   };
 }
@@ -1810,6 +1818,95 @@ function srKonumYazi(x) {
   return '⏳ Konum henüz yok';
 }
 function srHarita(ad, sehir) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ad + ' ' + sehir); }
+// ── 🧠 Bilgi Yarışması: misafir uygulamasının Eğlence sekmesindeki sorular ──
+const YR = { liste: [], konu: 'umre', duzenlenen: null, oyuncu: [] };
+async function renderYarisma() {
+  const el = document.getElementById('sayfa-yarisma');
+  el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
+  const [{ data, error }, { data: oy }, { data: kf }] = await Promise.all([sb.from('bilgi_sorulari').select('*').order('sira'), sb.from('yarisma_oyuncular').select('*'), sb.from('kafileler').select('*')]);
+  if (error) { el.innerHTML = '<div class="card">❌ ' + esc(error.message) + '</div>'; return; }
+  YR.liste = data || []; YR.duzenlenen = null;
+  const kAd = {}; (kf || []).forEach(k => { kAd[k.id] = k.ad; });
+  const say = {}; (oy || []).forEach(o => { say[o.kafile_id] = (say[o.kafile_id] || 0) + 1; });
+  YR.oyuncu = Object.entries(say).map(([id, n]) => ({ ad: kAd[id] || 'Grup', n }));
+  yarismaCiz();
+}
+function yarismaCiz() {
+  const l = YR.liste.filter(x => x.konu === YR.konu).sort((a, b) => a.sira - b.sira || a.id - b.id), d = YR.duzenlenen;
+  const taslak = l.filter(x => !x.yayinda).length;
+  const sekme = k => { const t = YR.liste.filter(x => x.konu === k), y = t.filter(x => x.yayinda).length; return `<button type="button" class="btn ${k === YR.konu ? 'btn-gold' : 'btn-navy'} yr-konu" data-konu="${k}" onclick="YR.konu='${k}';YR.duzenlenen=null;yarismaCiz()">${YARISMA_KONULARI[k]} (${y}/${t.length})</button>`; };
+  document.getElementById('sayfa-yarisma').innerHTML = `
+    <div class="header"><h2>🧠 Bilgi Yarışması</h2><button class="btn btn-gold" onclick="yarismaYeni()">➕ Soru ekle</button></div>
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafir uygulamasının <b>Eğlence</b> sekmesinde, grubun konusuna göre bu sorular çıkar. Her gün sıradaki 5 soru açılır; doğru cevap 10 puan, grup içinde sıralama yapılır. <b>Taslak sorular uygulamada görünmez.</b> Grubun konusu grup formunda seçilir (Umre/Hac otomatik).
+      ${YR.oyuncu.length ? `<br>Oynayanlar: ${YR.oyuncu.map(o => `${esc(o.ad)} · ${o.n} kişi`).join(' — ')}` : ''}</div>
+    ${d ? yarismaFormHtml(d) : ''}
+    <div class="card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${Object.keys(YARISMA_KONULARI).map(sekme).join('')}</div>
+      ${l.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="btn btn-gold" id="yrTopluYayin" onclick="yarismaTopluYayin(true)" ${taslak ? '' : 'disabled'}>✅ ${YARISMA_KONULARI[YR.konu]} sorularının tümünü yayınla</button><button class="btn btn-navy" onclick="yarismaTopluYayin(false)">Tümünü taslağa al</button></div>` : ''}
+      <div class="tur-list">${l.map((x, i) => `
+        <div class="tur-item yr-soru" data-id="${x.id}"><div class="tur-item-info"><h4>${i + 1}. ${esc(x.soru)} <span class="badge ${x.yayinda ? 'badge-green' : 'badge-red'}">${x.yayinda ? 'Yayında' : 'Taslak'}</span></h4>
+          <p>${(x.siklar || []).map((c, j) => j === x.dogru ? `<b style="color:#2e7d32">${'ABCD'[j]}) ${esc(c)} ✓</b>` : `${'ABCD'[j]}) ${esc(c)}`).join(' · ')}</p>
+          ${x.aciklama ? `<p style="font-size:12.5px;color:#777">${esc(x.aciklama)}</p>` : ''}</div>
+          <div class="tur-item-actions"><button class="btn ${x.yayinda ? 'btn-navy' : 'btn-gold'}" onclick="yarismaYayin(${x.id}, ${!x.yayinda})">${x.yayinda ? 'Taslağa al' : 'Yayınla'}</button>
+            <button class="btn btn-navy" onclick="yarismaDuzenle(${x.id})">Düzenle</button><button class="btn btn-red" onclick="yarismaSil(${x.id})">Sil</button></div></div>`).join('') || '<p style="color:#888;font-size:13px">Bu konuda henüz soru yok. “Soru ekle” ile başlayın.</p>'}</div>
+    </div>`;
+}
+function yarismaFormHtml(d) {
+  const s = d.siklar || ['', '', '', ''];
+  return `<div class="card" id="yr_kart"><h3>${d.id ? '✏️ Soruyu düzenle' : '➕ Yeni soru'}</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Konu</label><select id="yr_f_konu">${Object.entries(YARISMA_KONULARI).map(([k, v]) => `<option value="${k}" ${d.konu === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Sıra (küçük olan önce sorulur)</label><input id="yr_f_sira" type="number" value="${esc(String(d.sira ?? ''))}"></div>
+    </div>
+    <div class="form-group"><label>Soru</label><input id="yr_f_soru" maxlength="400" value="${esc(d.soru || '')}" placeholder="Ör. Tavaf kaç şavttan oluşur?"></div>
+    ${[0, 1, 2, 3].map(j => `<div class="form-group" style="display:flex;align-items:center;gap:8px"><label style="display:flex;align-items:center;gap:6px;margin:0;white-space:nowrap"><input type="radio" name="yr_f_dogru" value="${j}" ${d.dogru === j ? 'checked' : ''}> ${'ABCD'[j]})</label><input class="yr_f_sik" style="flex:1" maxlength="120" value="${esc(s[j] || '')}" placeholder="${j < 2 ? 'Şık' : 'Şık (isteğe bağlı)'}"></div>`).join('')}
+    <div style="font-size:11.5px;color:#888;margin:-4px 0 10px">Doğru şıkkın solundaki yuvarlağı işaretleyin.</div>
+    <div class="form-group"><label>Açıklama (cevaptan sonra gösterilir, isteğe bağlı)</label><textarea id="yr_f_aciklama" rows="2" maxlength="800">${esc(d.aciklama || '')}</textarea></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="yr_f_yayinda" ${d.yayinda ? 'checked' : ''}> Yayında (uygulamada görünsün)</label>
+    <div style="display:flex;gap:8px"><button class="btn btn-gold" onclick="yarismaKaydet()">💾 Kaydet</button><button class="btn btn-navy" onclick="YR.duzenlenen=null;yarismaCiz()">Vazgeç</button></div></div>`;
+}
+function yarismaYeni() {
+  const l = YR.liste.filter(x => x.konu === YR.konu);
+  YR.duzenlenen = { konu: YR.konu, sira: (l.reduce((m, x) => Math.max(m, x.sira || 0), 0) + 10), dogru: null, yayinda: false }; yarismaCiz(); window.scrollTo(0, 0);
+}
+function yarismaDuzenle(id) { YR.duzenlenen = YR.liste.find(x => x.id === id) || null; yarismaCiz(); window.scrollTo(0, 0); }
+async function yarismaKaydet() {
+  const d = YR.duzenlenen; if (!d) return;
+  const v = i => document.getElementById(i).value.trim();
+  const tum = [...document.querySelectorAll('.yr_f_sik')].map(i => i.value.trim());
+  const isaret = document.querySelector('input[name="yr_f_dogru"]:checked');
+  const dogruEski = isaret ? Number(isaret.value) : -1;
+  if (v('yr_f_soru').length < 5) { toast('❌ Soru metni gerekli', 'error'); return; }
+  if (dogruEski < 0 || !tum[dogruEski]) { toast('❌ Doğru şıkkı işaretleyin (şık boş olmamalı)', 'error'); return; }
+  // boş şıkları at, doğru şıkkın yeni sırasını bul
+  const siklar = [], dogru = tum.slice(0, dogruEski).filter(Boolean).length;
+  tum.forEach(x => { if (x) siklar.push(x); });
+  if (siklar.length < 2) { toast('❌ En az iki şık gerekli', 'error'); return; }
+  const k = { konu: v('yr_f_konu'), soru: v('yr_f_soru'), siklar, dogru, aciklama: v('yr_f_aciklama') || null,
+    sira: Number(v('yr_f_sira')) || 0, yayinda: document.getElementById('yr_f_yayinda').checked };
+  const { error } = d.id ? await sb.from('bilgi_sorulari').update(k).eq('id', d.id) : await sb.from('bilgi_sorulari').insert(k);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  toast('✅ Kaydedildi', 'success'); YR.konu = k.konu; renderYarisma();
+}
+async function yarismaYayin(id, yayinda) {
+  const { error } = await sb.from('bilgi_sorulari').update({ yayinda }).eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  const x = YR.liste.find(z => z.id === id); if (x) x.yayinda = yayinda; yarismaCiz();
+}
+async function yarismaTopluYayin(yayinda) {
+  const ad = YARISMA_KONULARI[YR.konu];
+  if (!confirm(`${ad} sorularının tümü ${yayinda ? 'yayınlansın (uygulamada görünsün)' : 'taslağa alınsın (uygulamadan kalksın)'} mı?`)) return;
+  const { error } = await sb.from('bilgi_sorulari').update({ yayinda }).eq('konu', YR.konu);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  YR.liste.forEach(x => { if (x.konu === YR.konu) x.yayinda = yayinda; }); yarismaCiz(); toast(yayinda ? '✅ Yayınlandı' : 'Taslağa alındı', 'success');
+}
+async function yarismaSil(id) {
+  const x = YR.liste.find(z => z.id === id);
+  if (!x || !confirm('Bu soru silinsin mi?\n\n' + x.soru + '\n\nMisafirlerin bu soruya verdiği cevaplar ve puanları da silinir.')) return;
+  const { error } = await sb.from('bilgi_sorulari').delete().eq('id', id);
+  if (error) { toast('❌ ' + error.message, 'error'); return; }
+  YR.liste = YR.liste.filter(z => z.id !== id); yarismaCiz(); toast('Silindi', 'success');
+}
 async function renderSehirRehberi() {
   const el = document.getElementById('sayfa-sehir');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';

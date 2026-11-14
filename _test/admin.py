@@ -70,7 +70,7 @@ with sync_playwright() as p:
     kontrol(pg.is_visible('#sayfa-ana') and not pg.is_visible('#sayfa-basvuru') and 'Grup Yönetimi' in pg.inner_text('#sayfa-ana') and 'Site Yönetimi' in pg.inner_text('#sayfa-ana'),
             'Girişte Ana Sayfa açılıyor (Başvurular değil); Grup Yönetimi ve Site Yönetimi bölümleri var', errs)
     basliklar = pg.locator('.sidebar .nav-baslik, .sidebar .nav-item').evaluate_all("l => l.map(e => e.id || e.textContent.trim())")
-    kontrol(basliklar[:6] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber', 'btn-sehir'] and basliklar[6:11] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-duyuru', 'btn-yorum'],
+    kontrol(basliklar[:7] == ['btn-ana', 'Grup Yönetimi', 'btn-kafile', 'btn-musteri', 'btn-rehber', 'btn-sehir', 'btn-yarisma'] and basliklar[7:12] == ['Site Yönetimi', 'btn-basvuru', 'btn-turlar', 'btn-duyuru', 'btn-yorum'],
             'Menü gruplu: Grup Yönetimi (Gruplar, Müşteriler, Rehber) ve Site Yönetimi (Başvurular, Turlar, Duyurular, Yorumlar)', basliklar)
     pg.locator('#sayfa-ana button', has_text='Müşteriler').click(); pg.wait_for_timeout(300)
     kontrol(pg.is_visible('#sayfa-musteri'), 'Ana Sayfa: kutucuğa basınca ilgili sekme açılıyor')
@@ -146,7 +146,7 @@ with sync_playwright() as p:
     pg.get_by_role('button', name=re.compile('Otel ekle')).click()
     kontrol(pg.locator('#k_oteller .otel-blok').count() == 3, 'Grup: "Otel ekle" ile üçüncü otel eklenebiliyor (kültür turları için)')
     pg.fill('#k_inis_sehri', 'Cidde'); pg.fill('#k_donus_sehri', 'Medine'); pg.fill('#k_yorum_link', 'https://g.page/r/ABC/review')
-    pg.select_option('#k_tur_turu', 'kultur'); pg.fill('#k_acil_tel', '112')
+    pg.select_option('#k_tur_turu', 'kultur'); pg.fill('#k_acil_tel', '112'); pg.select_option('#k_yarisma_konusu', 'balkan')
     satir = pg.locator('#k_program .prog-satir').first
     satir.locator('.p_tarih').fill('2026-11-11'); satir.locator('.p_saat').fill('14:30'); satir.locator('.p_baslik').fill('Mekke ziyaretleri'); satir.locator('.p_yer').fill('Otel lobisi')
     pg.get_by_role('button', name=re.compile('Satır ekle')).click()
@@ -157,7 +157,7 @@ with sync_playwright() as p:
     ek = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'insert' and i['tablo'] == 'kafileler']
     v = ek[0]['veri'] if ek else {}
     kontrol(len(ek) == 1 and v.get('kod') == kod and v.get('aktif') is True and len(v.get('oteller', [])) == 1
-            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112'
+            and [p['baslik'] for p in v.get('program', [])] == ['Kahvaltı', 'Mekke ziyaretleri'] and v.get('rehber_ad') == "Ali O'Hoca" and v.get('tur_turu') == 'kultur' and v.get('acil_tel') == '112' and v.get('yarisma_konusu') == 'balkan'
             and v.get('inis_sehri') == 'Cidde' and v.get('yorum_link') == 'https://g.page/r/ABC/review' and v.get('donus_sehri') == 'Medine' and v['oteller'][0].get('giris') == '2026-11-10' and v['oteller'][0].get('cikis') == '2026-11-15' and (v['oteller'][0].get('lat'), v['oteller'][0].get('lng')) == (21.4174, 39.8295),
             'Kafile: yeni kafile kaydediliyor (boş satır/otel atlanıyor, program tarih+saate göre sıralı)', errs)
     rk = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafile_rehberleri' and i['tur'] == 'insert']
@@ -408,6 +408,42 @@ with sync_playwright() as p:
     pg.fill('#sr_f_ad', 'Vrelo Bosne'); pg.fill('#sr_f_harita', 'https://maps.app.goo.gl/KOTU'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
     ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'sehir_rehberi' and i['tur'] == 'insert']
     kontrol(len(ek) == 1 and 'lat' not in ek[0]['veri'] and 'bulunamadı' in pg.inner_text('#toast'), 'Şehir rehberi (admin): konum bulunamazsa yine kaydediyor ve uyarıyor', errs)
+    # ── Bilgi Yarışması (admin) ──
+    pg.evaluate("""window.__islem = []; window.__DB.bilgi_sorulari = [
+      { id: 801, konu: 'umre', soru: 'Tavaf kaç şavttır?', siklar: ['3', '5', '7', '9'], dogru: 2, aciklama: 'Yedi tur.', sira: 10, yayinda: false },
+      { id: 802, konu: 'umre', soru: 'Sa\\'y nerede yapılır? <b>x</b>', siklar: ['Safa-Merve', 'Mina'], dogru: 0, aciklama: null, sira: 20, yayinda: true },
+      { id: 803, konu: 'balkan', soru: 'Mostar hangi nehirde?', siklar: ['Drina', 'Neretva', 'Vardar', 'Tuna'], dogru: 1, aciklama: null, sira: 10, yayinda: false }];
+      window.__DB.yarisma_oyuncular = [{ kafile_id: 'k1', oyuncu: 'aaaaaaaaaa', ad: 'Ayşe' }]; sekmeAc('yarisma')"""); pg.wait_for_timeout(500)
+    yt = pg.inner_text('#sayfa-yarisma')
+    kontrol(pg.locator('.yr-soru').count() == 2 and 'Umre (1/2)' in yt and 'Balkan (0/1)' in yt and '<b>x</b>' in yt and pg.locator('.yr-soru[data-id="801"] b', has_text='C) 7 ✓').count() == 1,
+            'Bilgi yarışması (admin): konuya göre sorular, yayında/toplam sayıları, doğru şık işaretli', yt[:300])
+    pg.click('.yr-konu[data-konu="balkan"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('.yr-soru').count() == 1 and pg.locator('.yr-soru[data-id="803"]').count() == 1, 'Bilgi yarışması (admin): Balkan sekmesinde yalnız Balkan soruları')
+    pg.click('#yrTopluYayin'); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'bilgi_sorulari' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': True} and g[0]['filtre'] == [['konu', 'balkan']] and 'Yayında' in pg.inner_text('.yr-soru[data-id="803"]'), 'Bilgi yarışması (admin): bir konunun tümü tek tuşla yayınlanıyor', g)
+    pg.evaluate("window.__islem = []"); pg.click('.yr-konu[data-konu="umre"]'); pg.wait_for_timeout(200)
+    pg.locator('.yr-soru[data-id="801"]').get_by_role('button', name='Yayınla').click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'bilgi_sorulari' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'] == {'yayinda': True} and g[0]['filtre'] == [['id', 801]], 'Bilgi yarışması (admin): tek soru yayınlanıyor')
+    pg.evaluate("window.__islem = []"); pg.get_by_role('button', name=re.compile('Soru ekle')).click(); pg.wait_for_timeout(200)
+    pg.fill('#yr_f_soru', 'Zemzem kimin için çıktı?'); pg.locator('.yr_f_sik').nth(0).fill('Hz. Musa'); pg.locator('.yr_f_sik').nth(2).fill('Hz. Hacer ve Hz. İsmail')
+    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(200)
+    kontrol(not pg.evaluate('window.__islem'), 'Bilgi yarışması (admin): doğru şık işaretlenmeden kaydetmiyor')
+    pg.check('input[name="yr_f_dogru"][value="2"]'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    ek = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'bilgi_sorulari' and i['tur'] == 'insert']
+    v = ek[0]['veri'] if ek else {}
+    kontrol(v.get('konu') == 'umre' and v.get('siklar') == ['Hz. Musa', 'Hz. Hacer ve Hz. İsmail'] and v.get('dogru') == 1 and v.get('yayinda') is False and v.get('sira') == 30,
+            'Bilgi yarışması (admin): yeni soru kaydediliyor (boş şık atlanıp doğru şık yeniden sıralanıyor, taslak olarak)', v)
+    pg.evaluate("window.__islem = []"); pg.wait_for_timeout(300); pg.locator('.yr-soru[data-id="801"]').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(200)
+    kontrol(pg.input_value('#yr_f_soru') == 'Tavaf kaç şavttır?' and pg.is_checked('input[name="yr_f_dogru"][value="2"]'), 'Bilgi yarışması (admin): düzenleme formu kayıtlı soruyla açılıyor')
+    pg.fill('#yr_f_aciklama', 'Yedi tur dönülür.'); pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'bilgi_sorulari' and i['tur'] == 'update']
+    kontrol(len(g) == 1 and g[0]['veri'].get('aciklama') == 'Yedi tur dönülür.' and g[0]['filtre'] == [['id', 801]], 'Bilgi yarışması (admin): soru düzenleniyor')
+    pg.evaluate("window.__islem = []"); pg.wait_for_timeout(300); pg.locator('.yr-soru[data-id="802"]').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(300)
+    g = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'bilgi_sorulari' and i['tur'] == 'delete']
+    kontrol(len(g) == 1 and g[0]['filtre'] == [['id', 802]] and pg.locator('.yr-soru[data-id="802"]').count() == 0 and not errs, 'Bilgi yarışması (admin): soru siliniyor', errs)
+    pg.evaluate("sekmeAc('sehir')"); pg.wait_for_timeout(500)
     pg.evaluate("window.__islem = []"); pg.locator('.mekan-item[data-id="503"]').count()
     pg.select_option('#sr_sehir', 'Mostar'); pg.wait_for_timeout(200); pg.locator('.mekan-item[data-id="503"]').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(300)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']

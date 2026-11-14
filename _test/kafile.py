@@ -57,6 +57,10 @@ def sayfa(c, errs, adres=URL, karsilama=False):
     pg.goto(adres, wait_until='domcontentloaded'); pg.wait_for_timeout(500)
     return pg
 
+def duyuru_ac(pg):
+    """Duyurular alt menüde değil; Bugün ekranındaki zilden açılır."""
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(150); pg.click('#ekran .zil'); pg.wait_for_timeout(250)
+
 def tasma(pg):
     return pg.evaluate('document.documentElement.scrollWidth > window.innerWidth + 1')
 
@@ -119,15 +123,16 @@ with sync_playwright() as p:
     kontrol(pg.locator('#anketKart').count() == 0, 'Anket: tur devam ederken anket kartı yok')
 
     # ── Duyurular ──
-    pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(300)
+    duyuru_ac(pg)
     d = pg.locator('article.duyuru')
     kontrol(d.count() == 2 and 'ÖNEMLİ' in d.nth(0).inner_text() and 'Saat değişikliği' in d.nth(1).inner_text(), 'Duyurular: önemli duyuru en üstte, ikisi de listede')
     kontrol(pg.evaluate('!window.__xss') and '<img' in d.nth(0).inner_text(), 'Güvenlik: duyurudaki HTML çalışmıyor, düz yazı gösteriliyor')
     kontrol(not pg.is_visible('#menuNokta'), 'Duyurular: açılınca okunmamış işareti kalkıyor')
 
     # ── Logo: her ekranın üstünde ──
-    for sk in ['bugun', 'duyurular', 'rehber', 'vakitler', 'acil']:
-        pg.click(f'.alt-menu [data-sekme="{sk}"]'); pg.wait_for_timeout(250)
+    for sk in ['bugun', 'duyurular', 'eglence', 'rehber', 'vakitler', 'acil']:
+        if sk == 'duyurular': duyuru_ac(pg)
+        else: pg.click(f'.alt-menu [data-sekme="{sk}"]'); pg.wait_for_timeout(250)
         kontrol(pg.evaluate("(()=>{const i=document.querySelector('#ekran header.bas .marka img');return !!i&&i.complete&&i.naturalWidth>0})()"), f'Logo: {sk} ekranında şirket logosu var')
 
     # ── Rehber: sayaç ve valiz ──
@@ -442,10 +447,10 @@ with sync_playwright() as p:
     kontrol(ab and ab[-1]['p_kod'] == 'TEST-ABCDE' and ab[-1]['p_endpoint'].startswith('https://fcm.googleapis.com/') and ab[-1]['p_p256dh'] and ab[-1]['p_auth']
             and 'subscribe:true:65' in pg.evaluate('window.__olaylar'), 'Bildirim: izin → abonelik (65 baytlık anahtarla) → grup koduyla sunucuya kaydediliyor', str(ab[-1:])[:120])
     kontrol(pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: açıldıktan sonra kart kayboluyor')
-    pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    duyuru_ac(pg)
     kontrol('Bildirimler açık' in pg.inner_text('#ekran'), 'Bildirim: Duyurular ekranında "Bildirimler açık" yazıyor')
     pg.goto(URL + '?sekme=duyurular', wait_until='domcontentloaded'); pg.wait_for_timeout(500)
-    kontrol(pg.locator('.alt-menu [data-sekme="duyurular"][aria-current="page"]').count() == 1 and 'sekme=' not in pg.url and 'Bildirimler açık' in pg.inner_text('#ekran'),
+    kontrol(pg.locator('.alt-menu [data-sekme="bugun"][aria-current="page"]').count() == 1 and pg.locator('#ekran h1', has_text='Duyurular').count() == 1 and 'sekme=' not in pg.url and 'Bildirimler açık' in pg.inner_text('#ekran'),
             'Bildirim: bildirime dokununca (?sekme=duyurular) uygulama Duyurular\'da açılıyor, abonelik hatırlanıyor')
     pg.click('[data-eylem="bildirim-kapat"]'); pg.wait_for_timeout(400)
     kontrol([g for a_, g in c.__rpc if a_ == 'bildirim_abonelik_sil'] and 'unsubscribe' in pg.evaluate('window.__olaylar') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 1,
@@ -456,12 +461,12 @@ with sync_playwright() as p:
     kontrol(not errs, 'Bildirim akışında JavaScript hatası yok', errs)
     c.close()
     c = push_baglam(izin_yanit='denied'); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300)
-    pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(300); pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    pg.click('#ekran [data-eylem="bildirim-ac"]'); pg.wait_for_timeout(300); duyuru_ac(pg)
     kontrol('izin verilmemiş' in pg.inner_text('#ekran') and not [1 for a_, _ in c.__rpc if a_ == 'bildirim_abone_ol'], 'Bildirim: izin reddedilince açıklama çıkıyor, sunucuya kayıt yapılmıyor', errs)
     c.close()
     c = push_baglam(ua='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1', push_var=False)
     c.add_init_script("delete window.PushManager;")
-    errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300); pg.click('.alt-menu [data-sekme="duyurular"]'); pg.wait_for_timeout(200)
+    errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300); duyuru_ac(pg)
     kontrol('Ana Ekrana Ekle' in pg.inner_text('#ekran') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: ana ekrana kurulmamış iPhone\'da önce kurulum anlatılıyor', errs)
     c.close()
     # Servis çalışanı: gelen bildirimi gösterme ve dokununca uygulamayı açma (node ile)
@@ -480,6 +485,83 @@ with sync_playwright() as p:
     except Exception: k_ = []
     kontrol(len(k_) == 2 and k_[0][1] == "Medine'ye hareket" and k_[0][2]['body'] == 'Yarın 08:00' and k_[0][2]['tag'] == 'duyuru-5'
             and k_[1] == ['ac', 'https://ismailcosarturizm.com.tr/kafile/?sekme=duyurular'], 'Servis çalışanı: bildirimi başlık/metinle gösteriyor, dokununca Duyurular\'ı açıyor', (r.stderr or r.stdout)[-160:])
+
+    # ── Bilgi & Eğlence (bilgi yarışması) ──
+    SORU = lambda i, d: {'id': i, 'soru': f'Deneme sorusu {i}?', 'siklar': ['Şık A', 'Şık B', 'Şık C', 'Şık D'], 'dogru': d, 'aciklama': f'Açıklama {i}.'}
+    YR = {'konu': 'umre', 'sorular': [SORU(i, i % 4) for i in range(1, 7)], 'tablo': [{'ad': 'Ayşe K.', 'puan': 20, 'ben': False}, {'ad': 'Mehmet <b>D.</b>', 'puan': 10, 'ben': False}], 'cevaplar': []}
+    KY = dict(KAFILE, baslangic='2026-11-12')  # turun 1. günü: 6 sorunun 5'i açık
+    def yr_baglam(yr=YR, kafile=KY, cevap_ok=True):
+        c = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', locale='tr-TR')
+        c.add_init_script(f"window.__SIMDI = '{SIMDI}'; window.confirm = function(){{ return true; }};")
+        c.__gonderilen = []; c.__cevap_ok = cevap_ok
+        J = {'content-type': 'application/json', 'access-control-allow-origin': '*'}
+        c.route(re.compile(r'^https?://(?!localhost)(?!wpkjxwbvewwgdclbsdya)'), lambda route, req: route.abort())
+        c.route('**/rest/v1/rpc/**', lambda route, req: route.fulfill(status=200, body='null', headers=J))
+        c.route('**/rest/v1/rpc/kafile_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(kafile), headers=J))
+        c.route('**/rest/v1/rpc/yarisma_getir', lambda route, req: route.fulfill(status=200, body=json.dumps(yr), headers=J))
+        def cevap(route, req):
+            if not c.__cevap_ok: return route.abort()
+            c.__gonderilen.append(json.loads(req.post_data)); route.fulfill(status=200, body='true', headers=J)
+        c.route('**/rest/v1/rpc/yarisma_cevap', cevap)
+        return c
+    c = yr_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
+    kontrol(pg.locator('.alt-menu [data-sekme="eglence"]').count() == 1 and pg.locator('.alt-menu [data-sekme="duyurular"]').count() == 0, 'Eğlence: alt menüde Duyurular yerine Eğlence sekmesi')
+    gs = pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else ''
+    kontrol('Deneme sorusu 1?' in gs and '1. sırada: Ayşe K.' in gs, 'Eğlence: Bugün ekranında "Günün sorusu" kartı (sıradaki soru ve grup lideri)', gs)
+    pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(400)
+    kontrol(pg.inner_text('#yrPuan').startswith('0') and pg.locator('#yrTablo .sira').count() == 2 and '<b>' in pg.inner_text('#yrTablo') and '5 soru' in pg.inner_text('#yrBasla').lower(),
+            'Eğlence: puan 0, grup sıralaması (adlar düz yazı), bugün 5 soru açık', errs)
+    pg.click('#yrBasla'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#yrAd').count() == 1, 'Eğlence: ilk oyunda sıralamada görünecek ad soruluyor')
+    pg.click('#yrAdForm button[type=submit]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#yrAd').count() == 1 and not c.__gonderilen, 'Eğlence: ad boşken başlamıyor')
+    pg.fill('#yrAd', '  Deneme   K. '); pg.click('#yrAdForm button[type=submit]'); pg.wait_for_timeout(400)
+    kontrol('Soru 1 / 6' in pg.inner_text('#ekran h1') and pg.locator('.secenek').count() == 4 and c.__gonderilen and c.__gonderilen[0]['p_ad'] == 'Deneme K.', 'Eğlence: ad kaydedilip 1. soru açılıyor', str(c.__gonderilen)[:150])
+    pg.click('.secenek[data-j="0"]'); pg.wait_for_timeout(400)   # 1. sorunun doğrusu B (1)
+    kontrol(pg.locator('.secenek.yanlis[data-j="0"]').count() == 1 and pg.locator('.secenek.dogru[data-j="1"]').count() == 1 and 'Doğru cevap: Şık B' in pg.inner_text('.yr-aciklama') and 'Açıklama 1.' in pg.inner_text('.yr-aciklama'),
+            'Eğlence: yanlış cevapta yanlış şık kırmızı, doğrusu yeşil, açıklama çıkıyor')
+    son = c.__gonderilen[-1] if c.__gonderilen else {}
+    kontrol(son.get('p_kod') == 'TEST-ABCDE' and son.get('p_cevaplar') == [{'id': 1, 'secim': 0}] and len(son.get('p_oyuncu', '')) >= 8, 'Eğlence: cevap grup koduyla sunucuya gidiyor', str(son)[:150])
+    pg.click('.secenek[data-j="1"]', force=True); pg.wait_for_timeout(200)
+    kontrol(pg.evaluate("JSON.parse(localStorage.getItem('kafile-yr-cevap-TEST-ABCDE'))['1'].s") == 0, 'Eğlence: cevap verildikten sonra değiştirilemiyor')
+    pg.click('[data-eylem="yarisma-basla"]'); pg.wait_for_timeout(300); pg.click('.secenek[data-j="2"]'); pg.wait_for_timeout(300)  # 2. soru doğrusu C
+    kontrol('Soru 2 / 6' in pg.inner_text('#ekran h1') and 'Doğru! +10 puan' in pg.inner_text('.yr-aciklama'), 'Eğlence: doğru cevapta +10 puan')
+    pg.click('#ekran .geri'); pg.wait_for_timeout(300)
+    t = pg.locator('#yrTablo .sira').all_inner_texts()
+    kontrol(pg.inner_text('#yrPuan').startswith('10') and len(t) == 3 and 'Deneme K. (siz)' in t[1] and pg.locator('#yrTablo .sira.ben').count() == 1 and '2.' in pg.inner_text('#yrPuan'),
+            'Eğlence: puan 10, sıralamada "(siz)" 2. sırada', t)
+    for j in [3, 0, 1]:   # 3., 4., 5. sorular (doğruları D, A, B)
+        pg.click('[data-eylem="yarisma-basla"]'); pg.wait_for_timeout(250); pg.click(f'.secenek[data-j="{j}"]'); pg.wait_for_timeout(250)
+    kontrol('Bugünlük bu kadar' in pg.inner_text('#ekran') and pg.locator('.secenek').count() == 4, 'Eğlence: günün 5 sorusu bitince "Bugünlük bu kadar"')
+    pg.click('#ekran .btn-dolu[data-eylem="yarisma-cik"]'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('#yrYarin').count() == 1 and 'Yarın 1 yeni soru' in pg.inner_text('#yrYarin') and pg.inner_text('#yrPuan').startswith('40') and '5' in pg.locator('#yrPuan > div').nth(2).inner_text(),
+            'Eğlence: bugünkü sorular bitti, yarın açılacak soru sayısı yazıyor; puan 40, bugün 5 çözüldü')
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(250)
+    kontrol(pg.locator('#gununSorusu').count() == 0, 'Eğlence: o günün soruları bitince Bugün\'deki kart kalkıyor')
+    pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(600); pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(300)
+    kontrol(pg.inner_text('#yrPuan').startswith('40') and 'Deneme K.' in pg.inner_text('#ekran'), 'Eğlence: sayfa yenilenince puan ve ad korunuyor')
+    pg.click('[data-eylem="yarisma-ad"]'); pg.wait_for_timeout(200); pg.fill('#yrAd', 'Yeni Ad'); pg.click('#yrAdForm button[type=submit]'); pg.wait_for_timeout(400)
+    kontrol('Yeni Ad (siz)' in pg.inner_text('#yrTablo') and c.__gonderilen[-1]['p_ad'] == 'Yeni Ad', 'Eğlence: "Adımı değiştir" adı güncelliyor')
+    duyuru_ac(pg)
+    kontrol(pg.locator('article.duyuru').count() == 2 and pg.locator('.alt-menu [data-sekme="bugun"][aria-current="page"]').count() == 1, 'Duyurular: Bugün ekranındaki zilden açılıyor')
+    pg.click('#ekran .geri'); pg.wait_for_timeout(250)
+    kontrol(pg.locator('#ekran .zil').count() == 1 and not tasma(pg) and not errs, 'Duyurular: "← Bugün" ile geri dönülüyor; taşma ve hata yok', errs)
+    c.close()
+    # internet yokken cevaplar telefonda bekliyor, bağlantı gelince gidiyor
+    c = yr_baglam(kafile=KAFILE, cevap_ok=False); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    pg.evaluate("localStorage.setItem('kafile-yr-ad-TEST-ABCDE', JSON.stringify('Çevrimdışı K.'))")
+    pg.click('#gununSorusu'); pg.wait_for_timeout(300); pg.click('.secenek[data-j="1"]'); pg.wait_for_timeout(400)
+    kontrol('Doğru! +10 puan' in pg.inner_text('.yr-aciklama') and pg.evaluate("JSON.parse(localStorage.getItem('kafile-yr-kuyruk-TEST-ABCDE')).length") == 1, 'Eğlence: internet yokken de cevaplanıyor, cevap telefonda bekliyor')
+    c.__cevap_ok = True; pg.evaluate("window.dispatchEvent(new Event('online'))"); pg.wait_for_timeout(700)
+    kontrol(c.__gonderilen and c.__gonderilen[-1]['p_cevaplar'] == [{'id': 1, 'secim': 1}] and pg.evaluate("JSON.parse(localStorage.getItem('kafile-yr-kuyruk-TEST-ABCDE')).length") == 0 and not errs,
+            'Eğlence: internet gelince bekleyen cevap gönderiliyor, kuyruk boşalıyor', errs)
+    c.close()
+    # grubun konusu yoksa (ör. kültür turu, konu seçilmemiş)
+    c = yr_baglam(yr={'konu': None, 'sorular': [], 'tablo': []}, kafile=KAFILE); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    kontrol(pg.locator('#gununSorusu').count() == 0, 'Eğlence: soru yoksa Bugün\'de Günün sorusu kartı çıkmıyor')
+    pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(300)
+    kontrol('henüz soru eklenmedi' in pg.inner_text('#yrBos') and not errs, 'Eğlence: soru yoksa açıklama yazıyor', errs)
+    c.close()
 
     # ── Kafile pasife alınmış ──
     c = baglam(b); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
