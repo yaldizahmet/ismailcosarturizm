@@ -568,6 +568,21 @@ with sync_playwright() as p:
     kontrol(c.__gonderilen and c.__gonderilen[-1]['p_cevaplar'] == [{'id': 1, 'secim': 1}] and pg.evaluate("JSON.parse(localStorage.getItem('kafile-yr-kuyruk-TEST-ABCDE')).length") == 0 and not errs,
             'Eğlence: internet gelince bekleyen cevap gönderiliyor, kuyruk boşalıyor', errs)
     c.close()
+    # Faydalı bilgiler: hac grubuna umreye özel yazılar gösterilmez
+    for tt, var_mi in [('umre', True), ('hac', False)]:
+        c = yr_baglam(kafile=dict(KAFILE, tur_turu=tt)); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+        pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
+        hr = pg.eval_on_selector_all('#ekran .liste a', 'l => l.map(a => a.getAttribute("href") + " " + a.textContent)')
+        umreye_ozel = [x for x in hr if 'rehber-ilk-umre' in x or 'valiz-listesi' in x]
+        kontrol(bool(umreye_ozel) == var_mi and any('rehber-ravza-ziyareti' in x for x in hr) and (var_mi or not any('umre' in x.split(' ', 1)[1].lower() for x in hr)) and not errs,
+                f'Faydalı bilgiler ({tt}): ' + ('umre yazıları listede' if var_mi else 'hac grubunda "umre" başlıklı yazı yok, Ravza var'), hr)
+        c.close()
+    c = b.new_context(viewport={'width': 390, 'height': 844}); pg = c.new_page()
+    pg.goto(URL.split('/kafile/')[0] + '/hac.html', wait_until='domcontentloaded'); pg.wait_for_timeout(300)
+    hr = pg.eval_on_selector_all('.rehber-kart', 'l => l.map(a => a.getAttribute("href"))')
+    kontrol(len(hr) == 3 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and not tasma(pg), 'Hac sayfası: Faydalı Bilgiler kartları var, bağlantılar çalışıyor', hr)
+    c.close()
+
     # grubun konusu yoksa (ör. kültür turu, konu seçilmemiş)
     c = yr_baglam(yr={'konu': None, 'sorular': [], 'tablo': []}, kafile=KAFILE); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
     kontrol(pg.locator('#gununSorusu').count() == 0, 'Eğlence: soru yoksa Bugün\'de Günün sorusu kartı çıkmıyor')
