@@ -232,6 +232,21 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .kayit-success-icon{font-size:48px;margin-bottom:12px}
 .kayit-success h3{font-family:var(--ff-head);font-size:20px;color:var(--navy);margin-bottom:8px}
 .kayit-success p{font-size:14px;color:#6b7a94;line-height:1.6}
+.rehber-kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:1100px;margin:0 auto}
+.rehber-kart{display:flex;gap:14px;align-items:flex-start;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--r);padding:18px;text-decoration:none;color:var(--text-dark);transition:border-color .2s,transform .15s}
+.rehber-kart:hover{border-color:var(--gold);transform:translateY(-2px)}
+.rehber-kart .rehber-kart-ikon{font-size:26px;line-height:1;flex-shrink:0}
+.rehber-kart b{display:block;font-size:15px;margin-bottom:4px;color:var(--navy)}
+.rehber-kart span{display:block;font-size:13px;color:var(--text-muted);line-height:1.55}
+.ana-video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;max-width:1100px;margin:0 auto}
+.ana-video{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;text-align:left;padding:0;font:inherit;color:inherit;transition:transform .2s,box-shadow .2s}
+.ana-video:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(11,31,58,.12)}
+.ana-video-resim{position:relative;aspect-ratio:16/9;background:var(--navy)}
+.ana-video-resim img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ana-video-oynat{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(11,31,58,.75);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid rgba(255,255,255,.8)}
+.ana-video:hover .ana-video-oynat{background:var(--gold)}
+.ana-video b{display:block;padding:12px 14px 14px;font-size:14px;color:var(--navy);line-height:1.4}
+.ana-dugme{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:14px;font-weight:600;padding:12px 24px;border-radius:10px;text-decoration:none;margin:4px}
 </style>
 
   <!-- SEO Meta Etiketleri -->
@@ -787,6 +802,67 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- VİDEOLAR (YouTube kanalından son 3 video; yüklenemezse yalnızca galeri bağlantısı kalır) -->
+<section style="padding:72px 5vw;background:var(--white)" id="anaVideolar">
+  <div style="max-width:1100px;margin:0 auto 32px;text-align:center">
+    <div class="section-eyebrow" style="justify-content:center">Galeri</div>
+    <h2 class="section-title">Turlarımızdan Videolar</h2>
+    <p class="section-sub" style="margin:0 auto">Kutsal topraklardan ve gezdiğimiz şehirlerden kareler.</p>
+  </div>
+  <div class="ana-video-grid" id="anaVideoGrid"></div>
+  <div style="text-align:center;margin-top:24px">
+    <a href="galeri.html" class="ana-dugme">📸 Tüm fotoğraf ve videolar</a>
+  </div>
+</section>
+<div id="ytModal" style="position:fixed;inset:0;background:rgba(5,12,25,.9);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px">
+  <button onclick="ytKapat()" aria-label="Kapat" style="position:absolute;top:12px;right:18px;background:none;border:0;color:#fff;font-size:38px;line-height:1;cursor:pointer">&times;</button>
+  <div style="position:relative;width:min(960px,100%);aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden" id="ytFrame"></div>
+</div>
+<script>
+(function(){
+  var grid = document.getElementById('anaVideoGrid');
+  var esc = function(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+  fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=8&playlistId=UU8DtiN-Mb4_lasmzKzWH9-g&key=AIzaSyCvJTO8yfmljMzQXFdN7IdYu6WZnA4nmr0')
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){
+      var v = (d.items||[]).filter(function(i){ var t=i.snippet.title; return t!=='Private video' && t!=='Deleted video'; }).slice(0,3);
+      grid.innerHTML = v.map(function(i){
+        var s=i.snippet, id=i.contentDetails.videoId, th=s.thumbnails||{}, img=(th.high||th.medium||th.default||{}).url||'';
+        return '<button type="button" class="ana-video" data-video="'+esc(id)+'"><span class="ana-video-resim"><img src="'+esc(img)+'" alt="" loading="lazy"><span class="ana-video-oynat" aria-hidden="true">▶</span></span><b>'+esc(s.title)+'</b></button>';
+      }).join('');
+    }).catch(function(){ grid.style.display='none'; });
+  grid.addEventListener('click', function(e){ var b=e.target.closest('[data-video]'); if(b) ytAc(b.getAttribute('data-video')); });
+  window.ytAc = function(id){
+    document.getElementById('ytFrame').innerHTML = '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>';
+    document.getElementById('ytModal').style.display='flex'; document.body.style.overflow='hidden';
+  };
+  window.ytKapat = function(){ document.getElementById('ytFrame').innerHTML=''; document.getElementById('ytModal').style.display='none'; document.body.style.overflow=''; };
+  document.getElementById('ytModal').addEventListener('click',function(e){ if(e.target.id==='ytModal') ytKapat(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && document.getElementById('ytModal').style.display==='flex') ytKapat(); });
+})();
+</script>
+
+<!-- FAYDALI BİLGİLER (rehber yazıları) -->
+<section style="padding:72px 5vw;background:var(--cream)" id="anaRehber">
+  <div style="max-width:1100px;margin:0 auto 32px;text-align:center">
+    <div class="section-eyebrow" style="justify-content:center">Faydalı Bilgiler</div>
+    <h2 class="section-title">Yolculuğa Hazırlanırken</h2>
+    <p class="section-sub" style="margin:0 auto">Hac ve umreye gideceklere adım adım rehber yazılarımız.</p>
+  </div>
+  <div class="rehber-kartlar">
+    <a class="rehber-kart" href="rehber-ilk-umre.html"><span class="rehber-kart-ikon" aria-hidden="true">🕋</span><span><b>İlk Kez Umreye Gideceklere Rehber</b><span>Kayıttan dönüşe kadar umre sürecinin nasıl işlediğini adım adım anlattık.</span></span></a>
+    <a class="rehber-kart" href="rehber-hac-nasil-yapilir.html"><span class="rehber-kart-ikon" aria-hidden="true">🤲</span><span><b>Hac Nasıl Yapılır? Adım Adım</b><span>8–13 Zilhicce: ihram, Arafat, Müzdelife, Mina ve tavaf sırasıyla.</span></span></a>
+    <a class="rehber-kart" href="rehber-umre-valiz-listesi.html"><span class="rehber-kart-ikon" aria-hidden="true">🧳</span><span><b>Umre Valiz Listesi</b><span>Belgelerden ilaçlara, umre valizi için kontrol listesi.</span></span></a>
+    <a class="rehber-kart" href="rehber-hac-kayit-kura.html"><span class="rehber-kart-ikon" aria-hidden="true">📝</span><span><b>Hac Kayıt ve Kura Süreci</b><span>Ön kayıt, kura, kesin kayıt: Diyanet sürecinin adımları.</span></span></a>
+    <a class="rehber-kart" href="rehber-ravza-ziyareti.html"><span class="rehber-kart-ikon" aria-hidden="true">🕌</span><span><b>Ravza Ziyareti ve Nusuk Randevusu</b><span>Medine'de Ravza için Nusuk uygulamasından randevu adım adım.</span></span></a>
+    <a class="rehber-kart" href="rehber-umre-fiyatlari.html"><span class="rehber-kart-ikon" aria-hidden="true">💳</span><span><b>Umre Fiyatları Neye Göre Değişir?</b><span>Dönem, otel uzaklığı, oda tipi ve fiyata dahil olanlar.</span></span></a>
+  </div>
+  <div style="text-align:center;margin-top:24px">
+    <a href="umre.html#rehber" class="ana-dugme">🌙 Tüm umre yazıları</a>
+    <a href="hac.html" class="ana-dugme">🕋 Hac sayfası</a>
   </div>
 </section>
 <section class="contact" id="iletisim">

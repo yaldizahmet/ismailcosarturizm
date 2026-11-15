@@ -150,6 +150,27 @@ with sync_playwright() as p:
     pg.fill('#sssAra', 'zzqqxx'); pg.wait_for_timeout(400)
     kontrol(pg.is_visible('#sssSonucYok') and not pg.is_visible('#sssSonucSay'), 'SSS araması: sonuç yoksa "bulamadık" ve WhatsApp yönlendirmesi')
     ctx.close()
+    # Ana sayfa: videolar (YouTube'dan son 3) ve rehber yazıları
+    YT = {'items': [{'snippet': {'title': t, 'thumbnails': {'high': {'url': 'http://localhost:8765/logo.png'}}}, 'contentDetails': {'videoId': f'vid{i}'}} for i, t in enumerate(['Private video', 'Kabe <b>önü</b>', 'Medine', 'Mostar', 'Fazla video'])]}
+    for yt_ok in [True, False]:
+        ctx = b.new_context(**p.devices['Pixel 7']); pg = ctx.new_page(); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+        pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
+        pg.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=MOCK, headers={'content-type': 'application/javascript'}))
+        pg.route('**/youtube/v3/playlistItems**', (lambda r, q: r.fulfill(status=200, body=json.dumps(YT), headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})) if yt_ok else (lambda r, q: r.fulfill(status=403, body='{}')))
+        pg.goto(YEREL + '/', wait_until='domcontentloaded'); pg.wait_for_timeout(800)
+        if yt_ok:
+            v = pg.locator('#anaVideoGrid .ana-video')
+            kontrol(v.count() == 3 and '<b>' in v.nth(0).inner_text() and 'Private' not in pg.inner_text('#anaVideoGrid'), 'Ana sayfa: son 3 video kartı (gizli videolar atlanıyor, başlık düz yazı)')
+            v.nth(1).click(); pg.wait_for_timeout(300)
+            kontrol(pg.is_visible('#ytModal') and 'embed/vid2' in (pg.get_attribute('#ytFrame iframe', 'src') or ''), 'Ana sayfa: videoya dokununca sayfada oynatıcı açılıyor')
+            pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+            kontrol(not pg.is_visible('#ytModal') and pg.locator('#ytFrame iframe').count() == 0, 'Ana sayfa: oynatıcı kapanıyor, video duruyor')
+            hr = pg.eval_on_selector_all('#anaRehber .rehber-kart', 'l => l.map(a => a.getAttribute("href"))')
+            kontrol(len(hr) == 6 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and not errs, 'Ana sayfa: 6 rehber yazısı kartı, bağlantılar çalışıyor', [hr, errs])
+        else:
+            kontrol(not pg.is_visible('#anaVideoGrid') and pg.is_visible('#anaVideolar a[href="galeri.html"]') and not errs, 'Ana sayfa: videolar yüklenemezse yalnızca "Tüm fotoğraf ve videolar" bağlantısı kalıyor', errs)
+        ctx.close()
     b.close()
 
 print('\n=== SAYAÇ TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')
