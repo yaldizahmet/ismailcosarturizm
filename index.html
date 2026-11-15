@@ -296,6 +296,12 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .prog-dugmeler a .ikon-k{color:var(--gold-light)}
 .prog-dugmeler a:hover{background:var(--navy-light)}
 /* rehber kartlarındaki ikonlar */
+/* boşluk kalmasın: kartlar satırı doldursun, bilgisayar/tablette dengeli sütunlar */
+.hizmet-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.neden-grid4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.ana-video-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));max-width:1000px}
+@media(min-width:701px){#anaRehber .rehber-kartlar{grid-template-columns:repeat(2,1fr)}.neden-grid4{grid-template-columns:repeat(4,1fr)}.neden-k{padding:20px 14px}}
+@media(min-width:1000px){#anaRehber .rehber-kartlar{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){
   .hero-actions a{white-space:nowrap;padding:13px 16px}
   .tc-kapak{aspect-ratio:2/1}
