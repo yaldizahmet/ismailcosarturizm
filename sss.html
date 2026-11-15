@@ -52,6 +52,7 @@ html{scroll-behavior:smooth}body{font-family:var(--ff-body);background:var(--cre
 .sss-kategoriler{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:center}
 .sss-kategoriler a{font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;padding:7px 13px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);white-space:nowrap}
 .sss-kategoriler a:hover{border-color:var(--gold);color:var(--gold)}
+.sss-sonucsay{display:none;text-align:center;margin-top:14px;font-size:14.5px;font-weight:700;color:var(--navy)}
 .sss-sonucyok{display:none;text-align:center;margin-top:20px;font-size:14.5px;color:var(--text-muted)}
 .sss-sonucyok a{color:var(--gold);font-weight:700}
 .sss-category{scroll-margin-top:96px}
@@ -183,6 +184,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
       <a href="#aile">👨‍👩‍👧 Aileler ve Özel Durumlar</a>
       <a href="#firma">🏢 İsmail Coşar Turizm</a>
     </nav>
+    <div class="sss-sonucsay" id="sssSonucSay" role="status" aria-live="polite"></div>
     <div class="sss-sonucyok" id="sssSonucYok">Aradığınız soruyu bulamadık. <a href="https://wa.me/905331980781?text=Merhaba%2C%20web%20sitenizden%20yaz%C4%B1yorum.%20Bir%20sorum%20var." target="_blank" rel="noopener">WhatsApp'tan sorun</a>, hemen yanıtlayalım.</div>
   </div>
 
@@ -485,11 +487,13 @@ function toggleSSS(el){
   var sade=function(t){return String(t||'').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g,function(c){return {'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','â':'a','î':'i','û':'u'}[c];});};
   var ogeler=[].slice.call(document.querySelectorAll('.sss-item')).map(function(el){var k=el.closest('.sss-category');return {el:el,metin:sade((k?k.querySelector('.sss-category-title').textContent+' ':'')+el.textContent)};});
   var kategoriler=[].slice.call(document.querySelectorAll('.sss-category'));
-  var yok=document.getElementById('sssSonucYok');
+  var yok=document.getElementById('sssSonucYok'), say=document.getElementById('sssSonucSay'), nav=document.querySelector('.sss-kategoriler');
   var zaman;
-  kutu.addEventListener('input',function(){
-    clearTimeout(zaman);
-    zaman=setTimeout(function(){
+  // Telefonda klavye açılınca sonuçlar görünsün: kutu ekranın üstüne gelir, ararken kategori düğmeleri gizlenir
+  var yukari=function(){ var y=kutu.getBoundingClientRect().top+window.pageYOffset-90; if(Math.abs(window.pageYOffset-y)>40) window.scrollTo({top:y,behavior:'smooth'}); };
+  kutu.addEventListener('focus',function(){ if(window.innerWidth<820) setTimeout(yukari,250); });
+  kutu.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); clearTimeout(zaman); ara(); kutu.blur(); var ilk=document.querySelector('.sss-item:not([style*="none"])'); if(ilk&&kutu.value.trim()){ var y=ilk.getBoundingClientRect().top+window.pageYOffset-110; window.scrollTo({top:y,behavior:'smooth'}); } } });
+  var ara=function(){
       var kelimeler=sade(kutu.value).split(/\s+/).filter(function(k){return k.length>1;});
       var bulunan=0;
       ogeler.forEach(function(o){
@@ -500,8 +504,11 @@ function toggleSSS(el){
       });
       kategoriler.forEach(function(c){c.style.display=c.querySelector('.sss-item:not([style*="none"])')?'':'none';});
       yok.style.display=bulunan?'none':'block';
-    },150);
-  });
+      if(nav) nav.style.display=kelimeler.length?'none':'';
+      say.style.display=kelimeler.length&&bulunan?'block':'none';
+      say.textContent=bulunan+' soru bulundu';
+  };
+  kutu.addEventListener('input',function(){ clearTimeout(zaman); zaman=setTimeout(ara,150); });
   // Bağlantıyla gelinen soruyu (#soru-12) aç
   if(/^#soru-\d+$/.test(location.hash)){var h=document.querySelector(location.hash);if(h){h.classList.add('open');}}
 })();

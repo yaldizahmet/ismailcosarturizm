@@ -131,6 +131,25 @@ with sync_playwright() as p:
     pg.goto(ALAN + '/iletisim.html', wait_until='domcontentloaded'); pg.wait_for_timeout(900)
     kontrol(not errs and pg.locator('form').count() >= 1, 'Sayaç: veritabanına ulaşılamazsa sessizce vazgeçiyor, sayfa normal çalışıyor', errs)
     ctx.close()
+    # SSS araması (telefon): sonuçlar kutunun hemen altında, kategori düğmeleri gizleniyor, Enter ilk sonuca götürüyor
+    ctx = b.new_context(**p.devices['Pixel 7']); pg = ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
+    pg.goto(YEREL + '/sss.html', wait_until='domcontentloaded'); pg.wait_for_timeout(500)
+    pg.tap('#sssAra'); pg.keyboard.type('bagaj', delay=30); pg.wait_for_timeout(700)
+    gor = pg.evaluate("[...document.querySelectorAll('.sss-item')].filter(e => e.offsetParent).length")
+    ilk = pg.evaluate("document.querySelector('.sss-item:not([style*=none])').getBoundingClientRect().top - document.getElementById('sssAra').getBoundingClientRect().bottom")
+    kontrol(gor >= 3 and not pg.is_visible('.sss-kategoriler') and f'{gor} soru bulundu' in pg.inner_text('#sssSonucSay') and ilk < 200,
+            'SSS araması: telefonda sonuçlar kutunun hemen altında, sayı yazıyor, kategori düğmeleri gizli', [gor, ilk])
+    pg.keyboard.press('Enter'); pg.wait_for_timeout(900)
+    y = pg.evaluate("document.querySelector('.sss-item:not([style*=none])').getBoundingClientRect().top")
+    kontrol(0 <= y < 300 and pg.evaluate("document.activeElement.id") != 'sssAra', 'SSS araması: Enter/Ara tuşu klavyeyi kapatıp ilk sonuca götürüyor', y)
+    pg.fill('#sssAra', ''); pg.wait_for_timeout(400)
+    kontrol(pg.is_visible('.sss-kategoriler') and not pg.is_visible('#sssSonucSay') and pg.evaluate("[...document.querySelectorAll('.sss-item')].filter(e => e.offsetParent).length") > 100 and not errs,
+            'SSS araması: kutu temizlenince tüm sorular ve kategoriler geri geliyor', errs)
+    pg.fill('#sssAra', 'zzqqxx'); pg.wait_for_timeout(400)
+    kontrol(pg.is_visible('#sssSonucYok') and not pg.is_visible('#sssSonucSay'), 'SSS araması: sonuç yoksa "bulamadık" ve WhatsApp yönlendirmesi')
+    ctx.close()
     b.close()
 
 print('\n=== SAYAÇ TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')
