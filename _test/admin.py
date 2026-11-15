@@ -183,7 +183,9 @@ with sync_playwright() as p:
     # konum bağlantısından yer bulunamazsa uyarı; elle koordinat yazılabiliyor
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     pg.locator('.o_konum').first.fill('https://maps.app.goo.gl/KOTU'); pg.evaluate("window.__islem = []")
-    pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)
+    pg.get_by_role('button', name=re.compile('Kaydet')).click()
+    try: pg.wait_for_function("window.__islem.some(i => i.tablo === 'kafileler' && i.tur === 'update') && document.body.innerText.includes('yer bulunamadı')", timeout=4000)
+    except Exception: pass  # zaman aşımında aşağıdaki kontrol hatayı gösterir
     gu = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafileler' and i['tur'] == 'update']
     kontrol(gu and 'lat' not in gu[-1]['veri']['oteller'][0] and 'yer bulunamadı' in pg.inner_text('body'), 'Otel konumu: bağlantıdan yer bulunamazsa grup yine kaydediliyor, uyarı çıkıyor')
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
