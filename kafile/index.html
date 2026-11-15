@@ -966,7 +966,8 @@ details.tum[open] summary::after{content:'▴'}
     h += '<p class="kucuk-not">Zemzem: Her misafirimiz için 5 litre zemzem tarafımızdan alınıp dönüşte teslim edilir; ayrıca almanıza gerek yok.</p>';
     var hac = S.veri.tur_turu === 'hac', bag = function (url, ad) { return '<a href="' + SITE + url + '" target="_blank" rel="noopener">' + ad + '<span class="ok" aria-hidden="true">›</span></a>'; };
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
-      (hac ? '' : bag('rehber-ilk-umre.html', 'İlk kez umreye gideceklere rehber') + bag('rehber-umre-valiz-listesi.html', 'Umre valiz listesi (ayrıntılı)')) + // hac grubuna umreye özel yazılar gösterilmez
+      (hac ? bag('rehber-hac-nasil-yapilir.html', 'Hac nasıl yapılır? Adım adım') + bag('rehber-hac-kayit-kura.html', 'Hac kayıt ve kura süreci') + bag('rehber-hac-valiz-listesi.html', 'Hac valiz listesi (ayrıntılı)')
+        : bag('rehber-ilk-umre.html', 'İlk kez umreye gideceklere rehber') + bag('rehber-umre-valiz-listesi.html', 'Umre valiz listesi (ayrıntılı)')) + // hac grubuna umreye özel yazılar gösterilmez
       bag('rehber-ravza-ziyareti.html', 'Ravza ziyareti ve Nusuk randevusu') +
       bag('rehber-yaslilar-icin-umre.html', hac ? 'İleri yaştakiler için öneriler' : 'Yaşlılar için umre önerileri') +
       '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a>' +

@@ -102,6 +102,24 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://ismailcosarturizm.com.tr/rehber-hac-nasil-yapilir.html</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ismailcosarturizm.com.tr/rehber-hac-kayit-kura.html</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ismailcosarturizm.com.tr/rehber-hac-valiz-listesi.html</loc>
+    <lastmod>2026-11-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <!-- TURLAR (otomatik: _araclar/tur_onizleme.py) -->
   <url>
     <loc>https://ismailcosarturizm.com.tr/tur-detay.html?id=endulus-2025</loc>

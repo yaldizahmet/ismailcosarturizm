@@ -577,14 +577,14 @@ with sync_playwright() as p:
         c = yr_baglam(kafile=dict(KAFILE, tur_turu=tt)); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
         pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
         hr = pg.eval_on_selector_all('#ekran .liste a', 'l => l.map(a => a.getAttribute("href") + " " + a.textContent)')
-        umreye_ozel = [x for x in hr if 'rehber-ilk-umre' in x or 'valiz-listesi' in x]
-        kontrol(bool(umreye_ozel) == var_mi and any('rehber-ravza-ziyareti' in x for x in hr) and (var_mi or not any('umre' in x.split(' ', 1)[1].lower() for x in hr)) and not errs,
+        umreye_ozel = [x for x in hr if 'rehber-ilk-umre' in x or 'rehber-umre-valiz-listesi' in x]
+        kontrol(bool(umreye_ozel) == var_mi and any('rehber-ravza-ziyareti' in x for x in hr) and (var_mi or sum('rehber-hac-' in x for x in hr) == 3) and (var_mi or not any('umre' in x.split(' ', 1)[1].lower() for x in hr)) and not errs,
                 f'Faydalı bilgiler ({tt}): ' + ('umre yazıları listede' if var_mi else 'hac grubunda "umre" başlıklı yazı yok, Ravza var'), hr)
         c.close()
     c = b.new_context(viewport={'width': 390, 'height': 844}); pg = c.new_page()
     pg.goto(URL.split('/kafile/')[0] + '/hac.html', wait_until='domcontentloaded'); pg.wait_for_timeout(300)
     hr = pg.eval_on_selector_all('.rehber-kart', 'l => l.map(a => a.getAttribute("href"))')
-    kontrol(len(hr) == 3 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and not tasma(pg), 'Hac sayfası: Faydalı Bilgiler kartları var, bağlantılar çalışıyor', hr)
+    kontrol(len(hr) == 6 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and hr[0] == 'rehber-hac-nasil-yapilir.html' and not tasma(pg), 'Hac sayfası: Faydalı Bilgiler kartları var, bağlantılar çalışıyor', hr)
     c.close()
 
     # grubun konusu yoksa (ör. kültür turu, konu seçilmemiş)
