@@ -161,7 +161,7 @@ with sync_playwright() as p:
         pg.goto(YEREL + '/', wait_until='domcontentloaded'); pg.wait_for_timeout(800)
         if yt_ok:
             v = pg.locator('#anaVideoGrid .ana-video')
-            kontrol(v.count() == 3 and '<b>' in v.nth(0).inner_text() and 'Private' not in pg.inner_text('#anaVideoGrid'), 'Ana sayfa: son 3 video kartı (gizli videolar atlanıyor, başlık düz yazı)')
+            kontrol(v.count() == 3 and '<b>' in v.nth(0).inner_text() and 'Private' not in pg.inner_text('#anaVideoGrid') and pg.evaluate("document.querySelector('.ana-video-resim').getBoundingClientRect().height") > 120, 'Ana sayfa: son 3 video kartı (kapak resmi görünür boyutta) (gizli videolar atlanıyor, başlık düz yazı)')
             v.nth(1).click(); pg.wait_for_timeout(300)
             kontrol(pg.is_visible('#ytModal') and 'embed/vid2' in (pg.get_attribute('#ytFrame iframe', 'src') or ''), 'Ana sayfa: videoya dokununca sayfada oynatıcı açılıyor')
             pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
