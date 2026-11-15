@@ -167,7 +167,10 @@ with sync_playwright() as p:
             pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
             kontrol(not pg.is_visible('#ytModal') and pg.locator('#ytFrame iframe').count() == 0, 'Ana sayfa: oynatıcı kapanıyor, video duruyor')
             hr = pg.eval_on_selector_all('#anaRehber .rehber-kart', 'l => l.map(a => a.getAttribute("href"))')
+            dg = pg.eval_on_selector_all('#anaRehber .ana-dugme', 'l => l.map(a => [a.getAttribute("href"), a.textContent.trim()])')
             kontrol(len(hr) == 6 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and not errs, 'Ana sayfa: 6 rehber yazısı kartı, bağlantılar çalışıyor', [hr, errs])
+            kontrol(dg == [['umre.html#rehber', 'Umre yazıları'], ['hac.html#rehber', 'Hac yazıları']] and all('id="rehber"' in open(os.path.join(KOK, u.split('#')[0]), encoding='utf-8').read() for u, _ in dg),
+                    'Ana sayfa: rehber bölümünün altında "Umre yazıları" ve "Hac yazıları" (ikisi de yazılar bölümüne gidiyor)', dg)
         else:
             kontrol(not pg.is_visible('#anaVideoGrid') and pg.is_visible('#anaVideolar a[href="galeri.html"]') and not errs, 'Ana sayfa: videolar yüklenemezse yalnızca "Tüm fotoğraf ve videolar" bağlantısı kalıyor', errs)
         ctx.close()
