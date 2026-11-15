@@ -46,7 +46,9 @@ a{color:#8A6516}
 
 /* ÜST BAŞLIK */
 .bas{background:var(--navy);color:#fff;padding:calc(22px + env(safe-area-inset-top)) 22px 22px;display:flex;flex-direction:column;gap:6px}
-.marka{align-self:flex-start;background:#fff;border-radius:10px;padding:4px 10px;margin-bottom:8px;line-height:0}.marka img{height:34px;width:auto;display:block}
+.marka{align-self:flex-start;background:#fff;border-radius:10px;padding:4px 10px;line-height:0;flex:none}.marka img{height:34px;width:auto;display:block}
+.marka-satir{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.marka-tur{flex:1;min-width:0;font-size:12.5px;letter-spacing:1.5px;font-weight:700;color:var(--goldl);text-transform:uppercase;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .giris-marka{background:#fff;border-radius:14px;padding:8px 16px;line-height:0}.giris-marka img{height:60px;width:auto;display:block}
 .adim{background:#fff;border-radius:18px;border:1px solid var(--cizgi);padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
 .adim-no{width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--goldl);font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;font-size:16px}
@@ -59,6 +61,7 @@ a{color:#8A6516}
 .bas h1{font-family:var(--ff-b);font-size:30px;font-weight:700;line-height:1.15}
 .bas-alt{font-size:14px;color:#c3cbd9}
 .zil{width:44px;height:44px;border-radius:12px;background:var(--navy2);border:0;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;flex:none}
+.zil[aria-current]{background:var(--gold);color:var(--navy)}
 .zil .nokta{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--goldl)}
 .secim{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--navy2);padding:5px;border-radius:14px;margin-top:8px}
 .secim button{height:44px;border:0;border-radius:10px;background:transparent;color:#fff;font-size:15px;font-weight:600}
@@ -249,7 +252,7 @@ details.tum[open] summary::after{content:'▴'}
 <div class="kap" id="uygulama" hidden>
   <main id="ekran"></main>
   <nav class="alt-menu" aria-label="Ana menü">
-    <button type="button" data-sekme="bugun"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Bugün<span class="nokta" id="menuNokta" hidden></span></button>
+    <button type="button" data-sekme="bugun"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Bugün</button><span id="menuNokta" hidden></span>
     <button type="button" data-sekme="eglence"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>Eğlence</button>
     <button type="button" data-sekme="rehber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Rehber</button>
     <button type="button" data-sekme="vakitler"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Vakitler</button>
@@ -476,7 +479,12 @@ details.tum[open] summary::after{content:'▴'}
   };
 
   // ── EKRANLAR ──
-  var MARKA = '<div class="marka"><img src="logo.png" alt="İsmail Coşar Turizm" width="140" height="34"></div>';
+  // Her ekranın üstünde aynı satır: logo · turun adı · duyuru zili (okunmamış varsa noktalı)
+  function markaSatiri() {
+    return '<div class="marka-satir"><div class="marka"><img src="logo.png" alt="İsmail Coşar Turizm" width="140" height="34"></div>' +
+      '<div class="marka-tur">' + esc(S.veri.ad || '') + '</div>' +
+      (S.karsilama ? '' : '<button type="button" class="zil" data-sekme="duyurular" aria-label="Duyurular"' + (S.sekme === 'duyurular' ? ' aria-current="page"' : '') + '>' + IKON.zil + (okunmamisVar() ? '<span class="nokta"></span>' : '') + '</button>') + '</div>';
+  }
   function ciz() {
     if (!S.veri) return;
     var e = $('ekran');
@@ -484,7 +492,8 @@ details.tum[open] summary::after{content:'▴'}
     var f = S.karsilama ? karsilamaEkrani : { bugun: bugunEkrani, eglence: eglenceEkrani, duyurular: duyurularEkrani, rehber: rehberEkrani, vakitler: vakitlerEkrani, acil: acilEkrani }[S.sekme] || bugunEkrani;
     var acikMi = !!(e.querySelector('details.tum') && e.querySelector('details.tum').open); // yenilemede "Tüm program" açık kalsın
     var ay = $('anketYorum'), ayOdak = !!ay && document.activeElement === ay; if (ay && anket) anket.yorum = ay.value; // yazılan anket yorumu yenilemede kaybolmasın
-    e.innerHTML = f().replace('<header class="bas">', '<header class="bas">' + MARKA); // her ekranın üstünde şirket logosu
+    if (S.sekme === 'duyurular' && !S.karsilama) okunduYap(); // zildeki nokta bu ekranda hemen kalksın
+    e.innerHTML = f().replace('<header class="bas">', '<header class="bas">' + markaSatiri()); // her ekranın üstünde logo, tur adı, zil
     if (ayOdak && $('anketYorum')) { var yy = $('anketYorum'); yy.focus(); try { yy.setSelectionRange(yy.value.length, yy.value.length); } catch (x) {} }
     if (acikMi && e.querySelector('details.tum')) e.querySelector('details.tum').open = true;
     if (S.sekme === 'duyurular') okunduYap();
@@ -581,7 +590,7 @@ details.tum[open] summary::after{content:'▴'}
   function karsilamaEkrani() {
     var v = S.veri, b = S.bildirim, kurulu = ekranaKurulu();
     var aralik = v.baslangic ? tarihYaz(v.baslangic) + (v.bitis ? ' – ' + tarihYaz(v.bitis) : '') : '';
-    var h = '<header class="bas"><div class="bas-etiket">' + esc(v.ad) + '</div><h1>Hoş geldiniz</h1>' +
+    var h = '<header class="bas"><h1>Hoş geldiniz</h1>' +
       '<div class="bas-alt">' + esc(aralik) + (aralik ? ' · ' : '') + 'Başlamadan önce 2 kısa adım</div></header><div class="icerik" id="karsilama">';
     if (v.rehber_tel) h += '<div class="kart"><div class="kart-etiket">Rehberiniz</div><div style="font-size:16px;font-weight:600">' + esc((v.rehber_ad ? v.rehber_ad + ' · ' : '') + v.rehber_tel) + '</div></div>';
     // 1. Bildirimler
@@ -619,8 +628,7 @@ details.tum[open] summary::after{content:'▴'}
       var kalan = v.bitis ? gunSayisi(bugun, v.bitis) : null;
       alt = aralik + (kalan == null ? '' : kalan === 0 ? ' · Bugün dönüş' : ' · Dönüşe ' + kalan + ' gün');
     }
-    var h = '<header class="bas"><div class="bas-ust"><div class="bas-etiket">' + esc(v.ad) + '</div>' +
-      '<button type="button" class="zil" data-sekme="duyurular" aria-label="Duyurular">' + IKON.zil + (okunmamisVar() ? '<span class="nokta"></span>' : '') + '</button></div>' +
+    var h = '<header class="bas">' +
       '<h1>' + baslik + '</h1>' + (alt ? '<div class="bas-alt">' + esc(alt) + '</div>' : '') + '</header><div class="icerik">';
     h += cevrimdisiSerit();
     if (S.yukleIstemi) h += '<div class="yukle-kart"><p>Uygulamayı telefonunuza yükleyin; internet olmasa da açılsın.</p><button type="button" data-eylem="yukle">Yükle</button></div>';
@@ -867,7 +875,7 @@ details.tum[open] summary::after{content:'▴'}
       }
       return h + '</div>';
     }
-    var h = '<header class="bas"><div class="bas-etiket">' + esc(v.ad) + '</div><h1>Bilgi &amp; Eğlence</h1><div class="bas-alt">Yolculuğumuzla ilgili sorular · grubunuzla yarışın</div></header><div class="icerik">' + cevrimdisiSerit();
+    var h = '<header class="bas"><h1>Bilgi &amp; Eğlence</h1><div class="bas-alt">Yolculuğumuzla ilgili sorular · grubunuzla yarışın</div></header><div class="icerik">' + cevrimdisiSerit();
     if (!l.length) return h + '<p class="bos" id="yrBos">' + (yrVeri() ? 'Bu grup için henüz soru eklenmedi. Sorular eklendiğinde burada görünecek.' : 'Sorular yükleniyor… İnternet bağlantısı gerekiyor; bir kez yüklendikten sonra internetsiz de oynayabilirsiniz.') + '</p></div>';
     var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r, i) { if (r.ben) benSira = i + 1; });
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;

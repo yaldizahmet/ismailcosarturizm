@@ -115,7 +115,7 @@ with sync_playwright() as p:
     pg.evaluate("delete navigator.share; navigator.share = undefined; window.__sonPaylasim = null")
     pg.click('[data-eylem="program-paylas"]'); pg.wait_for_timeout(200); pg.click('[data-kapsam="gun"]'); pg.wait_for_timeout(400)
     kontrol(pg.evaluate('window.__sonPaylasim') and 'kopyalandı' in pg.inner_text('#bildirim') and not errs, 'Program paylaş: paylaş menüsü olmayan cihazda kopyalayıp haber veriyor', errs)
-    kontrol('SON DUYURU' in m.upper() and pg.is_visible('#menuNokta'), 'Bugün: son duyuru kartı ve okunmamış duyuru işareti var')
+    kontrol('SON DUYURU' in m.upper() and pg.is_visible('#ekran .zil .nokta'), 'Bugün: son duyuru kartı ve zilde okunmamış duyuru işareti var')
     pg.click('details.tum summary'); pg.wait_for_timeout(200)
     kontrol(pg.locator('details.tum .gun-baslik').count() == 2 and '4. GÜN' in pg.inner_text('details.tum').upper(), 'Bugün: "Tüm program" 2 günü gün numarasıyla listeliyor')
     kontrol(not tasma(pg), 'Bugün: telefonda yatay taşma yok')
@@ -127,13 +127,17 @@ with sync_playwright() as p:
     d = pg.locator('article.duyuru')
     kontrol(d.count() == 2 and 'ÖNEMLİ' in d.nth(0).inner_text() and 'Saat değişikliği' in d.nth(1).inner_text(), 'Duyurular: önemli duyuru en üstte, ikisi de listede')
     kontrol(pg.evaluate('!window.__xss') and '<img' in d.nth(0).inner_text(), 'Güvenlik: duyurudaki HTML çalışmıyor, düz yazı gösteriliyor')
-    kontrol(not pg.is_visible('#menuNokta'), 'Duyurular: açılınca okunmamış işareti kalkıyor')
+    kontrol(pg.locator('#ekran .zil .nokta').count() == 0, 'Duyurular: açılınca zildeki okunmamış işareti kalkıyor')
 
     # ── Logo: her ekranın üstünde ──
     for sk in ['bugun', 'duyurular', 'eglence', 'rehber', 'vakitler', 'acil']:
         if sk == 'duyurular': duyuru_ac(pg)
         else: pg.click(f'.alt-menu [data-sekme="{sk}"]'); pg.wait_for_timeout(250)
         kontrol(pg.evaluate("(()=>{const i=document.querySelector('#ekran header.bas .marka img');return !!i&&i.complete&&i.naturalWidth>0})()"), f'Logo: {sk} ekranında şirket logosu var')
+        st = pg.locator('#ekran header.bas .marka-satir')
+        kontrol(st.count() == 1 and st.locator('.marka-tur').inner_text().replace('İ', 'I').upper() == KAFILE['ad'].upper() and st.locator('.zil').count() == 1 and pg.locator('#ekran .bas-etiket').count() == 0
+                and (sk != 'duyurular' or st.locator('.zil[aria-current="page"]').count() == 1),
+                f'Üst satır: {sk} ekranında logo, sağında tur adı ve duyuru zili (tur adı başlıkta tekrar etmiyor)', [st.count(), st.locator('.marka-tur').inner_text() if st.count() else '', pg.locator('#ekran .bas-etiket').count()])
 
     # ── Rehber: sayaç ve valiz ──
     pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
