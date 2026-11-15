@@ -51,9 +51,16 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     # Ana sayfa
     pg, errs, ist = sayfa(b, 'index.html', YORUMLAR)
-    kontrol(pg.locator('#yolcuSerit').count() == 1 and pg.evaluate("document.getElementById('yolcuSerit').nextElementSibling.id") == 'yorumGrid',
+    kontrol(pg.locator('#yolcuSerit').count() == 1 and pg.evaluate("document.getElementById('yolcuSerit').nextElementSibling.id") == 'googleSerit',
             'Ana sayfa: yolcu mesajları şeridi Google yorumlarının hemen üstünde', errs)
     kontrol(pg.locator('#yolcuSerit .yolcu-mesaji').count() == 2 and pg.locator('#yorumGrid > .yorum-card').count() == 20, 'Ana sayfa: 2 mesaj eklendi, 20 Google yorumu yerinde')
+    g = pg.evaluate("(()=>{const g=document.getElementById('yorumGrid');return {yatay:g.scrollWidth>g.clientWidth+200,yuk:g.getBoundingClientRect().height,sayfa:document.documentElement.scrollWidth<=window.innerWidth+1,ust:g.parentElement.id}})()")
+    kontrol(g['yatay'] and g['yuk'] < 700 and g['sayfa'] and g['ust'] == 'googleSerit' and pg.locator('#googleSerit a[href*="maps.app.goo.gl"]').count() == 1,
+            'Ana sayfa: Google yorumları yana kaydırmalı tek sıra (sayfa taşmıyor), altında tüm yorumlar bağlantısı', g)
+    pg.evaluate("document.getElementById('yorumGrid').scrollLeft = 0"); x0 = pg.evaluate("document.getElementById('yorumGrid').scrollLeft")
+    pg.set_viewport_size({'width': 1280, 'height': 900}); pg.wait_for_timeout(200)
+    pg.click('.g-oklar button[aria-label="Sonraki yorumlar"]'); pg.wait_for_timeout(700)
+    kontrol(pg.evaluate("document.getElementById('yorumGrid').scrollLeft") > x0 + 100, 'Ana sayfa (bilgisayar): › okuyla yorumlar kayıyor')
     kontrol(pg.evaluate('!window.__xss') and '<img src=x' in pg.inner_text('#yolcuSerit'), 'Güvenlik: isim/metindeki HTML çalışmıyor, düz yazı')
     kontrol(ist and all('select=id,ad_gorunen,' in u and ',ad,' not in u for u in ist) and 'Ayşe K***' in pg.inner_text('#yolcuSerit'),
             'Gizlilik: site yalnızca maskeli ismi istiyor ve gösteriyor (Ayşe K***)')

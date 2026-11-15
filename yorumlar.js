@@ -90,7 +90,7 @@
     var grid = document.getElementById('yorumGrid'), bolum = document.getElementById('yolcuMesajlari');
     if (grid) getir(null).then(function (l) {
       if (!Array.isArray(l) || !l.length) return;
-      stil(); grid.insertAdjacentHTML('beforebegin', '<div id="yolcuSerit">' + serit(l) + '</div>');
+      stil(); (document.getElementById('googleSerit') || grid).insertAdjacentHTML('beforebegin', '<div id="yolcuSerit">' + serit(l) + '</div>');
     }).catch(function () {});
     var turId = bolum && bolum.getAttribute('data-tur-id') === 'adres' ? new URLSearchParams(location.search).get('id') : null;
     if (bolum && bolum.getAttribute('data-tur-id') === 'adres' && !turId) bolum = null; // tur kimliği yoksa hiçbir şey gösterme

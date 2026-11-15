@@ -183,6 +183,13 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 @media(max-width:900px){.hero-crescent{display:none}.why-layout{grid-template-columns:1fr}.contact-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
 
 .yorumlar-section{background:var(--cream);padding:80px 5vw}
+.g-baslik{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--navy)}
+.g-oklar{display:flex;align-items:center;gap:6px}.g-oklar em{font-style:normal;font-size:12px;font-weight:500;color:var(--text-muted)}
+.g-oklar button{display:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);color:var(--navy);font-size:20px;line-height:1;cursor:pointer}
+.g-oklar button:hover{border-color:var(--gold);color:var(--gold)}
+@media(min-width:900px){.g-oklar button{display:inline-flex;align-items:center;justify-content:center}.g-oklar em{display:none}}
+.g-serit{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 14px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.g-serit>.yorum-card{flex:0 0 300px;max-width:82vw;scroll-snap-align:start;box-sizing:border-box}
 .yorum-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .yorum-card{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);padding:22px;display:flex;flex-direction:column;gap:10px;transition:transform .2s,box-shadow .2s}
 .yorum-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
@@ -500,7 +507,9 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
       <h2 class="section-title">Misafirlerimiz Ne Diyor?</h2>
       <p style="font-size:14px;color:var(--text-muted)">Google'da 76 yorum · Ortalama 5★</p>
     </div>
-    <div id="yorumGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+    <div id="googleSerit">
+    <div class="g-baslik"><span>⭐ Google yorumları</span><span class="g-oklar"><button type="button" aria-label="Önceki yorumlar" onclick="document.getElementById('yorumGrid').scrollBy({left:-320,behavior:'smooth'})">‹</button><button type="button" aria-label="Sonraki yorumlar" onclick="document.getElementById('yorumGrid').scrollBy({left:320,behavior:'smooth'})">›</button><em>Kaydırın →</em></span></div>
+    <div id="yorumGrid" class="g-serit" role="list">
       <div class="yorum-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <div style="width:38px;height:38px;border-radius:50%;background:#e8f5e9;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--navy);flex-shrink:0">A</div>
@@ -801,6 +810,8 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
           Google Yorumu
         </div>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:8px"><a href="https://maps.app.goo.gl/kcsyZAUVKr1JB5UH9" target="_blank" rel="noopener" style="font-size:14px;font-weight:600;color:var(--gold)">Google'daki tüm yorumları görün →</a></div>
     </div>
   </div>
 </section>
