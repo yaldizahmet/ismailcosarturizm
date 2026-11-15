@@ -42,7 +42,7 @@
     + '#cerezBant button{padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;min-width:104px}'
     + '#cerezBant .cb-red{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.55)}'
     + '#cerezBant .cb-kabul{background:#C9972B;color:#0B1F3A;border:1.5px solid #C9972B}'
-    + '@media(max-width:520px){#cerezBant .cb-btns{width:100%}#cerezBant button{flex:1}}';
+    + '@media(max-width:520px){#cerezBant{left:0;right:0;bottom:0;border-radius:14px 14px 0 0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));gap:8px;font-size:12px;line-height:1.45}#cerezBant p{flex-basis:100%}#cerezBant .cb-btns{width:100%}#cerezBant button{flex:1;padding:8px 10px;font-size:13px;min-width:0}}';
 
   function bantGoster() {
     if (document.getElementById('cerezBant')) return;
