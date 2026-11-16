@@ -836,10 +836,18 @@ details.tum[open] summary::after{content:'▴'}
       }
     }).catch(function () {});
   }
+  // Grup sıralaması: puan çoksa üstte; eşit puanda o puana önce ulaşan üstte (her telefonda aynı sıra).
+  // Eşit puandakiler aynı sırayı paylaşır (1, 1, 3…). Kendi satırımız sunucudakinden yeniyse (cevap kuyrukta) "şimdi ulaştı" sayılır.
   function yrTablo() {
-    var v = yrVeri(), ad = yrAd(), l = ((v && v.tablo) || []).filter(function (r) { return !r.ben; }).map(function (r) { return { ad: r.ad, puan: +r.puan || 0 }; });
-    if (ad) l.push({ ad: ad, puan: yrPuan(), ben: true });
-    l.sort(function (a, b) { return b.puan - a.puan || (a.ben ? -1 : b.ben ? 1 : 0); });
+    var v = yrVeri(), ad = yrAd(), tum = (v && v.tablo) || [], sunucuBen = tum.filter(function (r) { return r.ben; })[0];
+    var zaman = function (t) { var n = t ? Date.parse(t) : NaN; return isNaN(n) ? Infinity : n; };
+    var l = tum.filter(function (r) { return !r.ben; }).map(function (r, i) { return { ad: r.ad, puan: +r.puan || 0, son: zaman(r.son), i: i }; });
+    if (ad) {
+      var p = yrPuan(), ayni = sunucuBen && (+sunucuBen.puan || 0) === p;
+      l.push({ ad: ad, puan: p, ben: true, son: p === 0 ? Infinity : ayni ? zaman(sunucuBen.son) : Date.now(), i: ayni ? tum.indexOf(sunucuBen) : tum.length });
+    }
+    l.sort(function (a, b) { return b.puan - a.puan || a.son - b.son || a.i - b.i; });
+    l.forEach(function (r, i) { r.sira = i && r.puan === l[i - 1].puan ? l[i - 1].sira : i + 1; });
     return l;
   }
   function gununSorusuKarti() {
@@ -877,7 +885,7 @@ details.tum[open] summary::after{content:'▴'}
     }
     var h = '<header class="bas"><h1>Bilgi &amp; Eğlence</h1><div class="bas-alt">Yolculuğumuzla ilgili sorular · grubunuzla yarışın</div></header><div class="icerik">' + cevrimdisiSerit();
     if (!l.length) return h + '<p class="bos" id="yrBos">' + (yrVeri() ? 'Bu grup için henüz soru eklenmedi. Sorular eklendiğinde burada görünecek.' : 'Sorular yükleniyor… İnternet bağlantısı gerekiyor; bir kez yüklendikten sonra internetsiz de oynayabilirsiniz.') + '</p></div>';
-    var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r, i) { if (r.ben) benSira = i + 1; });
+    var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r) { if (r.ben) benSira = r.sira; });
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;
     h += '<div class="puan-kart" id="yrPuan"><div><b>' + yrPuan() + '</b><span>puanınız</span></div><div><b>' + (benSira ? benSira + '.' : '–') + '</b><span>grupta sıranız</span></div><div><b>' + yrBugunCozulen() + '</b><span>bugün çözülen</span></div></div>';
     if (sonraki) {
@@ -892,7 +900,7 @@ details.tum[open] summary::after{content:'▴'}
       h += '<section class="kart" style="gap:0;padding:6px 12px" id="yrTablo">';
       tablo.forEach(function (r, i) {
         if (i >= 10 && !r.ben) return;
-        h += '<div class="sira' + (r.ben ? ' ben' : '') + '"><span class="no">' + (['🥇', '🥈', '🥉'][i] || (i + 1)) + '</span><span class="ad">' + esc(r.ad) + (r.ben ? ' (siz)' : '') + '</span><span class="p">' + r.puan + '</span></div>';
+        h += '<div class="sira' + (r.ben ? ' ben' : '') + '"><span class="no">' + (r.puan > 0 && ['🥇', '🥈', '🥉'][r.sira - 1] || r.sira) + '</span><span class="ad">' + esc(r.ad) + (r.ben ? ' (siz)' : '') + '</span><span class="p">' + r.puan + '</span></div>';
       });
       h += '</section>';
     }

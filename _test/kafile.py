@@ -506,7 +506,7 @@ with sync_playwright() as p:
 
     # ── Bilgi & Eğlence (bilgi yarışması) ──
     SORU = lambda i, d: {'id': i, 'soru': f'Deneme sorusu {i}?', 'siklar': ['Şık A', 'Şık B', 'Şık C', 'Şık D'], 'dogru': d, 'aciklama': f'Açıklama {i}.'}
-    YR = {'konu': 'umre', 'sorular': [SORU(i, i % 4) for i in range(1, 7)], 'tablo': [{'ad': 'Ayşe K.', 'puan': 20, 'ben': False}, {'ad': 'Mehmet <b>D.</b>', 'puan': 10, 'ben': False}], 'cevaplar': []}
+    YR = {'konu': 'umre', 'sorular': [SORU(i, i % 4) for i in range(1, 7)], 'tablo': [{'ad': 'Ayşe K.', 'puan': 20, 'son': '2026-11-12T08:00:00+03:00', 'ben': False}, {'ad': 'Mehmet <b>D.</b>', 'puan': 10, 'son': '2026-11-12T09:00:00+03:00', 'ben': False}], 'cevaplar': []}
     KY = dict(KAFILE, baslangic='2026-11-12')  # turun 1. günü: 6 sorunun 5'i açık
     def yr_baglam(yr=YR, kafile=KY, cevap_ok=True):
         c = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', locale='tr-TR')
@@ -546,8 +546,8 @@ with sync_playwright() as p:
     kontrol('Soru 2 / 6' in pg.inner_text('#ekran h1') and 'Doğru! +10 puan' in pg.inner_text('.yr-aciklama'), 'Eğlence: doğru cevapta +10 puan')
     pg.click('#ekran .geri'); pg.wait_for_timeout(300)
     t = pg.locator('#yrTablo .sira').all_inner_texts()
-    kontrol(pg.inner_text('#yrPuan').startswith('10') and len(t) == 3 and 'Deneme K. (siz)' in t[1] and pg.locator('#yrTablo .sira.ben').count() == 1 and '2.' in pg.inner_text('#yrPuan'),
-            'Eğlence: puan 10, sıralamada "(siz)" 2. sırada', t)
+    kontrol(pg.inner_text('#yrPuan').startswith('10') and len(t) == 3 and 'Deneme K. (siz)' in t[2] and t[1].startswith('🥈') and t[2].startswith('🥈') and pg.locator('#yrTablo .sira.ben').count() == 1 and '2.' in pg.inner_text('#yrPuan'),
+            'Eğlence: eşit puanda ikisi de 2. (🥈); o puana önce ulaşan üstte, "(siz)" kendini öne almıyor', t)
     for j in [3, 0, 1]:   # 3., 4., 5. sorular (doğruları D, A, B)
         pg.click('[data-eylem="yarisma-basla"]'); pg.wait_for_timeout(250); pg.click(f'.secenek[data-j="{j}"]'); pg.wait_for_timeout(250)
     kontrol('Bugünlük bu kadar' in pg.inner_text('#ekran') and pg.locator('.secenek').count() == 4, 'Eğlence: günün 5 sorusu bitince "Bugünlük bu kadar"')
