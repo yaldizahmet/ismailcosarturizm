@@ -170,6 +170,12 @@ with sync_playwright() as p:
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca" and pg.input_value('#k_tur_turu') == 'kultur' and pg.input_value('#k_acil_tel') == '112', 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
     kontrol(pg.is_checked('.k_rehber'), 'Grup formu: düzenlerken atanmış rehber işaretli geliyor')
+    kontrol(pg.input_value('#k_yarisma_konusu') == 'balkan', 'Grup formu: kayıtlı yarışma konusu düzenlerken seçili geliyor')
+    pg.select_option('#k_yarisma_konusu', ''); pg.get_by_role('button', name=re.compile('Kaydet')).click()
+    try: pg.wait_for_function("document.body.innerText.includes('yarışma soruları görünmez')", timeout=3000)
+    except Exception: pass
+    kontrol('yarışma soruları görünmez' in pg.inner_text('body'), 'Grup formu: kültür turunda yarışma konusu seçilmezse kayıttan sonra uyarı çıkıyor')
+    pg.evaluate("window.__islem = []"); pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol('haritada işaretli' in pg.inner_text('.otel-blok .o_konum_durum') and "Harem'e kuş uçuşu ~650 m" in pg.inner_text('.otel-blok .o_konum_durum'),
             'Otel konumu: Google bağlantısından enlem/boylam bulunup kaydediliyor; formda Harem uzaklığıyla gösteriliyor', pg.inner_text('.otel-blok .o_konum_durum'))
     pg.uncheck('.k_rehber')
@@ -187,7 +193,7 @@ with sync_playwright() as p:
     try: pg.wait_for_function("window.__islem.some(i => i.tablo === 'kafileler' && i.tur === 'update') && document.body.innerText.includes('yer bulunamadı')", timeout=4000)
     except Exception: pass  # zaman aşımında aşağıdaki kontrol hatayı gösterir
     gu = [i for i in pg.evaluate('window.__islem') if i['tablo'] == 'kafileler' and i['tur'] == 'update']
-    kontrol(gu and 'lat' not in gu[-1]['veri']['oteller'][0] and 'yer bulunamadı' in pg.inner_text('body'), 'Otel konumu: bağlantıdan yer bulunamazsa grup yine kaydediliyor, uyarı çıkıyor')
+    kontrol(gu and 'lat' not in gu[-1]['veri']['oteller'][0] and 'yer bulunamadı' in pg.inner_text('body'), 'Otel konumu: bağlantıdan yer bulunamazsa grup yine kaydediliyor, uyarı çıkıyor', [str(gu)[:300], pg.inner_text('#toast') if pg.locator('#toast').count() else ''])
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     pg.locator('.o_konum').first.fill('21.4189, 39.8262'); pg.evaluate("window.__islem = []; window.__fn = []")
     pg.get_by_role('button', name=re.compile('Kaydet')).click(); pg.wait_for_timeout(400)

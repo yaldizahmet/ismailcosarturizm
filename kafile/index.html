@@ -252,7 +252,7 @@ details.tum[open] summary::after{content:'▴'}
 <div class="kap" id="uygulama" hidden>
   <main id="ekran"></main>
   <nav class="alt-menu" aria-label="Ana menü">
-    <button type="button" data-sekme="bugun"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Bugün</button><span id="menuNokta" hidden></span>
+    <button type="button" data-sekme="bugun"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Bugün</button>
     <button type="button" data-sekme="eglence"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>Eğlence</button>
     <button type="button" data-sekme="rehber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Rehber</button>
     <button type="button" data-sekme="vakitler"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Vakitler</button>
@@ -498,7 +498,7 @@ details.tum[open] summary::after{content:'▴'}
     if (acikMi && e.querySelector('details.tum')) e.querySelector('details.tum').open = true;
     if (S.sekme === 'duyurular') okunduYap();
     var var_ = okunmamisVar();
-    $('menuNokta').hidden = !var_;
+    // okunmamış duyuru işareti her ekranın üstündeki zilde (markaSatiri); alt menüde ayrı işaret yok
     var aktifSekme = S.sekme === 'duyurular' ? 'bugun' : S.sekme; // duyurular Bugün'ün alt sayfası (zilden açılır)
     document.querySelectorAll('.alt-menu button').forEach(function (b) { if (b.getAttribute('data-sekme') === aktifSekme) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     if (S.sekme === 'vakitler') pusulaCiz();

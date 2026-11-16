@@ -1044,6 +1044,7 @@ async function kafileKaydet(id) {
   if (error) { toast('❌ ' + (/duplicate|unique/i.test(error.message) ? 'Bu kod başka bir grupta kullanılıyor; “Yeni kod” ile değiştirin.' : error.message), 'error'); return; }
   try { await rehberEsitle(id || k.id); } catch (e) { toast('⚠️ Grup kaydedildi ama rehber ataması yapılamadı: ' + (e.message || e), 'error'); renderKafileler(); return; }
   if (konumSorun.length) toast('⚠️ Grup kaydedildi; ' + konumSorun.join(', ') + ' için konum bağlantısından yer bulunamadı. Haritada yere uzun basıp çıkan koordinatı (ör. 21.4189, 39.8262) konum kutusuna yazabilirsiniz.', 'error');
+  else if (k.tur_turu === 'kultur' && !k.yarisma_konusu) toast('⚠️ Grup kaydedildi; ama Bilgi yarışması konusu seçilmedi, bu grupta yarışma soruları görünmez. Formdaki "Bilgi yarışması" kutusundan konuyu (Balkan, Özbekistan…) seçin.', 'error');
   else toast('✅ Grup kaydedildi', 'success');
   renderKafileler();
 }

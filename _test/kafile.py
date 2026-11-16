@@ -116,6 +116,8 @@ with sync_playwright() as p:
     pg.click('[data-eylem="program-paylas"]'); pg.wait_for_timeout(200); pg.click('[data-kapsam="gun"]'); pg.wait_for_timeout(400)
     kontrol(pg.evaluate('window.__sonPaylasim') and 'kopyalandı' in pg.inner_text('#bildirim') and not errs, 'Program paylaş: paylaş menüsü olmayan cihazda kopyalayıp haber veriyor', errs)
     kontrol('SON DUYURU' in m.upper() and pg.is_visible('#ekran .zil .nokta'), 'Bugün: son duyuru kartı ve zilde okunmamış duyuru işareti var')
+    am = pg.evaluate("(()=>{const n=document.querySelector('.alt-menu');const c=[...n.children].filter(e=>getComputedStyle(e).display!=='none');return {say:c.length,ust:[...new Set(c.map(e=>Math.round(e.getBoundingClientRect().top)))].length}})()")
+    kontrol(am == {'say': 5, 'ust': 1}, 'Alt menü: okunmamış duyuru varken de 5 düğme tek satırda (boş hücre yok)', am)
     pg.click('details.tum summary'); pg.wait_for_timeout(200)
     kontrol(pg.locator('details.tum .gun-baslik').count() == 2 and '4. GÜN' in pg.inner_text('details.tum').upper(), 'Bugün: "Tüm program" 2 günü gün numarasıyla listeliyor')
     kontrol(not tasma(pg), 'Bugün: telefonda yatay taşma yok')
