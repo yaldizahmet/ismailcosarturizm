@@ -182,7 +182,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .form-success{display:none;text-align:center;padding:24px;background:#e8f5e9;border-radius:var(--r);color:#2e7d32;font-weight:600}
 @media(max-width:900px){.hero-crescent{display:none}.why-layout{grid-template-columns:1fr}.contact-layout{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
 
-.yorumlar-section{background:var(--cream);padding:80px 5vw}
+.yorumlar-section{background:var(--white);padding:80px 5vw}
 .g-baslik{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 10px;font-size:13px;font-weight:700;color:var(--navy)}
 .g-oklar{display:flex;align-items:center;gap:6px}.g-oklar em{font-style:normal;font-size:12px;font-weight:500;color:var(--text-muted)}
 .g-oklar button{display:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);color:var(--navy);font-size:20px;line-height:1;cursor:pointer}
@@ -504,24 +504,47 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </div>
 </section>
 
-<!-- NEDEN BİZ -->
-<section style="padding:72px 5vw;background:var(--navy)">
-  <div style="max-width:1100px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:48px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Neden Biz</div>
-      <h2 style="font-family:var(--ff-head);font-size:clamp(24px,3vw,36px);font-weight:700;color:#fff">Güvenle Tercih Ediliyoruz</h2>
-    </div>
-    <div class="neden-grid4">
-      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-rozet"/></svg></span><h4>Diyanet Onaylı</h4><p>T.C. Diyanet İşleri Başkanlığı onaylı lisanslı firma</p></div>
-      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-rehber"/></svg></span><h4>Uzman Rehber</h4><p>Her turda deneyimli rehberler eşliğinde</p></div>
-      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-otel"/></svg></span><h4>Konforlu Otel</h4><p>5 yıldızlı, yürüme mesafeli ve servisli otel seçenekleri</p></div>
-      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-destek"/></svg></span><h4>7/24 Destek</h4><p>Tur öncesi ve sırası her an yanınızdayız</p></div>
-    </div>
+<!-- VİDEOLAR (YouTube kanalından son 3 video; yüklenemezse yalnızca galeri bağlantısı kalır) -->
+<section style="padding:72px 5vw;background:var(--cream)" id="anaVideolar">
+  <div style="max-width:1100px;margin:0 auto 32px;text-align:center">
+    <div class="section-eyebrow" style="justify-content:center">Galeri</div>
+    <h2 class="section-title">Turlarımızdan Videolar</h2>
+    <p class="section-sub" style="margin:0 auto">Kutsal topraklardan ve gezdiğimiz şehirlerden kareler.</p>
+  </div>
+  <div class="ana-video-grid" id="anaVideoGrid"></div>
+  <div style="text-align:center;margin-top:24px">
+    <a href="galeri.html" class="ana-dugme"><svg class="ikon-k" aria-hidden="true"><use href="#i-kamera"/></svg>Tüm fotoğraf ve videolar</a>
   </div>
 </section>
+<div id="ytModal" style="position:fixed;inset:0;background:rgba(5,12,25,.9);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px">
+  <button onclick="ytKapat()" aria-label="Kapat" style="position:absolute;top:12px;right:18px;background:none;border:0;color:#fff;font-size:38px;line-height:1;cursor:pointer">&times;</button>
+  <div style="position:relative;width:min(960px,100%);aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden" id="ytFrame"></div>
+</div>
+<script>
+(function(){
+  var grid = document.getElementById('anaVideoGrid');
+  var esc = function(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+  fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=8&playlistId=UU8DtiN-Mb4_lasmzKzWH9-g&key=AIzaSyCvJTO8yfmljMzQXFdN7IdYu6WZnA4nmr0')
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){
+      var v = (d.items||[]).filter(function(i){ var t=i.snippet.title; return t!=='Private video' && t!=='Deleted video'; }).slice(0,3);
+      grid.innerHTML = v.map(function(i){
+        var s=i.snippet, id=i.contentDetails.videoId, th=s.thumbnails||{}, img=(th.high||th.medium||th.default||{}).url||'';
+        return '<button type="button" class="ana-video" data-video="'+esc(id)+'"><span class="ana-video-resim"><img src="'+esc(img)+'" alt="" loading="lazy"><span class="ana-video-oynat" aria-hidden="true">▶</span></span><b>'+esc(s.title)+'</b></button>';
+      }).join('');
+    }).catch(function(){ grid.style.display='none'; });
+  grid.addEventListener('click', function(e){ var b=e.target.closest('[data-video]'); if(b) ytAc(b.getAttribute('data-video')); });
+  window.ytAc = function(id){
+    document.getElementById('ytFrame').innerHTML = '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>';
+    document.getElementById('ytModal').style.display='flex'; document.body.style.overflow='hidden';
+  };
+  window.ytKapat = function(){ document.getElementById('ytFrame').innerHTML=''; document.getElementById('ytModal').style.display='none'; document.body.style.overflow=''; };
+  document.getElementById('ytModal').addEventListener('click',function(e){ if(e.target.id==='ytModal') ytKapat(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && document.getElementById('ytModal').style.display==='flex') ytKapat(); });
+})();
+</script>
 
-
-
+<!-- MİSAFİR YORUMLARI -->
 <section class="yorumlar-section">
   <div style="max-width:1200px;margin:0 auto">
     <div style="text-align:center;margin-bottom:48px">
@@ -838,45 +861,21 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </div>
 </section>
 
-<!-- VİDEOLAR (YouTube kanalından son 3 video; yüklenemezse yalnızca galeri bağlantısı kalır) -->
-<section style="padding:72px 5vw;background:var(--white)" id="anaVideolar">
-  <div style="max-width:1100px;margin:0 auto 32px;text-align:center">
-    <div class="section-eyebrow" style="justify-content:center">Galeri</div>
-    <h2 class="section-title">Turlarımızdan Videolar</h2>
-    <p class="section-sub" style="margin:0 auto">Kutsal topraklardan ve gezdiğimiz şehirlerden kareler.</p>
-  </div>
-  <div class="ana-video-grid" id="anaVideoGrid"></div>
-  <div style="text-align:center;margin-top:24px">
-    <a href="galeri.html" class="ana-dugme"><svg class="ikon-k" aria-hidden="true"><use href="#i-kamera"/></svg>Tüm fotoğraf ve videolar</a>
+<!-- NEDEN BİZ -->
+<section style="padding:72px 5vw;background:var(--navy)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Neden Biz</div>
+      <h2 style="font-family:var(--ff-head);font-size:clamp(24px,3vw,36px);font-weight:700;color:#fff">Güvenle Tercih Ediliyoruz</h2>
+    </div>
+    <div class="neden-grid4">
+      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-rozet"/></svg></span><h4>Diyanet Onaylı</h4><p>T.C. Diyanet İşleri Başkanlığı onaylı lisanslı firma</p></div>
+      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-rehber"/></svg></span><h4>Uzman Rehber</h4><p>Her turda deneyimli rehberler eşliğinde</p></div>
+      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-otel"/></svg></span><h4>Konforlu Otel</h4><p>5 yıldızlı, yürüme mesafeli ve servisli otel seçenekleri</p></div>
+      <div class="neden-k"><span class="ikon-kutu"><svg class="ikon" aria-hidden="true"><use href="#i-destek"/></svg></span><h4>7/24 Destek</h4><p>Tur öncesi ve sırası her an yanınızdayız</p></div>
+    </div>
   </div>
 </section>
-<div id="ytModal" style="position:fixed;inset:0;background:rgba(5,12,25,.9);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px">
-  <button onclick="ytKapat()" aria-label="Kapat" style="position:absolute;top:12px;right:18px;background:none;border:0;color:#fff;font-size:38px;line-height:1;cursor:pointer">&times;</button>
-  <div style="position:relative;width:min(960px,100%);aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden" id="ytFrame"></div>
-</div>
-<script>
-(function(){
-  var grid = document.getElementById('anaVideoGrid');
-  var esc = function(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
-  fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&maxResults=8&playlistId=UU8DtiN-Mb4_lasmzKzWH9-g&key=AIzaSyCvJTO8yfmljMzQXFdN7IdYu6WZnA4nmr0')
-    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function(d){
-      var v = (d.items||[]).filter(function(i){ var t=i.snippet.title; return t!=='Private video' && t!=='Deleted video'; }).slice(0,3);
-      grid.innerHTML = v.map(function(i){
-        var s=i.snippet, id=i.contentDetails.videoId, th=s.thumbnails||{}, img=(th.high||th.medium||th.default||{}).url||'';
-        return '<button type="button" class="ana-video" data-video="'+esc(id)+'"><span class="ana-video-resim"><img src="'+esc(img)+'" alt="" loading="lazy"><span class="ana-video-oynat" aria-hidden="true">▶</span></span><b>'+esc(s.title)+'</b></button>';
-      }).join('');
-    }).catch(function(){ grid.style.display='none'; });
-  grid.addEventListener('click', function(e){ var b=e.target.closest('[data-video]'); if(b) ytAc(b.getAttribute('data-video')); });
-  window.ytAc = function(id){
-    document.getElementById('ytFrame').innerHTML = '<iframe src="https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>';
-    document.getElementById('ytModal').style.display='flex'; document.body.style.overflow='hidden';
-  };
-  window.ytKapat = function(){ document.getElementById('ytFrame').innerHTML=''; document.getElementById('ytModal').style.display='none'; document.body.style.overflow=''; };
-  document.getElementById('ytModal').addEventListener('click',function(e){ if(e.target.id==='ytModal') ytKapat(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && document.getElementById('ytModal').style.display==='flex') ytKapat(); });
-})();
-</script>
 
 <!-- FAYDALI BİLGİLER (rehber yazıları) -->
 <section style="padding:72px 5vw;background:var(--cream)" id="anaRehber">
