@@ -296,6 +296,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .prog-dugmeler a .ikon-k{color:var(--gold-light)}
 .prog-dugmeler a:hover{background:var(--navy-light)}
 /* rehber kartlarındaki ikonlar */
+@media(max-width:600px){body>section:not(.hero){padding-top:48px!important;padding-bottom:48px!important}}
 /* boşluk kalmasın: kartlar satırı doldursun, bilgisayar/tablette dengeli sütunlar */
 .hizmet-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .neden-grid4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
@@ -310,6 +311,10 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 }
 .rehber-kart .ikon-kutu{width:44px;height:44px;border-radius:12px}
 .rehber-kart .ikon-kutu .ikon{width:24px;height:24px}
+
+/* footer-mobil-2: telefonda bağlantı sütunları ikişerli (footer kısalır) */
+/* footer-logo-acik */ .footer-logo-img{background:#fff;padding:4px 10px;border-radius:8px}
+@media(max-width:600px){.footer-grid{grid-template-columns:1fr 1fr!important;gap:24px 16px!important;margin-bottom:24px!important}.footer-grid>div:first-child{grid-column:1/-1}}
 </style>
 
   <!-- SEO Meta Etiketleri -->
@@ -500,7 +505,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
       <h2 class="section-title">Yaklaşan Programlar</h2>
     </div>
     <div class="tours-grid" id="toursGrid"></div>
-    <div class="prog-dugmeler"><a href="hac.html"><svg class="ikon-k" aria-hidden="true"><use href="#i-kabe"/></svg>Hac</a><a href="umre.html"><svg class="ikon-k" aria-hidden="true"><use href="#i-hilal"/></svg>Umre</a><a href="turlar.html"><svg class="ikon-k" aria-hidden="true"><use href="#i-ucak"/></svg>Kültür Turları</a></div>
+    <div style="text-align:center;margin-top:24px"><a href="turlar.html" style="font-size:14px;font-weight:700;color:var(--gold);text-decoration:none">Tüm programları görün →</a></div>
   </div>
 </section>
 
@@ -978,7 +983,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
           <span style="font-size:12px;color:rgba(255,255,255,.4)">ile ödeme yapabilirsiniz</span>
         </div>
       </div>
-<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span>TURSAB · Diyanet Onaylı</span><span><a href="kvkk.html" style="color:inherit">KVKK Aydınlatma Metni</a> · <a href="kvkk.html#cerez" style="color:inherit">Çerez Politikası</a> · <a href="#" onclick="cerezAyarlari();return false" style="color:inherit">Çerez Tercihleri</a></span></div>
+<div class="footer-bottom"><span>© 2026 İsmail Coşar Turizm. Tüm hakları saklıdır.</span><span><a href="kvkk.html" style="color:inherit">KVKK Aydınlatma Metni</a> · <a href="kvkk.html#cerez" style="color:inherit">Çerez Politikası</a> · <a href="#" onclick="cerezAyarlari();return false" style="color:inherit">Çerez Tercihleri</a></span></div>
 </footer>
 <a href="https://wa.me/905331980781?text=Merhaba" class="floating-wa" target="_blank">💬</a>
 
