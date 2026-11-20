@@ -174,6 +174,18 @@ with sync_playwright() as p:
         else:
             kontrol(not pg.is_visible('#anaVideoGrid') and pg.is_visible('#anaVideolar a[href="galeri.html"]') and not errs, 'Ana sayfa: videolar yüklenemezse yalnızca "Tüm fotoğraf ve videolar" bağlantısı kalıyor', errs)
         ctx.close()
+    # Sayfa içi bağlantı (#rehber): içerik sonradan yüklenip üstte yer kaplasa da ziyaretçi bölümün başında kalır (capa.js)
+    for sayfa_ in ['umre.html', 'hac.html', 'turlar.html']:
+        ctx = b.new_context(**p.devices['Pixel 7']); pg = ctx.new_page(); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+        pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
+        pg.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=MOCK, headers={'content-type': 'application/javascript'}))
+        # geç yüklenen içerik taklidi: 1,2 sn sonra en üste 1500px'lik blok eklenir; iPhone Safari gibi kaydırma sabitleme (scroll anchoring) kapalı
+        pg.add_init_script("document.addEventListener('DOMContentLoaded',function(){document.documentElement.style.overflowAnchor='none';document.body.style.overflowAnchor='none'});setTimeout(function(){var d=document.createElement('div');d.style.height='1500px';d.id='gecIcerik';document.body.insertBefore(d,document.body.firstChild)},1200)")
+        pg.goto(YEREL + '/' + sayfa_ + '#rehber', wait_until='domcontentloaded'); pg.wait_for_timeout(2200)
+        ust = pg.evaluate("document.getElementById('rehber').getBoundingClientRect().top")
+        kontrol(pg.locator('#gecIcerik').count() == 1 and 0 <= ust <= 120 and not errs, f'{sayfa_}#rehber: içerik geç yüklense de Faydalı Bilgiler bölümü ekranın başında', [ust, errs])
+        ctx.close()
     b.close()
 
 print('\n=== SAYAÇ TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')
