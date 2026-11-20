@@ -47,6 +47,12 @@ section{padding:80px 5vw}
 .btn-navy:hover{background:var(--navy-light)}
 .btn-wa{display:inline-flex;align-items:center;gap:9px;background:#25D366;color:#fff;font-size:15px;font-weight:600;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s}
 .btn-wa:hover{background:#20bb5a}
+.rehber-kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:1100px;margin:0 auto}
+.rehber-kart{display:flex;gap:14px;align-items:flex-start;background:var(--cream);border:1.5px solid var(--border);border-radius:var(--r);padding:18px;text-decoration:none;color:var(--text-dark);transition:border-color .2s,transform .15s}
+.rehber-kart:hover{border-color:var(--gold);transform:translateY(-2px)}
+.rehber-kart .rehber-kart-ikon{font-size:26px;line-height:1;flex-shrink:0}
+.rehber-kart b{display:block;font-size:15px;margin-bottom:4px;color:var(--navy)}
+.rehber-kart span{display:block;font-size:13px;color:var(--text-muted);line-height:1.55}
 .cta-band{background:var(--gold);padding:56px 5vw;text-align:center}
 .cta-band h2{font-family:var(--ff-head);font-size:clamp(22px,3vw,36px);font-weight:700;color:var(--navy);margin-bottom:10px}
 .cta-band p{font-size:15px;color:rgba(11,31,58,.7);margin-bottom:28px}
@@ -239,6 +245,18 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </div>
 </section>
 
+
+<section class="rehber-bolum" id="rehber" style="padding:56px 5vw;background:var(--white);border-top:1px solid var(--border)">
+  <div style="max-width:1100px;margin:0 auto 24px;text-align:center">
+    <h2 style="font-family:var(--ff-head);font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--navy);margin-bottom:8px">Faydalı Bilgiler</h2>
+    <p style="font-size:15px;color:var(--text-muted)">Yurt dışı kültür turuna hazırlanırken işinize yarayacak rehber yazılarımız</p>
+  </div>
+  <div class="rehber-kartlar">
+    <a class="rehber-kart" href="rehber-balkan-turu.html"><span class="rehber-kart-ikon" aria-hidden="true">🌍</span><span><b>Balkan Turuna Giderken</b><span>Vize, sınır geçişleri, para birimleri ve pratik bilgiler.</span></span></a>
+    <a class="rehber-kart" href="rehber-kultur-turu-valiz-listesi.html"><span class="rehber-kart-ikon" aria-hidden="true">🧳</span><span><b>Kültür Turu Valiz Listesi</b><span>Belgeler, kıyafet, ilaç ve günlük çanta için kontrol listesi.</span></span></a>
+    <a class="rehber-kart" href="sss.html"><span class="rehber-kart-ikon" aria-hidden="true">❓</span><span><b>Sıkça Sorulan Sorular</b><span>Kayıt, ödeme, belgeler ve yolculukla ilgili merak edilenler.</span></span></a>
+  </div>
+</section>
 
 <div class="cta-band">
   <h2>Hayalinizdeki Tura Katılın</h2><p>Programa kayıt veya özel grup turu için bize ulaşın.</p>

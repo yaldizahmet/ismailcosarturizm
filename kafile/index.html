@@ -1050,12 +1050,18 @@ details.tum[open] summary::after{content:'▴'}
     return h;
   }
 
+  function balkanMi() { // Balkan yazısı yalnızca Balkan gruplarına (tur adı ya da otel şehirlerinden)
+    var m = normal((S.veri && S.veri.ad) || '') + ' ' + normal(grupSehirleri().join(' '));
+    return /balkan|bosna|saraybosna|mostar|uskup|makedon|ohrid|kosova|prizren|arnavut|tiran|sirbistan|belgrad|karadag|kotor/.test(m);
+  }
   function yolculukRehberi() {
     var h = '<header class="bas"><h1>Yolculuk Rehberi</h1><div class="bas-alt">Gezilecek yerler, yeme-içme, valiz listesi</div></header><div class="icerik">';
     h += sehirRehberiBolumu();
     h += valizListesi(VALIZ_KULTUR);
     h += '<p class="kucuk-not">İşaretleriniz telefonda saklanır; uygulama kapansa da kaybolmaz.</p>';
     h += '<h2 class="bolum-baslik">Faydalı bilgiler</h2><div class="liste">' +
+      (balkanMi() ? '<a href="' + SITE + 'rehber-balkan-turu.html" target="_blank" rel="noopener">Balkan turuna giderken: vize, para, sınır geçişleri<span class="ok" aria-hidden="true">›</span></a>' : '') +
+      '<a href="' + SITE + 'rehber-kultur-turu-valiz-listesi.html" target="_blank" rel="noopener">Kültür turu valiz listesi (ayrıntılı)<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'turlar.html" target="_blank" rel="noopener">Kültür turlarımız<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + SITE + 'sss.html" target="_blank" rel="noopener">Sıkça sorulan sorular<span class="ok" aria-hidden="true">›</span></a>' +
       '<a href="' + esc(yorumLink()) + '" target="_blank" rel="noopener" class="yorum-satir">⭐ Google\'da yorum yapın<span class="ok" aria-hidden="true">›</span></a></div>';

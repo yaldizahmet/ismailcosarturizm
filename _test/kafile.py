@@ -589,6 +589,22 @@ with sync_playwright() as p:
     kontrol(len(hr) == 6 and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and hr[0] == 'rehber-hac-nasil-yapilir.html' and not tasma(pg), 'Hac sayfası: Faydalı Bilgiler kartları var, bağlantılar çalışıyor', hr)
     c.close()
 
+    # Kültür turu: Faydalı bilgilerde valiz listesi; Balkan yazısı yalnızca Balkan grubunda
+    for ad, balkan in [('Balkan Turu', True), ('Endülüs Turu', False)]:
+        c = yr_baglam(kafile=dict(KAFILE, tur_turu='kultur', ad=ad, oteller=[{'sehir': 'Granada', 'ad': 'Otel'}] if not balkan else KAFILE.get('oteller'))); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+        pg.click('.alt-menu [data-sekme="rehber"]'); pg.wait_for_timeout(300)
+        hr = pg.eval_on_selector_all('#ekran .liste a', 'l => l.map(a => a.getAttribute("href"))')
+        kontrol(any('rehber-kultur-turu-valiz-listesi' in x for x in hr) and any('rehber-balkan-turu' in x for x in hr) == balkan and not any('umre' in x or 'rehber-hac' in x for x in hr) and not errs,
+                f'Faydalı bilgiler (kültür, {ad}): valiz listesi var, Balkan yazısı ' + ('var' if balkan else 'yok'), hr)
+        c.close()
+    c = b.new_context(viewport={'width': 390, 'height': 844}); pg = c.new_page()
+    pg.goto(URL.split('/kafile/')[0] + '/turlar.html', wait_until='domcontentloaded'); pg.wait_for_timeout(300)
+    hr = pg.eval_on_selector_all('#rehber .rehber-kart', 'l => l.map(a => a.getAttribute("href"))')
+    kontrol(hr == ['rehber-balkan-turu.html', 'rehber-kultur-turu-valiz-listesi.html', 'sss.html'] and all(os.path.exists(os.path.join(KOK, h)) for h in hr) and not tasma(pg), 'Kültür turları sayfası: Faydalı Bilgiler kartları var, bağlantılar çalışıyor', hr)
+    pg.goto(URL.split('/kafile/')[0] + '/rehber-balkan-turu.html', wait_until='domcontentloaded'); pg.wait_for_timeout(300)
+    kontrol(pg.locator('.yazi table tr').count() == 7 and 'Karadağ' in pg.inner_text('.uyari') and not tasma(pg), 'Balkan yazısı: ülke tablosu telefonda taşmıyor, Karadağ uyarısı var')
+    c.close()
+
     # grubun konusu yoksa (ör. kültür turu, konu seçilmemiş)
     c = yr_baglam(yr={'konu': None, 'sorular': [], 'tablo': []}, kafile=KAFILE); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
     kontrol(pg.locator('#gununSorusu').count() == 0, 'Eğlence: soru yoksa Bugün\'de Günün sorusu kartı çıkmıyor')
