@@ -22,6 +22,11 @@ for f in sorted(glob.glob(os.path.join(KOK, '*.html'))) + [os.path.join(KOK, 'ka
     if (ad == 'admin.html') == bool(re.search(r'<script[^>]+src="[^"]*sayac\.js"', t)): eksik.append(ad)
 kontrol(not eksik, 'Sayaç: tüm site sayfalarında ve misafir uygulamasında var, admin panelinde yok', eksik)
 
+# 1b) Her rehber yazısının admin "En çok bakılan sayfalar" ve haftalık mailde okunur bir adı var
+adm = open(os.path.join(KOK, 'admin.html'), encoding='utf-8').read(); mail = open(os.path.join(KOK, '_supabase', 'functions', 'dogum-gunu-mail', 'index.ts'), encoding='utf-8').read()
+adsiz = [os.path.basename(f) for f in sorted(glob.glob(os.path.join(KOK, 'rehber-*.html'))) if f"'/{os.path.basename(f)}':" not in adm or f'"/{os.path.basename(f)}":' not in mail]
+kontrol(not adsiz, 'Ziyaretçi raporu: her rehber yazısının admin panelinde ve haftalık mailde adı var', adsiz)
+
 # 2) Arama motoru / yapay zekâ etiketleri
 sys.path.insert(0, os.path.join(KOK, '_araclar'))
 import sss_ld

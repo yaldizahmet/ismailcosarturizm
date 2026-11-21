@@ -36,7 +36,7 @@ const SAYFA_ADLARI: Record<string, string> = { "/": "Ana sayfa", "/umre.html": "
   "/tesekkurler.html": "Başvuru gönderildi (teşekkür sayfası)", "/kafile/": "Misafir uygulaması", "/rehber-ilk-umre.html": "Rehber: İlk umre",
   "/rehber-umre-donemleri.html": "Rehber: Umre dönemleri", "/rehber-umre-valiz-listesi.html": "Rehber: Valiz listesi",
   "/rehber-umre-belgeler.html": "Rehber: Umre belgeleri", "/rehber-ravza-ziyareti.html": "Rehber: Ravza ziyareti",
-  "/rehber-yaslilar-icin-umre.html": "Rehber: Yaşlılar için umre", "/rehber-umre-fiyatlari.html": "Rehber: Umre fiyatları", "/rehber-hac-nasil-yapilir.html": "Rehber: Hac nasıl yapılır", "/rehber-hac-kayit-kura.html": "Rehber: Hac kayıt ve kura", "/rehber-hac-valiz-listesi.html": "Rehber: Hac valiz listesi" };
+  "/rehber-yaslilar-icin-umre.html": "Rehber: Yaşlılar için umre", "/rehber-umre-fiyatlari.html": "Rehber: Umre fiyatları", "/rehber-hac-nasil-yapilir.html": "Rehber: Hac nasıl yapılır", "/rehber-hac-kayit-kura.html": "Rehber: Hac kayıt ve kura", "/rehber-hac-valiz-listesi.html": "Rehber: Hac valiz listesi", "/rehber-balkan-turu.html": "Rehber: Balkan turu", "/rehber-kultur-turu-valiz-listesi.html": "Rehber: Kültür turu valiz listesi" };
 function kaynakAdi(k: string | null) {
   const s = String(k || "").toLowerCase();
   if (!s) return "Doğrudan / WhatsApp";
