@@ -27,6 +27,11 @@ adm = open(os.path.join(KOK, 'admin.html'), encoding='utf-8').read(); mail = ope
 adsiz = [os.path.basename(f) for f in sorted(glob.glob(os.path.join(KOK, 'rehber-*.html'))) if f"'/{os.path.basename(f)}':" not in adm or f'"/{os.path.basename(f)}":' not in mail]
 kontrol(not adsiz, 'Ziyaretçi raporu: her rehber yazısının admin panelinde ve haftalık mailde adı var', adsiz)
 
+# 1c) KVKK: misafir uygulaması bölümü (Google Play gizlilik politikası) uygulamanın topladığı her veriyi anlatıyor
+kv = open(os.path.join(KOK, 'kvkk.html'), encoding='utf-8').read()
+kontrol('id="uygulama"' in kv and 'id="bildirim"' in kv and all(k in kv for k in ['Konum:', 'Bilgi yarışması:', 'Tur sonu anketi:', 'Bildirimler:', 'Ziyaret sayısı:', 'üçüncü kişilerle paylaşmaz']),
+        'KVKK: misafir uygulaması bölümü konum, yarışma, anket, bildirim ve sayaç verisini anlatıyor')
+
 # 2) Arama motoru / yapay zekâ etiketleri
 sys.path.insert(0, os.path.join(KOK, '_araclar'))
 import sss_ld
