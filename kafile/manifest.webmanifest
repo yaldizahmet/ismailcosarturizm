@@ -11,8 +11,59 @@
   "background_color": "#11253D",
   "theme_color": "#0B1F3A",
   "icons": [
-    { "src": "ikon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "ikon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "ikon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ikon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "travel",
+    "lifestyle"
+  ],
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "ekran/1-bugun.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Bugün: günün programı ve son duyuru"
+    },
+    {
+      "src": "ekran/2-rehber.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Rehber: tavaf sayacı, oteller ve faydalı bilgiler"
+    },
+    {
+      "src": "ekran/3-vakitler.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Vakitler: namaz vakitleri ve kıble"
+    },
+    {
+      "src": "ekran/4-acil.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Acil: rehberi ara, konumunu gönder, Arapça otel adresi"
+    }
   ]
 }

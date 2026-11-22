@@ -32,6 +32,11 @@ kontrol(r.returncode == 0, 'sw.js sözdizimi', r.stderr.strip()[-150:])
 man = json.load(open(os.path.join(KOK, 'kafile', 'manifest.webmanifest'), encoding='utf-8'))
 kontrol(man['start_url'] == '/kafile/' and man['scope'] == '/kafile/' and all(os.path.exists(os.path.join(KOK, 'kafile', i['src'])) for i in man['icons'])
         and {'192x192', '512x512'} <= {i['sizes'] for i in man['icons']}, 'manifest: kapsam /kafile/, 192 ve 512 ikonlar mevcut')
+from PIL import Image as _Img
+_ek = man.get('screenshots', [])
+kontrol(len(_ek) >= 2 and man.get('categories') and all(os.path.exists(os.path.join(KOK, 'kafile', e['src'])) and e.get('label')
+        and '%dx%d' % _Img.open(os.path.join(KOK, 'kafile', e['src'])).size == e['sizes'] for e in _ek),
+        'manifest: kategori ve ekran görüntüleri var; dosyalar mevcut, ölçüler doğru (Play paketi ve kurulum ekranı için)', [e.get('src') for e in _ek])
 
 def baglam(b, rpc='veri', konum=None):
     """rpc: 'veri' | 'yok' (kafile bulunamadı) | 'kopuk' (internet yok)"""
