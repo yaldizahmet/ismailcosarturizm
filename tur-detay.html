@@ -114,6 +114,18 @@ function kalkisaKalan(t){if(!/^\d{4}-\d{2}-\d{2}$/.test(t.tarih||''))return'';va
 function odaListeHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:13px;line-height:1.7;margin-top:4px">'+o.map(function(x){return '<div><span style="color:var(--text-muted)">'+x[0].toLocaleLowerCase('tr')+' odada kişi başı:</span> <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 </script>
 <script>
+/* Telefon kontrolü: Türkiye cep/sabit (05XX…, 0312…, 90…) ya da + / 00 ile başlayan yurt dışı numarası.
+   Aynı kural veritabanında da var (tel_gecerli); ikisi birlikte değiştirilmeli. */
+function telGecerli(t){
+  t=String(t||'').trim(); var d=t.replace(/\D/g,''), dis=/^\+/.test(t)||/^00/.test(d);
+  if(/^00/.test(d)) d=d.slice(2);
+  function yurtici(n){ if(n.length===11&&n[0]==='0') n=n.slice(1); return n.length===10&&/^[2-58]/.test(n)&&!/^\d0{9}$/.test(n)&&!/^(\d)\1+$/.test(n); }
+  if(d.length===12&&/^90/.test(d)) return yurtici(d.slice(2));
+  if(dis) return d.length>=8&&d.length<=15&&d[0]!=='0'&&!/^(\d)\1+$/.test(d)&&!/^\d0+$/.test(d);
+  return yurtici(d);
+}
+/* Mesajda bağlantı varsa reklam/spam olabilir: kayıt yine gider (admin'de Spam sekmesine düşer), bildirim maili gitmez */
+function linkVar(m){ return /(https?:\/\/|www\.|[a-z0-9-]+\.(com|net|org|io|ru|info|biz|xyz|top|site|online|shop|co)\b)/i.test(String(m||'')); }
 /* Form başvurularını Supabase "basvurular" tablosuna kaydeder */
 function basvuruKaydet(form){
   var fd=new FormData(form), v={};
@@ -121,6 +133,11 @@ function basvuruKaydet(form){
   fd.forEach(function(val,key){ if(key!=='bot-field') v[key]=String(val).trim(); });
   var ad=v.adsoyad||v['ad-soyad']||[v.ad,v.soyad].filter(Boolean).join(' ');
   var row={form:v['form-name']||form.getAttribute('name')||'',program:v.program||v.paket||v.tur||'',ad_soyad:ad,telefon:v.telefon||'',eposta:v.eposta||'',hizmet:v.hizmet||'',kisi_sayisi:v['kisi-sayisi']||v.kisi||'',mesaj:v.mesaj||'',sayfa:location.pathname,veri:v};
+  if(!telGecerli(row.telefon)){
+    alert('Lütfen geçerli bir telefon numarası yazın (ör. 0532 123 45 67). Yurt dışı numaralarını + ile başlatın (ör. +49 151 234 5678).');
+    var tg=form.querySelector('[name=telefon]'); if(tg) tg.focus();
+    return new Promise(function(){}); /* gönderilmedi; misafir düzeltip yeniden gönderir */
+  }
   var K='sb_publishable_bEXKjIeKKN4JrMkOPy3LQg_ZuSlEQNK';
   var db=fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/basvurular',{method:'POST',headers:{'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)})
     .then(function(r){ if(!r.ok) throw new Error('Başvuru kaydedilemedi: '+r.status); });
@@ -134,6 +151,7 @@ function basvuruKaydet(form){
   if(v['tercih-tarih']) mailVeri['Tercih Edilen Tarih']=v['tercih-tarih'];
   if(row.mesaj) mailVeri['Mesaj']=row.mesaj;
   mailVeri['Not']='Tüm başvurular admin panelindeki Başvurular sekmesinde de listelenir.';
+  if(linkVar(row.mesaj)||linkVar(row.ad_soyad)) return db.catch(function(){});
   var mail=fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(mailVeri)})
     .then(function(r){ return r.json(); }).then(function(j){ if(!j.success) throw new Error(j.message||'Mail gönderilemedi'); });
   mail.catch(function(){});

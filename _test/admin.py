@@ -17,6 +17,7 @@ window.__DB.kullanici_rolleri = [{ user_id: 'test-uid', rol: window.__ROL || 'ad
     var q = {
       select: function(){ return q; },
       eq: function(c, v){ filtre.push([c, v]); satir = satir.filter(function(r){ return r[c] === v; }); return q; },
+      neq: function(c, v){ satir = satir.filter(function(r){ return r[c] !== v; }); return q; },
       order: function(c){ satir.sort(function(a, b){ return a[c] > b[c] ? 1 : a[c] < b[c] ? -1 : 0; }); return q; },
       gte: function(c, v){ satir = satir.filter(function(r){ return r[c] >= v; }); return q; },
       limit: function(){ return q; }, range: function(a, b){ satir = satir.slice(a, b + 1); return q; }, single: function(){ tek = true; return q; }, maybeSingle: function(){ tek = true; return q; },
@@ -505,6 +506,20 @@ with sync_playwright() as p:
     pg.evaluate("window.__islem = []"); pg.locator('.yorum-item').get_by_role('button', name='Sil').click(); pg.wait_for_timeout(400)
     s_ = [i for i in pg.evaluate('window.__islem') if i['tur'] == 'delete']
     kontrol(len(s_) == 1 and s_[0]['tablo'] == 'yorumlar' and pg.locator('.yorum-item').count() == 0 and not errs, 'Yorum: siliniyor', errs)
+
+    # Başvurular: spam ayrı sekmede; "Tümü"de görünmez, spam kartında arama/WhatsApp bağlantısı yok, nedeni yazıyor
+    errs.clear()
+    pg.evaluate("""window.__DB.basvurular = [
+      {id: 901, created_at: '2026-11-22T10:00:00Z', form: 'ana-sayfa-iletisim', ad_soyad: 'Gerçek Misafir', telefon: '05321234567', mesaj: 'Umre fiyatı', durum: 'yeni', veri: {}},
+      {id: 902, created_at: '2026-11-22T11:00:00Z', form: 'ana-sayfa-iletisim', ad_soyad: 'Spam Gönderen', telefon: '10000000000', mesaj: 'see example.com', durum: 'spam', veri: {spam_nedeni: 'geçersiz telefon'}}];
+      basvuruFiltre = 'hepsi'; sekmeAc('basvuru');"""); pg.wait_for_timeout(400)
+    tum = pg.inner_text('#sayfa-basvuru')
+    pg.locator('#sayfa-basvuru button', has_text='Spam').click(); pg.wait_for_timeout(400)
+    sp = pg.inner_text('#sayfa-basvuru')
+    kontrol('Gerçek Misafir' in tum and 'Spam Gönderen' not in tum and 'Spam Gönderen' in sp and 'Gerçek Misafir' not in sp
+            and 'geçersiz telefon' in sp and pg.locator('#sayfa-basvuru a[href^="tel:"]').count() == 0 and not errs,
+            'Başvurular: spam yalnızca Spam sekmesinde, nedeni yazıyor, arama bağlantısı yok', errs)
+    pg.evaluate("basvuruFiltre = 'hepsi'; window.__DB.basvurular = []")
 
     # Telefon görünümü: her sekmede yatay taşma yok, seçili sekme üst şeritte görünür
     pg.set_viewport_size({'width': 390, 'height': 844})

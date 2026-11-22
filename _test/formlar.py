@@ -80,6 +80,20 @@ with sync_playwright() as p:
         hata += not ok
         print('✓' if ok else '✗', 'FORM', sayfa, acici or '(sayfa formu)', '-> veritabanı:', len(posts), 'mail:', len(mails), 'başarı mesajı:', basari, errs)
         pg.close()
+    # Spam koruması: geçersiz telefon gönderilmez (uyarı çıkar); mesajında bağlantı olan kayıt gider ama bildirim maili gitmez
+    for tel, mesaj, beklenen_kayit, beklenen_mail, ad in [('10000000000', 'Merhaba', 0, 0, 'geçersiz telefon'), ('05321234567', 'Listing is free: touristyard.com', 1, 0, 'mesajda bağlantı'),
+                                                         ('+49 151 2345678', 'Almanyadan arıyorum', 1, 1, 'yurt dışı numara')]:
+        pg = b.new_page(); errs = []; kur(pg, errs); posts = []; mails = []; uyari = []
+        pg.route('**/rest/v1/basvurular**', lambda r, q: (posts.append(1), r.fulfill(status=201, body='', headers={'access-control-allow-origin': '*'})))
+        pg.route('https://api.web3forms.com/**', lambda r, q: (mails.append(1), r.fulfill(status=200, body='{"success":true}', headers={'content-type': 'application/json', 'access-control-allow-origin': '*'})))
+        pg.goto(BASE + 'iletisim.html', wait_until='domcontentloaded'); pg.wait_for_timeout(900)
+        pg.query_selector('#contactForm').evaluate(DOLDUR.replace("i.value='05330000000'", "i.value=%r" % tel).replace("else i.value='Test Kişi';}", "else i.value=(i.tagName==='TEXTAREA'?%r:'Test Kişi');}" % mesaj))
+        pg.wait_for_timeout(1000)
+        uyari = [a for a in (pg.evaluate('window.__acilan||[]') or []) if str(a).startswith('ALERT:') and 'telefon' in str(a)]
+        ok = len(posts) == beklenen_kayit and len(mails) == beklenen_mail and (bool(uyari) == (beklenen_kayit == 0)) and not errs
+        hata += not ok
+        print('✓' if ok else '✗', 'SPAM KORUMASI', ad, '-> kayıt:', len(posts), 'mail:', len(mails), 'uyarı:', uyari[:1], errs)
+        pg.close()
     # Tıklama/başvuru sayacı: çerez onayı varsa olay gönderilir, yoksa hiçbir şey gönderilmez; tıklama ve form davranışı değişmez
     for tercih in ['kabul', 'red']:
         pg = b.new_page(); errs = []; kur(pg, errs); posts = []

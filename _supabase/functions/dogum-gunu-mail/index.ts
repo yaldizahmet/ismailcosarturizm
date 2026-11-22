@@ -92,10 +92,12 @@ Deno.serve(async (req: Request) => {
   } else s.push("Bu hafta ziyaret kaydı yok.");
 
   // 2) Başvurular
-  const b = bv.data ?? [];
+  const b = (bv.data ?? []).filter((x) => x.durum !== "spam");
+  const spamSay = (bv.data ?? []).length - b.length;
   s.push("", "", `📥 BAŞVURULAR: ${b.length}`);
   b.forEach((x, i) => s.push(`${i + 1}) ${x.ad_soyad || "(isimsiz)"}${x.telefon ? " · " + x.telefon : ""}${x.program || x.hizmet ? " · " + (x.program || x.hizmet) : ""}${x.durum === "yeni" ? " · HENÜZ BAKILMADI" : ""}`));
   if (!b.length) s.push("Bu hafta yeni başvuru gelmedi.");
+  if (spamSay) s.push(`(${spamSay} spam başvuru otomatik ayıklandı; admin panelinde Başvurular › Spam sekmesinde.)`);
 
   // 3) Tur sonu anketleri
   const a = an.data ?? [];

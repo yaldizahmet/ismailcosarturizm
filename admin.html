@@ -2239,8 +2239,8 @@ async function yorumSil(id) {
 
 // ── TOAST ──
 // ── BAŞVURULAR ──
-const DURUMLAR = {yeni:'🆕 Yeni', arandi:'📞 Arandı', kayit:'✅ Kayıt Oldu', iptal:'✖️ İlgilenmiyor'};
-const DURUM_RENK = {yeni:'#dc3545', arandi:'#C9972B', kayit:'#2e7d32', iptal:'#999'};
+const DURUMLAR = {yeni:'🆕 Yeni', arandi:'📞 Arandı', kayit:'✅ Kayıt Oldu', iptal:'✖️ İlgilenmiyor', spam:'🚫 Spam'};
+const DURUM_RENK = {yeni:'#dc3545', arandi:'#C9972B', kayit:'#2e7d32', iptal:'#999', spam:'#6c757d'};
 const FORM_AD = {'umre-kayit':'Umre Kayıt', 'hac-kayit':'Hac Kayıt', 'tur-kayit':'Tur Kayıt', 'iletisim-formu':'İletişim Formu', 'ana-sayfa-iletisim':'Ana Sayfa Formu'};
 let basvuruFiltre = 'hepsi';
 
@@ -2257,7 +2257,7 @@ async function renderBasvurular() {
   const el = document.getElementById('sayfa-basvuru');
   el.innerHTML = '<div class="loading">⏳ Yükleniyor...</div>';
   let q = sb.from('basvurular').select('*').order('created_at', { ascending: false }).limit(200);
-  if (basvuruFiltre !== 'hepsi') q = q.eq('durum', basvuruFiltre);
+  q = basvuruFiltre === 'hepsi' ? q.neq('durum', 'spam') : q.eq('durum', basvuruFiltre); // spam yalnızca kendi sekmesinde
   const { data, error } = await q;
   yeniSayacGuncelle();
   if (error) { el.innerHTML = '<div class="loading">❌ ' + esc(error.message) + '</div>'; return; }
@@ -2267,6 +2267,7 @@ async function renderBasvurular() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
       ${filtreler.map(([k,v]) => `<button class="btn ${basvuruFiltre===k?'btn-navy':''}" style="${basvuruFiltre===k?'':'background:#fff;border:1px solid #ddd;color:#333'}" onclick="basvuruFiltre='${k}';renderBasvurular()">${v}</button>`).join('')}
     </div>
+    ${basvuruFiltre === 'spam' ? '<p style="font-size:13px;color:#666;margin:-6px 0 14px">Telefonu geçersiz ya da mesajında bağlantı olan başvurular otomatik buraya düşer; bildirim maili gitmez. Gerçek bir misafirse durumunu değiştirin.</p>' : ''}
     ${!data.length ? '<div class="card" style="text-align:center;color:#888">Bu listede başvuru yok.</div>' : data.map(b => {
       const tel = (b.telefon||'').replace(/[^0-9+]/g,'');
       const wa = tel.replace(/^\+/,'').replace(/^0/,'90');
@@ -2284,11 +2285,11 @@ async function renderBasvurular() {
           </select>
         </div>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:14px">
-          ${tel?`<a href="tel:${esc(tel)}" style="color:#0B1F3A;font-weight:600;text-decoration:none">📞 ${esc(b.telefon)}</a><a href="https://wa.me/${esc(wa)}" target="_blank" style="color:#25D366;font-weight:600;text-decoration:none">💬 WhatsApp</a>`:''}
+          ${tel && b.durum !== 'spam'?`<a href="tel:${esc(tel)}" style="color:#0B1F3A;font-weight:600;text-decoration:none">📞 ${esc(b.telefon)}</a><a href="https://wa.me/${esc(wa)}" target="_blank" style="color:#25D366;font-weight:600;text-decoration:none">💬 WhatsApp</a>`:''}
           ${b.eposta?`<a href="mailto:${esc(b.eposta)}" style="color:#0B1F3A;text-decoration:none">✉️ ${esc(b.eposta)}</a>`:''}
           ${b.hizmet?`<span>🏷 ${esc(b.hizmet)}</span>`:''}
           ${b.kisi_sayisi?`<span>👥 ${esc(b.kisi_sayisi)}${/^\d+$/.test(b.kisi_sayisi)?' kişi':''}</span>`:''}
-          ${ekstra.map(([k,v]) => `<span>• ${esc(({'tercih-tarih':'Tercih edilen tarih','kvkk_onay':'KVKK onayı'})[k]||k)}: ${esc(v)}</span>`).join('')}
+          ${ekstra.map(([k,v]) => `<span>• ${esc(({'tercih-tarih':'Tercih edilen tarih','kvkk_onay':'KVKK onayı','spam_nedeni':'Spam nedeni'})[k]||k)}: ${esc(v)}</span>`).join('')}
         </div>
         ${b.mesaj?`<div style="margin-top:12px;padding:10px 12px;background:#f7f7f7;border-radius:8px;font-size:13.5px;white-space:pre-wrap">${esc(b.mesaj)}</div>`:''}
         <div style="margin-top:12px;text-align:right"><button class="btn btn-red" style="padding:6px 12px;font-size:12px" onclick="basvuruSil(${b.id})">Sil</button></div>
