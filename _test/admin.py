@@ -164,8 +164,8 @@ with sync_playwright() as p:
     kontrol(len(rk) == 1 and rk[0]['veri'] == [{'kafile_id': v.get('id'), 'user_id': 'r-1'}] and v.get('id') and 'Rehber: Rehber Bir' in pg.inner_text('.kafile-item .grup-rehber'),
             'Grup formu: işaretlenen rehber yeni gruba atanıyor ve listede adı görünüyor', str(rk)[:120])
     kontrol(pg.locator('.kafile-item').count() == 1 and kod in pg.inner_text('#sayfa-kafile') and pg.inner_text('.kafile-item .abone-sayisi') == '0', 'Kafile: listede görünüyor (bildirim açık telefon sayısıyla)')
-    href = pg.locator('.kafile-item a', has_text='Paylaş').get_attribute('href') or ''
-    kontrol('kafile%2F%23' + kod in href, 'Kafile: Paylaş bağlantısı kodlu uygulama adresini içeriyor')
+    href = pg.locator('.kafile-item a', has_text='Misafirlere linki gönder').get_attribute('href') or ''
+    kontrol('kafile%2F%23' + kod in href, 'Kafile: "Misafirlere linki gönder" bağlantısı kodlu uygulama adresini içeriyor')
     pg.evaluate("window.__islem = []")
     pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol(pg.locator('#k_program .prog-satir').count() == 2 and pg.input_value('#k_rehber_ad') == "Ali O'Hoca" and pg.input_value('#k_tur_turu') == 'kultur' and pg.input_value('#k_acil_tel') == '112', 'Kafile: düzenleme formu kayıtlı bilgilerle açılıyor')
@@ -740,7 +740,7 @@ with sync_playwright() as p:
         kontrol('Test · Rehber' in rp.inner_text('#kullaniciBilgi') and rp.is_visible('#kullaniciBilgi'), 'Rehber: sağ üstte kullanıcı adı ve rolü görünüyor', rp.inner_text('#kullaniciBilgi'))
         kontrol(rp.locator('.kafile-item').count() == 1 and rp.locator('.kafile-item button').count() == 1, 'Rehber: kafilede düzenle/sil/duyuru yok, yalnızca "Katılımcılar ve odalar"')
         h = rp.get_attribute('.kafile-item a.rehber-paylas', 'href') or ''
-        kontrol('KASIM-AAAAA' in rp.inner_text('.kafile-item') and h.startswith('https://wa.me/?text=') and 'kafile%2F%23KASIM-AAAAA' in h, 'Rehber: misafir kodu görünüyor, "Misafir kodunu paylaş" WhatsApp bağlantısı kodlu')
+        kontrol('KASIM-AAAAA' in rp.inner_text('.kafile-item') and h.startswith('https://wa.me/?text=') and 'kafile%2F%23KASIM-AAAAA' in h, 'Rehber: misafir kodu görünüyor, "Misafirlere linki gönder" WhatsApp bağlantısı kodlu')
         rp.locator('.kafile-item button').click(); rp.wait_for_timeout(400)
         kontrol(rp.locator('#kt_kart').count() == 0 and rp.locator('summary', has_text='Excel').count() == 0 and rp.locator('.katilimci-satir button', has_text='Çıkar').count() == 0
                 and rp.locator('.katilimci-satir').count() == 1, 'Rehber: listeyi görüyor; ekleme, Excel ve çıkarma yok', errs)
@@ -764,7 +764,7 @@ with sync_playwright() as p:
         kontrol(rp.locator('.anket-btn').count() == 0, 'Rehber: anket sonuçları butonu yok')
         rp.evaluate("sekmeAc('kafile')"); rp.wait_for_timeout(400)
         kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
-        kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafir kodunu paylaş" yazısı ortalı')
+        kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafirlere linki gönder" yazısı ortalı')
         rp.close()
     b.close()
 

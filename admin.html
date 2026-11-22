@@ -786,12 +786,12 @@ async function renderKafileler() {
     el.innerHTML = '<div class="header"><h2>👥 Gruplarım</h2></div><div class="card"><div class="tur-list">' +
       ((data || []).map(k => `<div class="tur-item kafile-item"><div class="tur-item-info"><h4>${esc(k.ad)}</h4><p>${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · ${katSay[k.id] || 0} kişi · Misafir kodu: <b style="letter-spacing:1px">${esc(k.kod)}</b></p></div>
         <div class="tur-item-actions" style="flex-wrap:wrap"><button class="btn btn-gold" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar ve odalar</button>
-          <a class="btn rehber-paylas" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">📲 Misafir kodunu paylaş</a></div></div>`).join('') ||
+          <a class="btn rehber-paylas" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">📲 Misafirlere linki gönder</a></div></div>`).join('') ||
         '<p style="color:#666;font-size:14px">Size atanmış grup yok. Ofisten gruba atanmanızı isteyin.</p>') + '</div></div>';
     return;
   }
   let html = '<div class="header"><h2>🧳 Gruplar</h2><button class="btn btn-gold" onclick="kafileYeni()">➕ Yeni Grup</button></div>';
-  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. Kodu ya da “Paylaş” bağlantısını grubun WhatsApp grubuna gönderin. Pasif gruplar uygulamada görünmez.</div>';
+  html += '<div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafirlerimiz <b>' + KAFILE_URL + '</b> adresinden grup koduyla girer. “Misafirlere linki gönder” düğmesi bağlantıyı WhatsApp’ta hazırlar; grubun WhatsApp grubuna gönderin. Pasif gruplar uygulamada görünmez.</div>';
   html += '<div class="card"><div class="tur-list">';
   if (!data || !data.length) html += '<p style="color:#666;font-size:14px">Henüz grup yok. “Yeni Grup” ile ekleyin.</p>';
   html += (data || []).map(k => `
@@ -801,12 +801,12 @@ async function renderKafileler() {
         <p>${TUR_TURLERI[k.tur_turu] || 'Umre'} · Kod: <b style="letter-spacing:1px">${esc(k.kod)}</b> · ${kafileTarih(k.baslangic)} – ${kafileTarih(k.bitis)} · Program: ${(k.program || []).length} satır ·${k.inis_sehri || k.donus_sehri ? ` ✈️ İniş: ${esc(k.inis_sehri || '—')} · Dönüş: ${esc(k.donus_sehri || '—')} ·` : ''} 🔔 <span class="abone-sayisi">${aboneSay[k.id] || 0}</span> telefonda bildirim açık · <span class="grup-rehber">🧭 ${grupRehber(k.id).length ? 'Rehber: ' + esc(grupRehber(k.id).join(', ')) : '<span style="color:#c62828">rehber hesabı atanmadı</span>'}</span></p>
       </div>
       <div class="tur-item-actions" style="flex-wrap:wrap">
-        <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}">${k.aktif ? 'Aktif' : 'Pasif'}</span>
+        <span class="badge ${k.aktif ? 'badge-green' : 'badge-red'}" style="align-self:center">${k.aktif ? 'Aktif' : 'Pasif'}</span>
         <button class="btn btn-navy" onclick="kafileDuzenle('${k.id}')">Düzenle</button>
         <button class="btn btn-gold" onclick="kafileDuyurular('${k.id}')">📢 Duyurular</button>
         <button class="btn btn-navy" onclick="kafileKatilimcilar('${k.id}')">👥 Katılımcılar (<span class="katilimci-sayisi">${katSay[k.id] || 0}</span>)</button>
         <button class="btn btn-navy anket-btn" onclick="kafileAnket('${k.id}')">📝 Anket${anketOzet[k.id] ? ' (' + anketOzet[k.id].n + ' · ' + ondalik(anketOzet[k.id].t / anketOzet[k.id].n) + '★)' : ''}</button>
-        <a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">Paylaş</a>
+        <a class="btn" style="background:#25D366;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center" target="_blank" rel="noopener" title="Uygulama linkini WhatsApp’ta misafirlere gönderin" href="https://wa.me/?text=${encodeURIComponent(kafilePaylasMetni(k))}">📲 Misafirlere linki gönder</a>
         <button class="btn btn-red" onclick="kafileSil('${k.id}')">Sil</button>
       </div>
     </div>`).join('');
