@@ -32,6 +32,15 @@ kv = open(os.path.join(KOK, 'kvkk.html'), encoding='utf-8').read()
 kontrol('id="uygulama"' in kv and 'id="bildirim"' in kv and all(k in kv for k in ['Konum:', 'Bilgi yarışması:', 'Tur sonu anketi:', 'Bildirimler:', 'Ziyaret sayısı:', 'üçüncü kişilerle paylaşmaz']),
         'KVKK: misafir uygulaması bölümü konum, yarışma, anket, bildirim ve sayaç verisini anlatıyor')
 
+# 1d) Android uygulaması (Play Store) siteyi doğrulayabiliyor: assetlinks.json geçerli ve Jekyll onu yayınlıyor
+try:
+    al = json.load(open(os.path.join(KOK, '.well-known', 'assetlinks.json'), encoding='utf-8'))
+    al_ok = al[0]['target']['package_name'] == 'com.ismailcosarturizm.app' and all(re.fullmatch(r'([0-9A-F]{2}:){31}[0-9A-F]{2}', f) for f in al[0]['target']['sha256_cert_fingerprints'])
+except Exception as e:
+    al_ok = False
+kontrol(al_ok and '.well-known' in open(os.path.join(KOK, '_config.yml'), encoding='utf-8').read(),
+        'Android uygulaması: .well-known/assetlinks.json geçerli (paket adı, imza parmak izi) ve _config.yml onu yayınlıyor')
+
 # 2) Arama motoru / yapay zekâ etiketleri
 sys.path.insert(0, os.path.join(KOK, '_araclar'))
 import sss_ld

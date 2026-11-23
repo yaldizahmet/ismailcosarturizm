@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ismailcosarturizm.app",
+    "sha256_cert_fingerprints": [
+      "C6:92:FB:42:34:0C:7F:05:43:19:0B:19:7E:86:ED:FF:F9:B1:77:6F:2B:DA:F6:23:17:FF:41:D2:49:54:4A:B3"
+    ]
+  }
+}]

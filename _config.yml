@@ -1,0 +1,3 @@
+# GitHub Pages (Jekyll) ayarı: "." ile başlayan klasörler varsayılan olarak yayınlanmaz.
+# Android uygulamasının (Play Store, com.ismailcosarturizm.app) siteyi doğrulayan dosyası için .well-known yayınlanmalı.
+include: [".well-known"]
