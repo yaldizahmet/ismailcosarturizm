@@ -527,6 +527,17 @@ with sync_playwright() as p:
             c.__gonderilen.append(json.loads(req.post_data)); route.fulfill(status=200, body='true', headers=J)
         c.route('**/rest/v1/rpc/yarisma_cevap', cevap)
         return c
+    # Şehre göre sıra: önce Medine'de kalan grup ilk gün Medine sorusunu görür; Medine soruları bitip Mekke'ye geçince Mekke sorusu gelir
+    def SS(i, sehir): return dict(SORU(i, 0), sehir=sehir, soru=f'{sehir or "Genel"} sorusu {i}?')
+    ky_s = dict(KAFILE, baslangic='2026-11-12', bitis='2026-11-16', oteller=[{'sehir': 'Medine', 'ad': 'M1', 'giris': '2026-11-12', 'cikis': '2026-11-13'}, {'sehir': 'Mekke Oteli Bölgesi', 'ad': 'M2', 'giris': '2026-11-13', 'cikis': '2026-11-16'}])
+    sorular_s = [SS(i, 'Mekke') for i in range(1, 8)] + [SS(i, 'Medine') for i in range(8, 13)] + [SS(i, None) for i in range(13, 16)]
+    sonuc = []
+    for simdi, cevaplar in [('2026-11-12T11:00:00+03:00', []), ('2026-11-13T11:00:00+03:00', [{'id': i, 'secim': 0, 'gun': '2026-11-12'} for i in range(8, 13)])]:
+        c = yr_baglam(yr={'konu': 'umre', 'sorular': sorular_s, 'tablo': [], 'cevaplar': cevaplar}, kafile=ky_s); c.add_init_script(f"window.__SIMDI = '{simdi}';")
+        errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(700)
+        sonuc.append((pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else '', errs)); c.close()
+    kontrol('Medine sorusu 8?' in sonuc[0][0] and 'Mekke sorusu 1?' in sonuc[1][0] and not sonuc[0][1] and not sonuc[1][1],
+            'Eğlence: şehir etiketli sorular grubun o gün kaldığı şehre göre geliyor (önce Medine, sonra Mekke)', [s[0][:60] for s in sonuc])
     c = yr_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
     kontrol(pg.locator('.alt-menu [data-sekme="eglence"]').count() == 1 and pg.locator('.alt-menu [data-sekme="duyurular"]').count() == 0, 'Eğlence: alt menüde Duyurular yerine Eğlence sekmesi')
     gs = pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else ''

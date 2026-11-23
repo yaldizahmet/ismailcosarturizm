@@ -1845,7 +1845,7 @@ function yarismaCiz() {
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">${Object.keys(YARISMA_KONULARI).map(sekme).join('')}</div>
       ${l.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="btn btn-gold" id="yrTopluYayin" onclick="yarismaTopluYayin(true)" ${taslak ? '' : 'disabled'}>✅ ${YARISMA_KONULARI[YR.konu]} sorularının tümünü yayınla</button><button class="btn btn-navy" onclick="yarismaTopluYayin(false)">Tümünü taslağa al</button></div>` : ''}
       <div class="tur-list">${l.map((x, i) => `
-        <div class="tur-item yr-soru" data-id="${x.id}"><div class="tur-item-info"><h4>${i + 1}. ${esc(x.soru)} <span class="badge ${x.yayinda ? 'badge-green' : 'badge-red'}">${x.yayinda ? 'Yayında' : 'Taslak'}</span></h4>
+        <div class="tur-item yr-soru" data-id="${x.id}"><div class="tur-item-info"><h4>${i + 1}. ${esc(x.soru)} <span class="badge ${x.yayinda ? 'badge-green' : 'badge-red'}">${x.yayinda ? 'Yayında' : 'Taslak'}</span>${x.sehir ? ` <span class="badge" style="background:#eef2f7;color:#0B1F3A">📍 ${esc(x.sehir)}</span>` : ''}</h4>
           <p>${(x.siklar || []).map((c, j) => j === x.dogru ? `<b style="color:#2e7d32">${'ABCD'[j]}) ${esc(c)} ✓</b>` : `${'ABCD'[j]}) ${esc(c)}`).join(' · ')}</p>
           ${x.aciklama ? `<p style="font-size:12.5px;color:#777">${esc(x.aciklama)}</p>` : ''}</div>
           <div class="tur-item-actions"><button class="btn ${x.yayinda ? 'btn-navy' : 'btn-gold'}" onclick="yarismaYayin(${x.id}, ${!x.yayinda})">${x.yayinda ? 'Taslağa al' : 'Yayınla'}</button>
@@ -1858,7 +1858,9 @@ function yarismaFormHtml(d) {
     <div class="form-row">
       <div class="form-group"><label>Konu</label><select id="yr_f_konu">${Object.entries(YARISMA_KONULARI).map(([k, v]) => `<option value="${k}" ${d.konu === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
       <div class="form-group"><label>Sıra (küçük olan önce sorulur)</label><input id="yr_f_sira" type="number" value="${esc(String(d.sira ?? ''))}"></div>
+      <div class="form-group"><label>Şehir (isteğe bağlı)</label><input id="yr_f_sehir" maxlength="40" value="${esc(d.sehir || '')}" placeholder="Ör. Mekke, Medine"></div>
     </div>
+    <div style="font-size:11.5px;color:#888;margin:-4px 0 10px">Şehir yazılırsa soru, grubun o şehirde kaldığı günlerde (otel tarihlerine göre) öne alınır. Boş bırakılırsa genel sorudur.</div>
     <div class="form-group"><label>Soru</label><input id="yr_f_soru" maxlength="400" value="${esc(d.soru || '')}" placeholder="Ör. Tavaf kaç şavttan oluşur?"></div>
     ${[0, 1, 2, 3].map(j => `<div class="form-group" style="display:flex;align-items:center;gap:8px"><label style="display:flex;align-items:center;gap:6px;margin:0;white-space:nowrap"><input type="radio" name="yr_f_dogru" value="${j}" ${d.dogru === j ? 'checked' : ''}> ${'ABCD'[j]})</label><input class="yr_f_sik" style="flex:1" maxlength="120" value="${esc(s[j] || '')}" placeholder="${j < 2 ? 'Şık' : 'Şık (isteğe bağlı)'}"></div>`).join('')}
     <div style="font-size:11.5px;color:#888;margin:-4px 0 10px">Doğru şıkkın solundaki yuvarlağı işaretleyin.</div>
@@ -1884,7 +1886,7 @@ async function yarismaKaydet() {
   tum.forEach(x => { if (x) siklar.push(x); });
   if (siklar.length < 2) { toast('❌ En az iki şık gerekli', 'error'); return; }
   const k = { konu: v('yr_f_konu'), soru: v('yr_f_soru'), siklar, dogru, aciklama: v('yr_f_aciklama') || null,
-    sira: Number(v('yr_f_sira')) || 0, yayinda: document.getElementById('yr_f_yayinda').checked };
+    sira: Number(v('yr_f_sira')) || 0, sehir: v('yr_f_sehir') || null, yayinda: document.getElementById('yr_f_yayinda').checked };
   const { error } = d.id ? await sb.from('bilgi_sorulari').update(k).eq('id', d.id) : await sb.from('bilgi_sorulari').insert(k);
   if (error) { toast('❌ ' + error.message, 'error'); return; }
   toast('✅ Kaydedildi', 'success'); YR.konu = k.konu; renderYarisma();
