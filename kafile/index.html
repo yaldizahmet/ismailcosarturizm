@@ -1260,6 +1260,7 @@ details.tum[open] summary::after{content:'▴'}
     var yazi;
     if (!k) yazi = 'Konumunuza göre kıble yönünü gösterir. Otel odasında ve yolculukta kullanışlıdır.<button type="button" data-eylem="kible">Kıbleyi göster</button>';
     else if (k.hata) yazi = esc(k.hata) + '<button type="button" data-eylem="kible">Tekrar dene</button>';
+    else if (k.aci == null) yazi = 'Konumunuz alınıyor…';
     else if (k.mesafe != null && k.mesafe < 0.3) yazi = 'Kâbe\'ye çok yakınsınız; Kâbe\'ye doğru dönün.';
     else if (k.yon == null) yazi = 'Kıble, kuzeyden saat yönünde <b>' + Math.round(k.aci) + '°</b>. ' + (k.bekliyor ? 'Pusula hazırlanıyor… Telefonu düz tutun.'
       : k.iosSor ? 'Oku canlı görmek için pusulayı açın.<button type="button" data-eylem="kible">Pusulayı aç</button>' // iPhone: pusula izni ancak dokununca istenebilir
@@ -1297,7 +1298,22 @@ details.tum[open] summary::after{content:'▴'}
   function konumVakitAl() {
     if (!navigator.geolocation) { S.konumHata = 'Bu telefonda konum kullanılamıyor.'; ciz(); return; }
     bildir('Konumunuz alınıyor…');
-    navigator.geolocation.getCurrentPosition(konumKaydet, function () { S.konumHata = 'Konum izni verilmedi. Telefon ayarlarından tarayıcıya konum izni verip tekrar deneyin.'; ciz(); }, { enableHighAccuracy: false, timeout: 15000, maximumAge: KONUM_OMUR });
+    konumAl(konumKaydet, function (e) { S.konumHata = konumHataMetni(e); ciz(); }, false, KONUM_OMUR);
+  }
+  // Konum hatasını nedenine göre anlatır: izin kapalı mı, yoksa konum bulunamadı mı (kapalı alan, GPS kapalı).
+  // Play Store uygulamasında izin uygulamanın kendi ayarındadır; tarayıcıda tarayıcının.
+  function konumHataMetni(e) {
+    if (e && e.code === 1) return /iPhone|iPad|iPod/.test(navigator.userAgent)
+      ? 'Konum izni kapalı. iPhone Ayarlar › Gizlilik ve Güvenlik › Konum Servisleri › Safari Web Siteleri bölümünden izin verip tekrar deneyin.'
+      : 'Konum izni kapalı. Uygulama simgesine basılı tutup Site ayarları › Konum › İzin ver yolunu izleyin, sonra tekrar deneyin. (Tarayıcıda açtıysanız: adres çubuğundaki simge › İzinler › Konum.)';
+    return 'Konum bulunamadı. Telefonun konum (GPS) özelliğinin açık olduğundan emin olup tekrar deneyin.';
+  }
+  // Önce istenen hassasiyetle dener; zaman aşımı ya da konum bulunamazsa daha az hassas konumla bir kez daha dener.
+  function konumAl(tamam, hata, hassas, eskiKabul) {
+    navigator.geolocation.getCurrentPosition(tamam, function (e) {
+      if (e && e.code === 1) return hata(e);
+      navigator.geolocation.getCurrentPosition(tamam, hata, { enableHighAccuracy: false, timeout: 20000, maximumAge: 30 * 60 * 1000 });
+    }, { enableHighAccuracy: !!hassas, timeout: 15000, maximumAge: eskiKabul || 600000 });
   }
   function konumOtoYenile() {
     if (!S.veri || kutsalMi() || !navigator.geolocation) return;
@@ -1321,12 +1337,13 @@ details.tum[open] summary::after{content:'▴'}
   // otomatik: Vakitler ekranı açılınca kendiliğinden başlar. iPhone pusula iznini yalnızca bir dokunuşla verdiği için
   // orada önce yön derece olarak çıkar, "Pusulayı aç" ile canlı ok başlar.
   function kibleBaslat(otomatik) {
-    S.kible = { bekliyor: true, aci: null, yon: null, mesafe: null };
+    S.kible = { bekliyor: true, aci: null, yon: null, mesafe: null }; var basladi = Date.now();
+    if (S.sekme === 'vakitler') ciz(); // basıldığı hemen görünsün: "Konumunuz alınıyor…"
     var ios = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
     var izin = ios ? (otomatik ? Promise.resolve('sor') : DeviceOrientationEvent.requestPermission().catch(function () { return 'denied'; })) : Promise.resolve('granted');
     izin.then(function (sonuc) {
       if (!navigator.geolocation) { S.kible = { hata: 'Bu telefonda konum kullanılamıyor.' }; ciz(); return; }
-      navigator.geolocation.getCurrentPosition(function (p) {
+      konumAl(function (p) {
         var D = Math.PI / 180, f1 = p.coords.latitude * D, f2 = KABE.enlem * D, dl = (KABE.boylam - p.coords.longitude) * D;
         var aci = (Math.atan2(Math.sin(dl), Math.cos(f1) * Math.tan(f2) - Math.sin(f1) * Math.cos(dl)) / D + 360) % 360;
         var mesafe = 6371 * Math.acos(Math.min(1, Math.sin(f1) * Math.sin(f2) + Math.cos(f1) * Math.cos(f2) * Math.cos(dl)));
@@ -1334,7 +1351,7 @@ details.tum[open] summary::after{content:'▴'}
         if (sonuc !== 'denied') pusulaDinle(); // 'sor': daha önce izin verildiyse olaylar yine gelir
         ciz();
         setTimeout(function () { if (S.kible && S.kible.yon == null && S.kible.bekliyor) { S.kible.bekliyor = false; if (S.sekme === 'vakitler') ciz(); } }, sonuc === 'sor' ? 1500 : 4000);
-      }, function () { S.kible = { hata: 'Konum izni verilmedi. Telefon ayarlarından tarayıcıya konum izni verip tekrar deneyin.' }; ciz(); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 600000 });
+      }, function (e) { setTimeout(function () { S.kible = { hata: konumHataMetni(e) }; ciz(); }, Math.max(0, 800 - (Date.now() - basladi))); }, true, 600000); // "Tekrar dene"ye basıldığı görülsün
     });
   }
   function kibleOtomatik() {

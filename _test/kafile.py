@@ -244,6 +244,25 @@ with sync_playwright() as p:
     kontrol(not errs, 'Kıble (iPhone): JavaScript hatası yok', errs)
     c.close()
 
+    # Kıble konum hataları: izin kapalıysa ayar yolu anlatılıyor; konum bulunamazsa (Play uygulaması, kapalı alan) daha az hassas konumla yeniden deneniyor
+    for kod, ikinci_basarili, beklenen in [(1, False, 'Konum izni kapalı'), (3, True, '°'), (3, False, 'Konum bulunamadı')]:
+        c = baglam(b); c.add_init_script("""(function(){ var n = 0; window.__konumDeneme = [];
+          Object.defineProperty(navigator, 'geolocation', { configurable: true, value: { watchPosition: function(){ return 1; }, clearWatch: function(){},
+            getCurrentPosition: function(ok, hata, o){ n++; window.__konumDeneme.push(!!(o && o.enableHighAccuracy));
+              setTimeout(function(){ if (n > 1 && %s) ok({ coords: { latitude: 41.0082, longitude: 28.9784, accuracy: 500 } }); else hata({ code: %d, message: 'x' }); }, 50); } } });
+          if (navigator.permissions) navigator.permissions.query = function(){ return Promise.resolve({ state: 'prompt' }); }; })();""" % ('true' if ikinci_basarili else 'false', kod))
+        errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+        pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(900)
+        yz = pg.inner_text('#kibleYazi'); deneme = pg.evaluate('window.__konumDeneme')
+        if kod == 1:  # "Tekrar dene": basınca "Konumunuz alınıyor…" görünür, sonra mesaj geri gelir
+            pg.click('#kibleYazi button'); pg.wait_for_timeout(150); ara = pg.inner_text('#kibleYazi'); pg.wait_for_timeout(1200)
+            yz2 = pg.inner_text('#kibleYazi')
+            kontrol('Konumunuz alınıyor' in ara and 'Site ayarları' in yz2 and '0°' not in ara, 'Kıble: "Tekrar dene" basınca "Konumunuz alınıyor…" görünüyor, izin kapalıysa ayar yolu yeniden çıkıyor', [ara[:60], yz2[:80]])
+            deneme = deneme[:1]
+        kontrol(beklenen in yz and (deneme == [True] if kod == 1 else deneme[:2] == [True, False]) and not errs,
+                f'Kıble: konum hatası {kod}' + (' → ikinci (daha az hassas) denemede bulundu' if ikinci_basarili else f' → "{beklenen}" mesajı'), [yz[:80], deneme, errs])
+        c.close()
+
     # ── Kültür turu (Saraybosna): sayaç yok, yerel saat, yerel vakitler, yerel acil numara ──
     KULTUR = dict(KAFILE, kod='TEST-KULTR', ad='Balkan Turu', tur_turu='kultur', acil_tel='112', baslangic='2026-11-10', bitis='2026-11-16',
                   oteller=[{'sehir': 'Saraybosna', 'ad': 'Test Otel Saraybosna', 'adres': 'Ferhadija 1', 'adres_ar': '', 'tel': '+387 33 000 000', 'konum': ''}],
