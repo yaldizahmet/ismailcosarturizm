@@ -163,7 +163,7 @@ details.tum[open] summary::after{content:'▴'}
 .kible .pusula svg{transition:transform .15s linear}
 .kible-yazi{display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
 .kible-yazi .etiket{font-size:13px;letter-spacing:1.5px;font-weight:700;color:var(--goldl)}
-.kible-yazi button{align-self:flex-start;height:42px;border-radius:10px;border:0;background:var(--gold);color:var(--navy);font-weight:700;padding:0 14px}
+.kible-yazi button{display:block;margin-top:10px;align-self:flex-start;height:42px;border-radius:10px;border:0;background:var(--gold);color:var(--navy);font-weight:700;padding:0 14px}
 
 /* ACİL */
 .btn-acil{min-height:72px;border-radius:18px;background:var(--kirmizi);color:#fff;text-decoration:none;display:flex;align-items:center;gap:14px;padding:12px 20px;border:0;width:100%;text-align:left}
@@ -1259,7 +1259,7 @@ details.tum[open] summary::after{content:'▴'}
     var k = S.kible, h = '';
     var yazi;
     if (!k) yazi = 'Konumunuza göre kıble yönünü gösterir. Otel odasında ve yolculukta kullanışlıdır.<button type="button" data-eylem="kible">Kıbleyi göster</button>';
-    else if (k.hata) yazi = esc(k.hata) + '<button type="button" data-eylem="kible">Tekrar dene</button>';
+    else if (k.hata) yazi = esc(k.hata) + (k.kod ? ' <span style="opacity:.55;font-size:12px">(hata kodu ' + k.kod + ')</span>' : '') + '<button type="button" data-eylem="kible">Tekrar dene</button>';
     else if (k.aci == null) yazi = 'Konumunuz alınıyor…';
     else if (k.mesafe != null && k.mesafe < 0.3) yazi = 'Kâbe\'ye çok yakınsınız; Kâbe\'ye doğru dönün.';
     else if (k.yon == null) yazi = 'Kıble, kuzeyden saat yönünde <b>' + Math.round(k.aci) + '°</b>. ' + (k.bekliyor ? 'Pusula hazırlanıyor… Telefonu düz tutun.'
@@ -1351,7 +1351,7 @@ details.tum[open] summary::after{content:'▴'}
         if (sonuc !== 'denied') pusulaDinle(); // 'sor': daha önce izin verildiyse olaylar yine gelir
         ciz();
         setTimeout(function () { if (S.kible && S.kible.yon == null && S.kible.bekliyor) { S.kible.bekliyor = false; if (S.sekme === 'vakitler') ciz(); } }, sonuc === 'sor' ? 1500 : 4000);
-      }, function (e) { setTimeout(function () { S.kible = { hata: konumHataMetni(e) }; ciz(); }, Math.max(0, 800 - (Date.now() - basladi))); }, true, 600000); // "Tekrar dene"ye basıldığı görülsün
+      }, function (e) { setTimeout(function () { S.kible = { hata: konumHataMetni(e), kod: e && e.code }; ciz(); }, Math.max(0, 800 - (Date.now() - basladi))); }, true, 600000); // "Tekrar dene"ye basıldığı görülsün
     });
   }
   function kibleOtomatik() {
