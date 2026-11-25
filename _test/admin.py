@@ -173,9 +173,9 @@ with sync_playwright() as p:
     kontrol(pg.is_checked('.k_rehber'), 'Grup formu: düzenlerken atanmış rehber işaretli geliyor')
     kontrol(pg.input_value('#k_yarisma_konusu') == 'balkan', 'Grup formu: kayıtlı yarışma konusu düzenlerken seçili geliyor')
     pg.select_option('#k_yarisma_konusu', ''); pg.get_by_role('button', name=re.compile('Kaydet')).click()
-    try: pg.wait_for_function("document.body.innerText.includes('yarışma soruları görünmez')", timeout=3000)
-    except Exception: pass
-    kontrol('yarışma soruları görünmez' in pg.inner_text('body'), 'Grup formu: kültür turunda yarışma konusu seçilmezse kayıttan sonra uyarı çıkıyor')
+    try: pg.wait_for_function("document.body.innerText.includes('yarışma soruları görünmez')", timeout=10000); _uyari = True  # tam test yükündeyken yavaş olabiliyor
+    except Exception: _uyari = False
+    kontrol(_uyari, 'Grup formu: kültür turunda yarışma konusu seçilmezse kayıttan sonra uyarı çıkıyor')
     pg.evaluate("window.__islem = []"); pg.locator('.kafile-item').get_by_role('button', name='Düzenle').click(); pg.wait_for_timeout(300)
     kontrol('haritada işaretli' in pg.inner_text('.otel-blok .o_konum_durum') and "Harem'e kuş uçuşu ~650 m" in pg.inner_text('.otel-blok .o_konum_durum'),
             'Otel konumu: Google bağlantısından enlem/boylam bulunup kaydediliyor; formda Harem uzaklığıyla gösteriliyor', pg.inner_text('.otel-blok .o_konum_durum'))

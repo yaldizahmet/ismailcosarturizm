@@ -9,11 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
-/* Eski siteden (ismailcosarturizm.com) kalan adresleri yeni sayfalara yönlendirir.
+/* Eski siteden (ismailcosarturizm.com) kalan ve yanlış yazılan adresleri (ör. /Aadmin, /kafle) doğru sayfalara yönlendirir.
    Adresteki kelimeye göre eşleşir; eşleşme yoksa aşağıdaki "Sayfa taşındı" mesajı gösterilir. */
 (function () {
   var yol = decodeURIComponent(location.pathname + ' ' + location.search).toLocaleLowerCase('tr');
   var KURALLAR = [
+    [/adm[iı]n|y[oö]net[iı]m|panel/, '/admin.html'],
+    [/kaf[iı]?le|misafir|uygulama/, '/kafile/'],
     [/umre|umra/, '/umre.html'],
     [/(^|[^a-zçğıöşü])hac(c|ı|i)?([^a-zçğıöşü]|$)|hajj/, '/hac.html'],
     [/balkan|end[uü]l[uü]s|ispanya|[oö]zbek|k[uü]lt[uü]r|yurt-?d[iı]s|tur(lar|lari)?\b|tours?\b/, '/turlar.html'],
@@ -26,7 +28,7 @@
     [/^\/(index|anasayfa|home|default)(\.\w+)?\/?\s*$/, '/']
   ];
   for (var i = 0; i < KURALLAR.length; i++) {
-    if (KURALLAR[i][0].test(yol)) { location.replace(KURALLAR[i][1]); return; }
+    if (KURALLAR[i][0].test(yol)) { location.replace(KURALLAR[i][1] + location.hash); return; } // #KOD gibi ekler korunur
   }
 })();
 </script>

@@ -41,6 +41,15 @@ except Exception as e:
 kontrol(al_ok and '.well-known' in open(os.path.join(KOK, '_config.yml'), encoding='utf-8').read(),
         'Android uygulaması: .well-known/assetlinks.json geçerli (paket adı, imza parmak izi) ve _config.yml onu yayınlıyor')
 
+# 1e) Sayfa bulunamadı (404): yanlış yazılan adresler doğru sayfaya gidiyor, #KOD korunuyor
+import re as _re
+_kod404 = open(os.path.join(KOK, '404.html'), encoding='utf-8').read()
+_kurallar = _re.search(r'var KURALLAR = (\[.*?\]);', _kod404, _re.S).group(1)
+_hedef = lambda yol: next((h for d, h in _re.findall(r"\[/(.*?)/, '(.*?)'\]", _kurallar) if _re.search(d, yol.lower())), None)
+_beklenen = {'/aadmin': '/admin.html', '/yonetim': '/admin.html', '/kafle': '/kafile/', '/misafir': '/kafile/', '/umre-turlari': '/umre.html', '/iletisim-sayfasi': '/iletisim.html', '/hac': '/hac.html'}
+_yanlis = {y: _hedef(y) for y, h in _beklenen.items() if _hedef(y) != h}
+kontrol(not _yanlis and 'location.hash' in _kod404, '404: yanlış yazılan adresler doğru sayfaya gidiyor (/Aadmin → admin, /kafle → misafir uygulaması), #KOD korunuyor', _yanlis)
+
 # 2) Arama motoru / yapay zekâ etiketleri
 sys.path.insert(0, os.path.join(KOK, '_araclar'))
 import sss_ld
