@@ -781,6 +781,17 @@ with sync_playwright() as p:
         kontrol(rp.get_by_text('Çıkış', exact=False).locator('visible=true').count() == 1, 'Rehber: tek bir "Çıkış" var (menüde tekrar yok)')
         kontrol(rp.evaluate("getComputedStyle(document.querySelector('.rehber-paylas')).textAlign") == 'center', 'Rehber: "Misafirlere linki gönder" yazısı ortalı')
         rp.close()
+    # Hareketsizlikte otomatik çıkış: son hareket 31 dk önceyse panel açılmaz, giriş ekranında açıklama çıkar; 5 dk önceyse panel açılır
+    for dk, acik in [(31, False), (5, True)]:
+        p2 = b.new_page(viewport={'width': 1300, 'height': 900}); e2 = []
+        p2.on('pageerror', lambda e: e2.append(str(e)[:160]))
+        p2.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=SAHTE, headers={'content-type': 'application/javascript'}))
+        p2.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort() if 'jsdelivr' not in q.url else r.fallback())
+        p2.add_init_script(f"try {{ localStorage.setItem('admin-son-hareket', String(Date.now() - {dk} * 60000)); }} catch (e) {{}}")
+        p2.goto(BASE + 'admin.html', wait_until='domcontentloaded'); p2.wait_for_timeout(1000)
+        if acik: kontrol(p2.is_visible('#appDiv') and not e2, 'Otomatik çıkış: 5 dakikalık aradan sonra panel açık kalıyor', e2)
+        else: kontrol(not p2.is_visible('#appDiv') and '30 dakika işlem yapılmadığı' in p2.inner_text('#loginErr') and not e2, 'Otomatik çıkış: 30 dakikadan uzun hareketsizlikte oturum kapanıyor, giriş ekranında nedeni yazıyor', e2)
+        p2.close()
     b.close()
 
 print('\n=== ADMIN TESTİ:', 'TEMİZ' if not hata else f'{hata} SORUN')

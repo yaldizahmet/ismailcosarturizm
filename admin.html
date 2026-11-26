@@ -227,11 +227,40 @@ async function paneliAc() {
   sekmeAc(ROL === 'rehber' ? 'kafile' : 'ana');
 }
 
+// ── Hareketsizlikte otomatik çıkış: 30 dakika dokunulmazsa oturum kapanır (ortak/unutulan cihaz için).
+// Son hareket zamanı localStorage'da tutulur; böylece sayfa kapalıyken geçen süre de sayılır ve sekmeler ortak çalışır.
+const HAREKETSIZ_SURE = 30 * 60 * 1000, SON_HAREKET = 'admin-son-hareket';
+function sonHareket() { try { return Number(localStorage.getItem(SON_HAREKET)) || 0; } catch (e) { return 0; } }
+let hareketYazildi = 0;
+function hareketKaydet(zorla) {
+  const t = Date.now(); if (!zorla && t - hareketYazildi < 15000) return; hareketYazildi = t;
+  try { localStorage.setItem(SON_HAREKET, String(t)); } catch (e) {}
+}
+async function hareketsizlikKontrol() {
+  if (document.getElementById('appDiv').style.display === 'none') return;
+  const son = sonHareket();
+  if (son && Date.now() - son > HAREKETSIZ_SURE) {
+    await cikisYap();
+    const e = document.getElementById('loginErr'); e.textContent = '30 dakika işlem yapılmadığı için güvenlik amacıyla çıkış yapıldı. Lütfen yeniden giriş yapın.'; e.style.display = 'block';
+  }
+}
+['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(o => addEventListener(o, () => hareketKaydet(false), { passive: true, capture: true }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) hareketsizlikKontrol(); });
+setInterval(hareketsizlikKontrol, 60000);
+
 window.onload = async () => {
   document.getElementById('appDiv').style.display = 'none';
   document.getElementById('loginDiv').style.display = 'flex';
   const { data } = await sb.auth.getSession();
-  if (data && data.session) paneliAc();
+  if (data && data.session) {
+    const son = sonHareket();
+    if (son && Date.now() - son > HAREKETSIZ_SURE) {
+      await sb.auth.signOut();
+      const e = document.getElementById('loginErr'); e.textContent = '30 dakika işlem yapılmadığı için güvenlik amacıyla çıkış yapıldı. Lütfen yeniden giriş yapın.'; e.style.display = 'block';
+      return;
+    }
+    hareketKaydet(true); paneliAc();
+  }
 };
 
 document.querySelectorAll('#loginDiv input').forEach(i => {
@@ -248,7 +277,8 @@ async function girisYap() {
   btn.disabled = false; btn.textContent = 'Giriş Yap';
   if (!error) {
     document.getElementById('upass').value = '';
-    paneliAc();
+    document.getElementById('loginErr').style.display = 'none';
+    hareketKaydet(true); paneliAc();
   } else {
     document.getElementById('loginErr').textContent = 'Kullanıcı adı / e-posta veya şifre yanlış!';
     document.getElementById('loginErr').style.display = 'block';
