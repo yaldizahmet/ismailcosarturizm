@@ -204,6 +204,8 @@ function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)re
 function bugunTR(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date());}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}}
 function turGuncel(t){var d=String((t&&t.tarih)||'');return !/^\d{4}-\d{2}-\d{2}$/.test(d)||d>=bugunTR();}
 function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
+function hicriTarih(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return null;try{var p=new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).formatToParts(new Date(d+'T12:00:00Z')),o={};p.forEach(function(x){o[x.type]=x.value;});return o.day&&o.month&&o.year?{g:String(+o.day),a:o.month,y:String(o.year).replace(/\D/g,'')}:null;}catch(e){return null;}}
+function hicriAraligi(t){if(!t||!/umre|hac/.test(String(t.kategori||'')))return'';var a=hicriTarih(t.tarih),b=hicriTarih(t.donus_tarihi);if(!a)return'';if(!b)return a.g+' '+a.a+' '+a.y;return a.y===b.y?(a.a===b.a?a.g+'–'+b.g+' '+a.a+' '+a.y:a.g+' '+a.a+' – '+b.g+' '+b.a+' '+a.y):a.g+' '+a.a+' '+a.y+' – '+b.g+' '+b.a+' '+b.y;}
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
 function odaKisaHtml(t){var o=odaFiyatlari(t);if(!o.length)return'';return '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px">'+o.map(function(x){return '<div>'+x[0].toLocaleLowerCase('tr')+' odada kişi başı: <strong style="color:var(--text-dark)">'+x[1]+' '+(t.para_birimi||'')+'</strong></div>';}).join('')+'</div>';}
 function satirSonu(s){return String(s||'').replace(/\n/g,'<br>');}
@@ -471,7 +473,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           <div class="paket-body">
             <div class="paket-price"><span style="font-size:12px;color:var(--text-muted)">Kişi başı</span>
             <span class="paket-price-num">${p.fiyat || ''} ${p.para_birimi || ''}</span>${odaKisaHtml(p)}</div>
-            ${p.tarih?`<div style="font-size:13px;color:var(--text-muted);margin:4px 0 12px">📅 ${turTarihAraligi(p)} ${kalkisaKalan(p)}</div>`:''}
+            ${p.tarih?`<div style="font-size:13px;color:var(--text-muted);margin:4px 0 12px">📅 ${turTarihAraligi(p)} ${kalkisaKalan(p)}${hicriAraligi(p)?`<div style="margin-top:3px"><span style="color:var(--text-muted);font-size:12.5px;font-weight:400" title="Hicri takvime göre (Ümmü'l-Kurâ)">🌙 ${hicriAraligi(p)}</span></div>`:''}</div>`:''}
             <ul class="paket-includes">
               <li>Türkiye–Cidde uçuşu</li>
               <li>Mekke ve Medine'de otel${p.sure ? ' (' + p.sure + ')' : ''}</li>

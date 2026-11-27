@@ -281,6 +281,13 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .neden-k .ikon-kutu{margin:0 auto 12px;background:rgba(201,151,43,.14)}
 .neden-k h4{font-family:var(--ff-head);font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
 .neden-k p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}
+.adimlar{list-style:none;padding:0;margin:0 auto;max-width:1100px;display:grid;grid-template-columns:repeat(5,1fr);gap:18px;counter-reset:adim;position:relative}
+.adimlar::before{content:'';position:absolute;top:22px;left:10%;right:10%;height:2px;background:var(--border)}
+.adimlar li{position:relative;text-align:center;counter-increment:adim}
+.adimlar li::before{content:counter(adim);display:flex;align-items:center;justify-content:center;width:46px;height:46px;margin:0 auto 12px;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:700;font-size:18px;position:relative;box-shadow:0 0 0 6px var(--white)}
+.adimlar h4{font-size:15.5px;color:var(--navy);margin:0 0 6px}.adimlar p{font-size:13.5px;line-height:1.55;color:var(--text-muted);margin:0}
+@media(max-width:800px){.adimlar{grid-template-columns:1fr;gap:0;max-width:520px}.adimlar::before{top:22px;bottom:22px;left:22px;right:auto;width:2px;height:auto}
+.adimlar li{display:grid;grid-template-columns:46px 1fr;column-gap:14px;text-align:left;padding-bottom:18px}.adimlar li::before{margin:0;grid-row:span 2}.adimlar h4{margin-top:4px}}
 @media(max-width:700px){.neden-grid4{grid-template-columns:1fr 1fr;gap:10px}.neden-k{padding:16px 12px}.neden-k .ikon-kutu{width:44px;height:44px;margin-bottom:8px}.neden-k h4{font-size:14.5px}.neden-k p{font-size:12px}}
 /* tur kartları: kapak + "…'dan başlayan" */
 .tc-kapak{position:relative;aspect-ratio:16/9;background:var(--navy);overflow:hidden}
@@ -380,6 +387,8 @@ function trTarih(d){if(!d)return'';var p=String(d).split('-');if(p.length!==3)re
 function bugunTR(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date());}catch(e){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}}
 function turGuncel(t){var d=String((t&&t.tarih)||'');return !/^\d{4}-\d{2}-\d{2}$/.test(d)||d>=bugunTR();}
 function turTarihAraligi(t){var g=trTarih(t.tarih),d=trTarih(t.donus_tarihi);return g&&d?g+' – '+d:(g||d);}
+function hicriTarih(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return null;try{var p=new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).formatToParts(new Date(d+'T12:00:00Z')),o={};p.forEach(function(x){o[x.type]=x.value;});return o.day&&o.month&&o.year?{g:String(+o.day),a:o.month,y:String(o.year).replace(/\D/g,'')}:null;}catch(e){return null;}}
+function hicriAraligi(t){if(!t||!/umre|hac/.test(String(t.kategori||'')))return'';var a=hicriTarih(t.tarih),b=hicriTarih(t.donus_tarihi);if(!a)return'';if(!b)return a.g+' '+a.a+' '+a.y;return a.y===b.y?(a.a===b.a?a.g+'–'+b.g+' '+a.a+' '+a.y:a.g+' '+a.a+' – '+b.g+' '+b.a+' '+a.y):a.g+' '+a.a+' '+a.y+' – '+b.g+' '+b.a+' '+b.y;}
 function odaFiyatlari(t){return [['2 Kişilik',t.fiyat_2],['3 Kişilik',t.fiyat_3],['4 Kişilik',t.fiyat_4]].filter(function(x){return x[1]&&String(x[1]).trim();});}
 var TUR_KAPAK={umre:'og-umre.jpg',hac:'hac-14.jpg',kultur:'galeri-06.jpg',diger:'galeri-06.jpg'};
 function enDusukFiyat(t){var l=odaFiyatlari(t).map(function(x){return x[1];});if(!l.length&&t.fiyat)l=[t.fiyat];var n=l.map(function(v){return Number(String(v).replace(/[^\d.,]/g,'').replace(/\.(?=\d{3}\b)/g,'').replace(',','.'));}).filter(function(v){return v>0;});return n.length?Math.min.apply(null,n):0;}
@@ -884,6 +893,25 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </div>
 </section>
 
+<!-- KAYIT NASIL OLUR -->
+<section style="padding:72px 5vw;background:var(--white)" id="kayitAdimlari">
+  <div style="max-width:1100px;margin:0 auto 40px;text-align:center">
+    <div class="section-eyebrow" style="justify-content:center">Kayıt Nasıl Olur?</div>
+    <h2 class="section-title">İlk Mesajdan Yolculuğa 5 Adım</h2>
+  </div>
+  <ol class="adimlar">
+    <li><h4>Bize ulaşın</h4><p>WhatsApp, telefon ya da formdan yazın; size uygun programı birlikte seçelim.</p></li>
+    <li><h4>Kaydınızı yapalım</h4><p>Kişi sayısı ve oda tipini belirleyip kaydınızı oluşturalım.</p></li>
+    <li><h4>Belgelerinizi iletin</h4><p>Pasaport ve gereken belgeleri bize ulaştırın.</p></li>
+    <li><h4>Hazırlık</h4><p>Program, otel ve hazırlık bilgileri size iletilir; misafir uygulamanız hazır olur.</p></li>
+    <li><h4>Yola çıkış</h4><p>Havalimanında rehberinizle buluşup hayırlı yolculuğa başlarız.</p></li>
+  </ol>
+  <div style="text-align:center;margin-top:36px">
+    <a href="https://wa.me/905331980781?text=Merhaba%2C%20kay%C4%B1t%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." class="ana-dugme" target="_blank" rel="noopener">💬 WhatsApp'tan yazın</a>
+    <a href="#programlar" class="ana-dugme">Programları gör</a>
+  </div>
+</section>
+
 <!-- FAYDALI BİLGİLER (rehber yazıları) -->
 <section style="padding:72px 5vw;background:var(--cream)" id="anaRehber">
   <div style="max-width:1100px;margin:0 auto 32px;text-align:center">
@@ -1037,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       <a class="tc-kapak" href="tur-detay.html?id=${encodeURIComponent(t.id)}" style="display:block"><img src="${kapak}" alt="" loading="lazy"><span class="kontenjan" style="${kMap[t.kontenjan]||kMap.var}">${kLabel[t.kontenjan]||'Yer Var'}</span><span class="tc-kalkis">${kalkisaKalan(t)}</span></a>
       <h3><a href="tur-detay.html?id=${encodeURIComponent(t.id)}" style="color:inherit;text-decoration:none">${t.baslik}</a></h3>
       <div class="tc-meta">
-        <span class="tc-meta-item"><svg class="ikon-k" aria-hidden="true"><use href="#i-takvim"/></svg> <strong>${turTarihAraligi(t)}</strong></span>
+        <span class="tc-meta-item"><svg class="ikon-k" aria-hidden="true"><use href="#i-takvim"/></svg> <strong>${turTarihAraligi(t)}</strong></span>${hicriAraligi(t)?`<span class="tc-meta-item"><span style="color:var(--text-muted);font-size:12.5px;font-weight:400" title="Hicri takvime göre (Ümmü'l-Kurâ)">🌙 ${hicriAraligi(t)}</span></span>`:''}
         <span class="tc-meta-item"><svg class="ikon-k" aria-hidden="true"><use href="#i-konum"/></svg> ${t.konum}</span>
         <span class="tc-meta-item"><svg class="ikon-k" aria-hidden="true"><use href="#i-saat"/></svg> <strong>${t.sure}</strong></span>
         ${t.kategori==='umre' && t.otel ? `<span class="tc-meta-item" style="flex-basis:100%"><svg class="ikon-k" aria-hidden="true"><use href="#i-otel"/></svg> <strong>${t.otel}</strong></span>` : ''}
