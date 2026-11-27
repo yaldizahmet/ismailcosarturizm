@@ -388,6 +388,7 @@ details.tum[open] summary::after{content:'▴'}
   /* iPhone'da ana ekrana ekleme adımları: Safari'nin gerçek simgeleriyle */
   var IKON_PAYLAS = '<svg class="ios-ikon" viewBox="0 0 24 24" aria-label="Paylaş simgesi"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8a1.5 1.5 0 0 0-1.5-1.5H16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   var IKON_EKLE = '<svg class="ios-ikon" viewBox="0 0 24 24" aria-label="Ekle simgesi"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8.5v7M8.5 12h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var IKON_KUR = '<svg class="ios-ikon" viewBox="0 0 24 24" aria-label="Uygulamayı kur simgesi" style="color:#1a1a1a"><path d="M14 4h3.5A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5H14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 12h10M10.5 8.5 14 12l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function adimlar(l) { return '<ol class="ios-adim"><li>' + l.join('</li><li>') + '</li></ol>'; }
   function androidMu() { return /android/i.test(navigator.userAgent); }
   /* Sosyal medya uygulamalarının içinde açılan sayfa (buradan ana ekrana eklenemez) */
@@ -406,7 +407,7 @@ details.tum[open] summary::after{content:'▴'}
   function kurulumAnlatim() {
     var u = navigator.userAgent, ic = uygulamaIciAdi();
     if (iosMu()) {
-      if (ic) return '<p class="kur-not">Sayfa ' + ic + ' içinde açıldı; buradan kurulamıyor. Önce köşedeki menüden (<b>•••</b> ya da <b>⋯</b>) <b>Safari\'de aç</b>\'ı seçin, sonra oradaki anlatımı izleyin.</p>';
+      if (ic) return '<p class="kur-not">Sayfa ' + ic + ' içinde açıldı; buradan ana ekrana eklenemiyor. Önce köşedeki menüden (<b>•••</b> ya da <b>⋯</b>) <b>Safari\'de aç</b>\'ı seçin, sonra oradaki anlatımı izleyin.</p>';
       if (/CriOS|EdgiOS/.test(u)) return adimlar([
         'Adres çubuğunun sağındaki ' + IKON_PAYLAS + ' simgesine dokunun (ekranın <b>üstünde</b>).',
         'Açılan listede ' + IKON_EKLE + ' <b>Ana Ekrana Ekle</b>\'yi seçin. Görmüyorsanız listeyi yukarı kaydırın.',
@@ -422,9 +423,13 @@ details.tum[open] summary::after{content:'▴'}
         '<p class="kur-not">Sayfayı WhatsApp\'tan açtıysanız ve alt çubuk yoksa: sağ alttaki 🧭 pusulaya dokunup Safari\'de açın.</p>';
     }
     if (androidMu()) {
-      if (ic) return '<p class="kur-not">Sayfa ' + ic + ' içinde açıldı; buradan kurulamıyor. Sağ üstteki <b>⋮</b> menüden <b>Tarayıcıda aç</b> (ya da <b>Chrome\'da aç</b>) seçeneğine dokunun.</p>';
+      if (ic) return '<p class="kur-not">Sayfa ' + ic + ' içinde açıldı; buradan ana ekrana eklenemiyor. Sağ üstteki <b>⋮</b> menüden <b>Tarayıcıda aç</b> (ya da <b>Chrome\'da aç</b>) seçeneğine dokunun.</p>';
       if (/Firefox/i.test(u)) return adimlar(['Sağ üstteki (ya da alttaki) <b>⋮</b> menüye dokunun.', '<b>Ana ekrana ekle</b> seçeneğine dokunun.', 'Açılan pencerede <b>Ekle</b>\'ye dokunun.']);
-      return adimlar(['Sağ üstteki <b>⋮</b> menüye dokunun.', '<b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>\'yi seçin.', 'Açılan pencerede <b>Yükle</b> / <b>Ekle</b>\'ye dokunun.']);
+      if (/SamsungBrowser/i.test(u)) return adimlar([
+        'Adres çubuğunda, yenile düğmesinin solundaki ' + IKON_KUR + ' simgesine dokunun.',
+        'Açılan pencerede <b>Yükle</b>\'ye dokunun.']) +
+        '<p class="kur-not">Simge yoksa: sağ alttaki <b>⋮</b> menü → <b>Sayfayı şuraya ekle</b> → <b>Ana ekran</b>.</p>';
+      return adimlar(['Tarayıcının <b>⋮</b> menüsüne dokunun (sağ üstte ya da sağ altta).', '<b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>\'yi seçin.', 'Açılan pencerede <b>Yükle</b> / <b>Ekle</b>\'ye dokunun.']);
     }
     return '';
   }
@@ -659,11 +664,11 @@ details.tum[open] summary::after{content:'▴'}
     h += '<div class="adim" id="adimBildirim"><div class="adim-no' + (b1 ? ' tamam' : '') + '">' + (b1 ? '✓' : '1') + '</div><div style="flex:1;min-width:0"><h3>Duyuruları kaçırmayın</h3>' + y1 + '</div></div>';
     // 2. Telefona kur
     var y2;
-    if (kurulu) y2 = '<p>Uygulama telefonunuzda kurulu.</p>';
-    else if (S.yukleIstemi) y2 = '<p>Uygulama telefonunuzda simge olarak dursun, internet olmasa da açılsın.</p><button type="button" class="btn-dolu" data-eylem="yukle">📲 Telefona kur</button>';
+    if (kurulu) y2 = '<p>Ana ekranınıza eklenmiş.</p>';
+    else if (S.yukleIstemi) y2 = '<p>Ana ekranda simge olarak dursun, internet zayıfken de açılsın.</p><button type="button" class="btn-dolu" data-eylem="yukle">📲 Ana ekrana ekle</button>';
     else if (kurulumAnlatim()) y2 = kurulumAnlatim();
     else y2 = '<p>Tarayıcının sağ üstündeki menüye (⋮) dokunup <b>Ana ekrana ekle</b> ya da <b>Uygulamayı yükle</b>\'yi seçin.</p>';
-    h += '<div class="adim" id="adimKur"><div class="adim-no' + (kurulu ? ' tamam' : '') + '">' + (kurulu ? '✓' : '2') + '</div><div style="flex:1;min-width:0"><h3>Telefonunuza kurun</h3>' + y2 + '</div></div>';
+    h += '<div class="adim" id="adimKur"><div class="adim-no' + (kurulu ? ' tamam' : '') + '">' + (kurulu ? '✓' : '2') + '</div><div style="flex:1;min-width:0"><h3>Ana ekrana ekleyin</h3>' + y2 + '</div></div>';
     h += '<button type="button" class="btn-altin" data-eylem="karsilama-bitti">Başla →</button>';
     h += '<p class="kucuk-not" style="text-align:center">Bu ekran yalnızca bir kez gösterilir. Bildirim ve kurulumu sonra da yapabilirsiniz.</p>';
     return h + '</div>';
@@ -686,8 +691,8 @@ details.tum[open] summary::after{content:'▴'}
     var h = '<header class="bas">' +
       '<h1>' + baslik + '</h1>' + (alt ? '<div class="bas-alt">' + esc(alt) + '</div>' : '') + '</header><div class="icerik">';
     h += cevrimdisiSerit();
-    if (S.yukleIstemi) h += '<div class="yukle-kart"><p>Uygulamayı telefonunuza yükleyin; internet olmasa da açılsın.</p><button type="button" data-eylem="yukle">Yükle</button></div>';
-    else if (S.iosIpucu && !ekranaKurulu() && kurulumAnlatim()) h += '<div class="yukle-kart ios-kart"><details class="kur-ac"><summary><b>📲 Uygulamayı kurun</b> <span class="kur-nasil">Nasıl?</span></summary>' + kurulumAnlatim() + '</details><button type="button" class="kapat" data-eylem="ios-kapat" aria-label="Kapat">×</button></div>';
+    if (S.yukleIstemi) h += '<div class="yukle-kart"><p>Ana ekrana ekleyin; simge olarak dursun, internet zayıfken de açılsın.</p><button type="button" data-eylem="yukle">Ekle</button></div>';
+    else if (S.iosIpucu && !ekranaKurulu() && kurulumAnlatim()) h += '<div class="yukle-kart ios-kart"><details class="kur-ac"><summary><b>📲 Ana ekrana ekleyin</b> <span class="kur-nasil">Nasıl?</span></summary>' + kurulumAnlatim() + '</details><button type="button" class="kapat" data-eylem="ios-kapat" aria-label="Kapat">×</button></div>';
 
     h += bildirimKarti('bugun');
     if (v.bitis && gunSayisi(v.bitis, bugun) >= 0) h += anketKarti();

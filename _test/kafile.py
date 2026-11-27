@@ -523,6 +523,7 @@ with sync_playwright() as p:
     for _ad, _ua, _var in [('iPhone Chrome', _I + ' CriOS/131.0 Mobile/15E148 Safari/604.1', 'Adres çubuğunun sağındaki'),
                            ('iPhone Firefox', _I + ' FxiOS/133.0 Mobile/15E148 Safari/605.1.15', 'Sağ alttaki ≡'),
                            ('iPhone Instagram içi', _I + ' Mobile/15E148 Instagram 350.0', "Safari'de aç"),
+                           ('Android Samsung', 'Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/27.0 Chrome/125.0 Mobile Safari/537.36', 'yenile düğmesinin solundaki'),
                            ('Android Firefox', 'Mozilla/5.0 (Android 14; Mobile; rv:133.0) Gecko/133.0 Firefox/133.0', 'Ana ekrana ekle'),
                            ('Android Facebook içi', 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36 [FBAN/EMA;FBAV/450.0]', 'Tarayıcıda aç')]:
         c = push_baglam(ua=_ua, push_var=False); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
