@@ -510,6 +510,12 @@ with sync_playwright() as p:
     c.add_init_script("delete window.PushManager;")
     errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(300); duyuru_ac(pg)
     kontrol('Ana Ekrana Ekle' in pg.inner_text('#ekran') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: ana ekrana kurulmamış iPhone\'da önce kurulum anlatılıyor', errs)
+    pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(200)
+    _k = pg.locator('#ekran .ios-kart')
+    kontrol(_k.count() == 1 and _k.locator('.ios-adim li').count() == 3 and _k.locator('svg.ios-ikon').count() == 2 and not tasma(pg),
+            'Kurulum (iPhone): Bugün\'deki bant 3 adımlı, Paylaş ve Ekle simgeleri resimli, taşma yok', errs)
+    pg.click('#ekran .ios-kart [data-eylem="ios-kapat"]'); pg.wait_for_timeout(200)
+    kontrol(pg.locator('#ekran .ios-kart').count() == 0, 'Kurulum (iPhone): × ile bant kapanıyor', errs)
     c.close()
     # Servis çalışanı: gelen bildirimi gösterme ve dokununca uygulamayı açma (node ile)
     sw_test = r"""
