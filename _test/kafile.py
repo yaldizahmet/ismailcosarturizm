@@ -579,6 +579,11 @@ with sync_playwright() as p:
         sonuc.append((pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else '', errs)); c.close()
     kontrol('Medine sorusu 8?' in sonuc[0][0] and 'Mekke sorusu 1?' in sonuc[1][0] and not sonuc[0][1] and not sonuc[1][1],
             'Eğlence: şehir etiketli sorular grubun o gün kaldığı şehre göre geliyor (önce Medine, sonra Mekke)', [s[0][:60] for s in sonuc])
+    c = yr_baglam(kafile=dict(KAFILE, baslangic='2026-11-20', bitis='2026-11-30')); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
+    _gs0 = pg.locator('#gununSorusu').count(); pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(400)
+    kontrol(_gs0 == 0 and pg.locator('#yrBekle').count() == 1 and '20 Kasım' in pg.inner_text('#yrBekle') and pg.locator('#yrBasla').count() == 0 and not errs,
+            'Eğlence: yolculuk başlamadan soru açılmıyor; Bugün\'de kart yok, Eğlence\'de "ilk günü açılacak" notu', errs)
+    c.close()
     c = yr_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
     kontrol(pg.locator('.alt-menu [data-sekme="eglence"]').count() == 1 and pg.locator('.alt-menu [data-sekme="duyurular"]').count() == 0, 'Eğlence: alt menüde Duyurular yerine Eğlence sekmesi')
     gs = pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else ''

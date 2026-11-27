@@ -893,8 +893,10 @@ details.tum[open] summary::after{content:'▴'}
   function yrAcik() { // bugüne kadar açılan sorular
     var l = yrSorular(), v = S.veri, b = simdi().tarih;
     if (v && v.bitis && gunSayisi(v.bitis, b) > 0) return l; // tur bitti: hepsi açık
+    if (yrOnce()) return []; // yolculuk başlamadan soru açılmaz
     return l.slice(0, YR_GUNLUK * (yrGunNo() + 1));
   }
+  function yrOnce() { var v = S.veri; return !!(v && v.baslangic && gunSayisi(v.baslangic, simdi().tarih) < 0); }
   function yrSiradaki() { var c = yrCevaplar(); return yrAcik().filter(function (q) { return !c[q.id]; })[0] || null; }
   function yrPuan() { var c = yrCevaplar(), p = 0; yrSorular().forEach(function (q) { if (c[q.id] && c[q.id].s === q.dogru) p += 10; }); return p; }
   function yrBugunCozulen() { var c = yrCevaplar(), b = simdi().tarih, n = 0; for (var k in c) if (c[k].g === b) n++; return n; }
@@ -974,7 +976,8 @@ details.tum[open] summary::after{content:'▴'}
     var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r) { if (r.ben) benSira = r.sira; });
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;
     h += '<div class="puan-kart" id="yrPuan"><div><b>' + yrPuan() + '</b><span>puanınız</span></div><div><b>' + (benSira ? benSira + '.' : '–') + '</b><span>grupta sıranız</span></div><div><b>' + yrBugunCozulen() + '</b><span>bugün çözülen</span></div></div>';
-    if (sonraki) {
+    if (yrOnce()) h += '<section class="kart" id="yrBekle"><div class="kart-etiket">Sorular yolculukta açılacak</div><p style="margin:0;font-size:15px;line-height:1.5">İlk sorular yolculuğun ilk günü (<b>' + esc(tarihYaz(v.baslangic)) + '</b>) açılacak. Her gün ' + YR_GUNLUK + ' yeni soru; o gün bulunduğunuz şehirle ilgili.</p></section>';
+    else if (sonraki) {
       var kalan = yrAcik().filter(function (s) { return !c[s.id]; }).length;
       h += '<button type="button" class="altin-kart" data-eylem="yarisma-basla" id="yrBasla"><div class="kart-etiket" style="width:100%"><span>Bugünün soruları</span><span>' + kalan + ' soru</span></div>' +
         '<div style="font-size:16px;font-weight:600;line-height:1.4">Her doğru cevap 10 puan. Her gün ' + YR_GUNLUK + ' yeni soru açılır.</div><div class="btn-dolu" style="margin-top:4px">▶ ' + (cozulen ? 'Devam et' : 'Başla') + '</div></button>';
