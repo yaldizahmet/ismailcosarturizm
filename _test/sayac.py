@@ -202,6 +202,28 @@ with sync_playwright() as p:
         else:
             kontrol(not pg.is_visible('#anaVideoGrid') and pg.is_visible('#anaVideolar a[href="galeri.html"]') and not errs, 'Ana sayfa: videolar yüklenemezse yalnızca "Tüm fotoğraf ve videolar" bağlantısı kalıyor', errs)
         ctx.close()
+    # Ana sayfa: kayıt adımları, tur kartlarında hicri tarih (yalnızca umre/hac); tur detayında "Programı PDF olarak indir"
+    ctx = b.new_context(**p.devices['Pixel 7']); pg = ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    pg.route(re.compile(r'^https?://(?!localhost)'), lambda r, q: r.abort())
+    pg.route('**cdn.jsdelivr.net/npm/@supabase/**', lambda r, q: r.fulfill(status=200, body=MOCK, headers={'content-type': 'application/javascript'}))
+    pg.goto(YEREL + '/', wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
+    ad = pg.locator('#kayitAdimlari .adimlar li'); dg = pg.eval_on_selector_all('#kayitAdimlari .ana-dugme', 'l => l.map(a => a.getAttribute("href"))')
+    kontrol(ad.count() == 5 and 'ofisimize' in ad.nth(0).inner_text() and dg[0].startswith('https://wa.me/') and dg[1:] == ['iletisim.html', '#iletisim']
+            and pg.evaluate('document.documentElement.scrollWidth <= innerWidth') and not errs, 'Ana sayfa: 5 kayıt adımı; WhatsApp, Ofis adresi ve Formu doldurun düğmeleri; telefonda taşma yok', [dg, errs])
+    hic = pg.evaluate("Array.from(document.querySelectorAll('#programlar .tour-card')).map(k => [k.querySelector('h3').innerText, /🌙/.test(k.innerText)])")
+    hk = pg.evaluate("[hicriAraligi({kategori:'umre',tarih:'2026-12-10',donus_tarihi:'2026-12-23'}), hicriAraligi({kategori:'diger',tarih:'2026-12-10'}), hicriAraligi({kategori:'hac',tarih:'bozuk'})]")
+    kontrol(any(h for _, h in hic) and hk[0] == '1–14 Recep 1448' and hk[1] == '' and hk[2] == '' and not errs,
+            'Tur kartları: umre/hac turlarında hicri tarih (Ümmü\'l-Kurâ: 10–23 Aralık 2026 = 1–14 Recep 1448); kültür turunda ve hatalı tarihte yok', [hk, hic[:3]])
+    pg.goto(YEREL + '/tur-detay.html?id=umre-aralik', wait_until='domcontentloaded'); pg.wait_for_timeout(1200)
+    pg.evaluate("window.__yazdir = 0; window.print = function(){ window.__yazdir++; window.__baslik = document.title; }; 0")
+    pg.click('#turPdf'); pg.wait_for_timeout(200)
+    yz = pg.evaluate('[window.__yazdir, window.__baslik]'); pg.emulate_media(media='print'); pg.wait_for_timeout(200)
+    gizli = pg.evaluate("['.navbar','footer','.floating-wa','.btn-kayit','.btn-whatsapp','#turPdf'].every(s => { const e = document.querySelector(s); return !e || getComputedStyle(e).display === 'none'; })")
+    ust = pg.evaluate("getComputedStyle(document.querySelector('.yazdir-ust')).display")
+    kontrol(yz[0] == 1 and yz[1].startswith('ARALIK AYI UMRE') and gizli and ust == 'flex' and not errs,
+            'Tur detayı: "Programı PDF olarak indir" yazdırmayı açıyor, dosya adı turun adı; çıktıda menü/düğmeler yok, logo ve iletişim satırı var', [yz, gizli, ust, errs])
+    ctx.close()
     # Sayfa içi bağlantı (#rehber): içerik sonradan yüklenip üstte yer kaplasa da ziyaretçi bölümün başında kalır (capa.js)
     for sayfa_ in ['umre.html', 'hac.html', 'turlar.html']:
         ctx = b.new_context(**p.devices['Pixel 7']); pg = ctx.new_page(); errs = []
