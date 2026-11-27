@@ -287,7 +287,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.6);padding:56px 5vw 28px;b
 .adimlar li::before{content:counter(adim);display:flex;align-items:center;justify-content:center;width:46px;height:46px;margin:0 auto 12px;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:700;font-size:18px;position:relative;box-shadow:0 0 0 6px var(--white)}
 .adimlar h4{font-size:15.5px;color:var(--navy);margin:0 0 6px}.adimlar p{font-size:13.5px;line-height:1.55;color:var(--text-muted);margin:0}
 @media(max-width:800px){.adimlar{grid-template-columns:1fr;gap:0;max-width:520px}.adimlar::before{top:22px;bottom:22px;left:22px;right:auto;width:2px;height:auto}
-.adimlar li{display:grid;grid-template-columns:46px 1fr;column-gap:14px;text-align:left;padding-bottom:18px}.adimlar li::before{margin:0;grid-row:span 2}.adimlar h4{margin-top:4px}}
+.adimlar li{display:grid;grid-template-columns:46px 1fr;column-gap:14px;text-align:left;padding-bottom:18px}.adimlar li:last-child{padding-bottom:0}.adimlar::before{bottom:auto;height:calc(100% - 64px)}.adimlar li::before{margin:0;grid-row:span 2}.adimlar h4{margin-top:4px}}
 @media(max-width:700px){.neden-grid4{grid-template-columns:1fr 1fr;gap:10px}.neden-k{padding:16px 12px}.neden-k .ikon-kutu{width:44px;height:44px;margin-bottom:8px}.neden-k h4{font-size:14.5px}.neden-k p{font-size:12px}}
 /* tur kartları: kapak + "…'dan başlayan" */
 .tc-kapak{position:relative;aspect-ratio:16/9;background:var(--navy);overflow:hidden}
@@ -900,7 +900,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
     <h2 class="section-title">İlk Mesajdan Yolculuğa 5 Adım</h2>
   </div>
   <ol class="adimlar">
-    <li><h4>Bize ulaşın</h4><p>WhatsApp, telefon ya da formdan yazın; size uygun programı birlikte seçelim.</p></li>
+    <li><h4>Bize ulaşın</h4><p>WhatsApp'tan yazın, arayın ya da Çankaya'daki ofisimize gelin; size uygun programı birlikte seçelim.</p></li>
     <li><h4>Kaydınızı yapalım</h4><p>Kişi sayısı ve oda tipini belirleyip kaydınızı oluşturalım.</p></li>
     <li><h4>Belgelerinizi iletin</h4><p>Pasaport ve gereken belgeleri bize ulaştırın.</p></li>
     <li><h4>Hazırlık</h4><p>Program, otel ve hazırlık bilgileri size iletilir; misafir uygulamanız hazır olur.</p></li>
@@ -908,7 +908,7 @@ fetch('https://wpkjxwbvewwgdclbsdya.supabase.co/rest/v1/duyurular?aktif=eq.true&
   </ol>
   <div style="text-align:center;margin-top:36px">
     <a href="https://wa.me/905331980781?text=Merhaba%2C%20kay%C4%B1t%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." class="ana-dugme" target="_blank" rel="noopener">💬 WhatsApp'tan yazın</a>
-    <a href="#programlar" class="ana-dugme">Programları gör</a>
+    <a href="iletisim.html" class="ana-dugme">📍 Ofis adresi</a>
   </div>
 </section>
 
