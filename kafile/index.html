@@ -265,7 +265,7 @@ details.tum[open] summary::after{content:'▴'}
   <main id="ekran"></main>
   <nav class="alt-menu" aria-label="Ana menü">
     <button type="button" data-sekme="bugun"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Bugün</button>
-    <button type="button" data-sekme="eglence"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>Eğlence</button>
+    <button type="button" data-sekme="eglence"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>Bilgi</button>
     <button type="button" data-sekme="rehber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Rehber</button>
     <button type="button" data-sekme="vakitler"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Vakitler</button>
     <button type="button" data-sekme="acil" class="acil"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>Acil</button>
@@ -854,7 +854,7 @@ details.tum[open] summary::after{content:'▴'}
     return f === 0 ? saat : f === 1 ? 'Dün ' + saat : tarihYaz(gun) + ' ' + saat;
   }
 
-  // ── Bilgi & Eğlence: tur türüne göre bilgi yarışması, grup içi sıralama ──
+  // ── Bilgi Yarışması (alt menüde "Bilgi"): tur türüne göre bilgi yarışması, grup içi sıralama ──
   //    Sorular telefona bir kez iner (internet yokken de oynanır). Her gün 5 yeni soru açılır.
   //    Cevaplar telefonda bekler, internet olunca gönderilir; puanı sunucu hesaplar (doğru cevap 10 puan).
   var YR_GUNLUK = 5;
@@ -949,7 +949,7 @@ details.tum[open] summary::after{content:'▴'}
   function eglenceEkrani() {
     var v = S.veri, q = S.yarisma, l = yrSorular();
     if (q && q.adSor) {
-      return '<header class="bas"><button type="button" class="geri" data-eylem="yarisma-cik">← Bilgi &amp; Eğlence</button><h1>Adınız</h1><div class="bas-alt">Grup sıralamasında görünecek ad</div></header><div class="icerik">' +
+      return '<header class="bas"><button type="button" class="geri" data-eylem="yarisma-cik">← Bilgi Yarışması</button><h1>Adınız</h1><div class="bas-alt">Grup sıralamasında görünecek ad</div></header><div class="icerik">' +
         '<form id="yrAdForm" class="kart" style="gap:12px"><label for="yrAd" style="font-size:15px;line-height:1.5">Sıralamayı yalnızca grubunuz görür. Adınızı ve soyadınızın baş harfini yazmanız yeterli.</label>' +
         '<input id="yrAd" class="ad-kutu" maxlength="30" autocomplete="name" placeholder="Ör. Ayşe K." value="' + esc(yrAd()) + '">' +
         '<button type="submit" class="btn-dolu">' + (q.sonra === 'basla' ? 'Kaydet ve başla' : 'Kaydet') + '</button></form></div>';
@@ -958,7 +958,7 @@ details.tum[open] summary::after{content:'▴'}
       var x = null; l.forEach(function (s) { if (s.id === q.id) x = s; });
       if (!x) { S.yarisma = null; return eglenceEkrani(); }
       var sira = 0; l.forEach(function (s, i) { if (s.id === x.id) sira = i + 1; }); var cev = yrCevaplar()[x.id], secim = cev ? cev.s : null;
-      var h = '<header class="bas"><button type="button" class="geri" data-eylem="yarisma-cik">← Bilgi &amp; Eğlence</button><h1>Soru ' + sira + ' / ' + l.length + '</h1></header><div class="icerik">' +
+      var h = '<header class="bas"><button type="button" class="geri" data-eylem="yarisma-cik">← Bilgi Yarışması</button><h1>Soru ' + sira + ' / ' + l.length + '</h1></header><div class="icerik">' +
         '<div class="ilerleme" aria-hidden="true"><i style="width:' + Math.round((sira - (secim == null ? 1 : 0)) / l.length * 100) + '%"></i></div><div class="soru-metin">' + esc(x.soru) + '</div>';
       (x.siklar || []).forEach(function (c, j) {
         var sinif = secim == null ? '' : j === x.dogru ? ' dogru' : j === secim ? ' yanlis' : '';
@@ -971,7 +971,7 @@ details.tum[open] summary::after{content:'▴'}
       }
       return h + '</div>';
     }
-    var h = '<header class="bas"><h1>Bilgi &amp; Eğlence</h1><div class="bas-alt">Yolculuğumuzla ilgili sorular · grubunuzla yarışın</div></header><div class="icerik">' + cevrimdisiSerit();
+    var h = '<header class="bas"><h1>Bilgi Yarışması</h1><div class="bas-alt">Yolculuğumuzla ilgili sorular · grubunuzla yarışın</div></header><div class="icerik">' + cevrimdisiSerit();
     if (!l.length) return h + '<p class="bos" id="yrBos">' + (yrVeri() ? 'Bu grup için henüz soru eklenmedi. Sorular eklendiğinde burada görünecek.' : 'Sorular yükleniyor… İnternet bağlantısı gerekiyor; bir kez yüklendikten sonra internetsiz de oynayabilirsiniz.') + '</p></div>';
     var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r) { if (r.ben) benSira = r.sira; });
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;

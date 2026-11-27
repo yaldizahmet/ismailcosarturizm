@@ -999,7 +999,7 @@ function kafileFormu(k) {
         <div class="form-group"><label>Yerel acil numara (isteğe bağlı)</label><input id="k_acil_tel" value="${esc(k.acil_tel)}" placeholder="Ör. 112">
           <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında gidilen ülkenin acil numarası. Umre/Hac'da 911 ve 997 zaten gösterilir.</div></div>
       </div>
-      <div class="form-group" style="max-width:420px"><label>Bilgi yarışması (uygulamadaki Eğlence sekmesi)</label>
+      <div class="form-group" style="max-width:420px"><label>Bilgi yarışması (uygulamadaki Bilgi sekmesi)</label>
         <select id="k_yarisma_konusu"><option value="" ${!k.yarisma_konusu ? 'selected' : ''}>Tur türüne göre (Umre/Hac soruları)</option>${Object.entries(YARISMA_KONULARI).map(([d, a]) => `<option value="${d}" ${k.yarisma_konusu === d ? 'selected' : ''}>${a} soruları</option>`).join('')}<option value="kapali" ${k.yarisma_konusu === 'kapali' ? 'selected' : ''}>Kapalı</option></select>
         <div style="font-size:11.5px;color:#888;margin-top:4px">Kültür turlarında konuyu seçin (Balkan, Özbekistan…); seçilmezse yarışma çıkmaz. Sorular: 🧠 Bilgi Yarışması sayfası.</div></div>
       <div class="form-group"><label>Google yorum bağlantısı (isteğe bağlı)</label><input id="k_yorum_link" value="${esc(k.yorum_link)}" placeholder="https://g.page/r/.../review">
@@ -1849,7 +1849,7 @@ function srKonumYazi(x) {
   return '⏳ Konum henüz yok';
 }
 function srHarita(ad, sehir) { return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ad + ' ' + sehir); }
-// ── 🧠 Bilgi Yarışması: misafir uygulamasının Eğlence sekmesindeki sorular ──
+// ── 🧠 Bilgi Yarışması: misafir uygulamasının Bilgi sekmesindeki sorular ──
 const YR = { liste: [], konu: 'umre', duzenlenen: null, oyuncu: [] };
 async function renderYarisma() {
   const el = document.getElementById('sayfa-yarisma');
@@ -1868,7 +1868,7 @@ function yarismaCiz() {
   const sekme = k => { const t = YR.liste.filter(x => x.konu === k), y = t.filter(x => x.yayinda).length; return `<button type="button" class="btn ${k === YR.konu ? 'btn-gold' : 'btn-navy'} yr-konu" data-konu="${k}" onclick="YR.konu='${k}';YR.duzenlenen=null;yarismaCiz()">${YARISMA_KONULARI[k]} (${y}/${t.length})</button>`; };
   document.getElementById('sayfa-yarisma').innerHTML = `
     <div class="header"><h2>🧠 Bilgi Yarışması</h2><button class="btn btn-gold" onclick="yarismaYeni()">➕ Soru ekle</button></div>
-    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafir uygulamasının <b>Eğlence</b> sekmesinde, grubun konusuna göre bu sorular çıkar. Her gün sıradaki 5 soru açılır; doğru cevap 10 puan, grup içinde sıralama yapılır. <b>Taslak sorular uygulamada görünmez.</b> Grubun konusu grup formunda seçilir (Umre/Hac otomatik).
+    <div class="card" style="font-size:13px;color:#555;line-height:1.6">Misafir uygulamasının <b>Bilgi</b> sekmesinde, grubun konusuna göre bu sorular çıkar. Her gün sıradaki 5 soru açılır; doğru cevap 10 puan, grup içinde sıralama yapılır. <b>Taslak sorular uygulamada görünmez.</b> Grubun konusu grup formunda seçilir (Umre/Hac otomatik).
       ${YR.oyuncu.length ? `<br>Oynayanlar: ${YR.oyuncu.map(o => `${esc(o.ad)} · ${o.n} kişi`).join(' — ')}` : ''}</div>
     ${d ? yarismaFormHtml(d) : ''}
     <div class="card">

@@ -585,7 +585,7 @@ with sync_playwright() as p:
             'Eğlence: yolculuk başlamadan soru açılmıyor; Bugün\'de kart yok, Eğlence\'de "ilk günü açılacak" notu', errs)
     c.close()
     c = yr_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
-    kontrol(pg.locator('.alt-menu [data-sekme="eglence"]').count() == 1 and pg.locator('.alt-menu [data-sekme="duyurular"]').count() == 0, 'Eğlence: alt menüde Duyurular yerine Eğlence sekmesi')
+    kontrol(pg.locator('.alt-menu [data-sekme="eglence"]').count() == 1 and pg.inner_text('.alt-menu [data-sekme="eglence"]').strip() == 'Bilgi' and 'Eğlence' not in pg.content() and pg.locator('.alt-menu [data-sekme="duyurular"]').count() == 0, 'Bilgi yarışması: alt menüde "Bilgi" sekmesi (Eğlence adı yok), Duyurular alt menüde değil')
     gs = pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else ''
     kontrol('Deneme sorusu 1?' in gs and '1. sırada: Ayşe K.' in gs, 'Eğlence: Bugün ekranında "Günün sorusu" kartı (sıradaki soru ve grup lideri)', gs)
     pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(400)
