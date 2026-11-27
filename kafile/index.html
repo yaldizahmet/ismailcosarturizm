@@ -975,8 +975,9 @@ details.tum[open] summary::after{content:'▴'}
     if (!l.length) return h + '<p class="bos" id="yrBos">' + (yrVeri() ? 'Bu grup için henüz soru eklenmedi. Sorular eklendiğinde burada görünecek.' : 'Sorular yükleniyor… İnternet bağlantısı gerekiyor; bir kez yüklendikten sonra internetsiz de oynayabilirsiniz.') + '</p></div>';
     var tablo = yrTablo(), benSira = 0; tablo.forEach(function (r) { if (r.ben) benSira = r.sira; });
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;
-    h += '<div class="puan-kart" id="yrPuan"><div><b>' + yrPuan() + '</b><span>puanınız</span></div><div><b>' + (benSira ? benSira + '.' : '–') + '</b><span>grupta sıranız</span></div><div><b>' + yrBugunCozulen() + '</b><span>bugün çözülen</span></div></div>';
-    if (yrOnce()) h += '<section class="kart" id="yrBekle"><div class="kart-etiket">Sorular yolculukta açılacak</div><p style="margin:0;font-size:15px;line-height:1.5">İlk sorular yolculuğun ilk günü (<b>' + esc(tarihYaz(v.baslangic)) + '</b>) açılacak. Her gün ' + YR_GUNLUK + ' yeni soru; o gün bulunduğunuz şehirle ilgili.</p></section>';
+    var once = yrOnce();
+    if (!once) h += '<div class="puan-kart" id="yrPuan"><div><b>' + yrPuan() + '</b><span>puanınız</span></div><div><b>' + (benSira ? benSira + '.' : '–') + '</b><span>grupta sıranız</span></div><div><b>' + yrBugunCozulen() + '</b><span>bugün çözülen</span></div></div>';
+    if (once) h += '<section class="kart" id="yrBekle"><div class="kart-etiket">Sorular yolculukta açılacak</div><p style="margin:0;font-size:15px;line-height:1.5">İlk sorular yolculuğun ilk günü (<b>' + esc(tarihYaz(v.baslangic)) + '</b>) açılacak. Her gün ' + YR_GUNLUK + ' yeni soru; o gün bulunduğunuz şehirle ilgili.</p></section>';
     else if (sonraki) {
       var kalan = yrAcik().filter(function (s) { return !c[s.id]; }).length;
       h += '<button type="button" class="altin-kart" data-eylem="yarisma-basla" id="yrBasla"><div class="kart-etiket" style="width:100%"><span>Bugünün soruları</span><span>' + kalan + ' soru</span></div>' +
@@ -984,7 +985,7 @@ details.tum[open] summary::after{content:'▴'}
     } else if (cozulen >= l.length) h += '<section class="kart" id="yrBitti"><div class="kart-etiket">Tebrikler 🎉</div><p style="margin:0;font-size:15px;line-height:1.5">Tüm soruları çözdünüz. Yeni sorular eklenirse burada görünecek.</p></section>';
     else h += '<section class="kart" id="yrYarin"><div class="kart-etiket">Bugünkü sorular bitti</div><p style="margin:0;font-size:15px;line-height:1.5">Yarın ' + Math.min(YR_GUNLUK, l.length - acikSay) + ' yeni soru açılacak.</p></section>';
     h += '<h2 class="bolum-baslik">Grup sıralaması</h2>';
-    if (!tablo.length) h += '<p class="bos">Henüz kimse oynamadı. İlk siz başlayın!</p>';
+    if (once || !tablo.length) h += '<p class="bos" id="yrTabloBos">' + (once ? 'Sıralama yolculuk başlayınca oluşacak.' : 'Henüz kimse oynamadı. İlk siz başlayın!') + '</p>';
     else {
       h += '<section class="kart" style="gap:0;padding:6px 12px" id="yrTablo">';
       tablo.forEach(function (r, i) {
