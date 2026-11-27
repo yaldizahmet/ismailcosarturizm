@@ -512,10 +512,25 @@ with sync_playwright() as p:
     kontrol('Ana Ekrana Ekle' in pg.inner_text('#ekran') and pg.locator('#ekran [data-eylem="bildirim-ac"]').count() == 0, 'Bildirim: ana ekrana kurulmamış iPhone\'da önce kurulum anlatılıyor', errs)
     pg.click('.alt-menu [data-sekme="bugun"]'); pg.wait_for_timeout(200)
     _k = pg.locator('#ekran .ios-kart')
-    kontrol(_k.count() == 1 and _k.locator('.ios-adim li').count() == 3 and _k.locator('svg.ios-ikon').count() == 2 and not tasma(pg),
-            'Kurulum (iPhone): Bugün\'deki bant 3 adımlı, Paylaş ve Ekle simgeleri resimli, taşma yok', errs)
+    _kapali = _k.count() == 1 and not _k.locator('.ios-adim').is_visible() and _k.bounding_box()['height'] < 90
+    _k.locator('summary').click(); pg.wait_for_timeout(150)
+    kontrol(_kapali and _k.locator('.ios-adim').is_visible() and _k.locator('.ios-adim li').count() == 3 and _k.locator('svg.ios-ikon').count() == 2 and not tasma(pg),
+            'Kurulum (iPhone): Bugün\'deki bant tek satır; "Nasıl?"a dokununca 3 adım ve Paylaş/Ekle simgeleri açılıyor, taşma yok', errs)
     pg.click('#ekran .ios-kart [data-eylem="ios-kapat"]'); pg.wait_for_timeout(200)
     kontrol(pg.locator('#ekran .ios-kart').count() == 0, 'Kurulum (iPhone): × ile bant kapanıyor', errs)
+    c.close()
+    _I = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)'
+    for _ad, _ua, _var in [('iPhone Chrome', _I + ' CriOS/131.0 Mobile/15E148 Safari/604.1', 'Adres çubuğunun sağındaki'),
+                           ('iPhone Firefox', _I + ' FxiOS/133.0 Mobile/15E148 Safari/605.1.15', 'Sağ alttaki ≡'),
+                           ('iPhone Instagram içi', _I + ' Mobile/15E148 Instagram 350.0', "Safari'de aç"),
+                           ('Android Firefox', 'Mozilla/5.0 (Android 14; Mobile; rv:133.0) Gecko/133.0 Firefox/133.0', 'Ana ekrana ekle'),
+                           ('Android Facebook içi', 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36 [FBAN/EMA;FBAV/450.0]', 'Tarayıcıda aç')]:
+        c = push_baglam(ua=_ua, push_var=False); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+        _t = pg.text_content('#ekran .ios-kart') if pg.locator('#ekran .ios-kart').count() else ''
+        kontrol(_var in _t and not tasma(pg), f'Kurulum ({_ad}): tarayıcıya uygun anlatım çıkıyor', (errs, _t[:90]))
+        c.close()
+    c = push_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE')
+    kontrol(pg.locator('#ekran .ios-kart').count() == 0, 'Kurulum: bilgisayarda telefon kurulum bandı çıkmıyor', errs)
     c.close()
     # Servis çalışanı: gelen bildirimi gösterme ve dokununca uygulamayı açma (node ile)
     sw_test = r"""
