@@ -581,7 +581,7 @@ with sync_playwright() as p:
             'Eğlence: şehir etiketli sorular grubun o gün kaldığı şehre göre geliyor (önce Medine, sonra Mekke)', [s[0][:60] for s in sonuc])
     c = yr_baglam(kafile=dict(KAFILE, baslangic='2026-11-20', bitis='2026-11-30')); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
     _gs0 = pg.locator('#gununSorusu').count(); pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(400)
-    kontrol(_gs0 == 0 and pg.locator('#yrBekle').count() == 1 and '20 Kasım' in pg.inner_text('#yrBekle') and pg.locator('#yrBasla').count() == 0 and pg.locator('#yrPuan').count() == 0 and 'yolculuk başlayınca' in pg.inner_text('#ekran') and 'İlk siz başlayın' not in pg.inner_text('#ekran') and not errs,
+    kontrol(_gs0 == 0 and pg.locator('#yrBekle').count() == 1 and "20 Kasım'da, yolculuğun ilk günü" in pg.inner_text('#yrBekle') and 'şehir' not in pg.inner_text('#yrBekle') and not any(ch.isdigit() for ch in pg.inner_text('#yrBekle').split('günü')[1]) and pg.locator('[data-eylem="yarisma-ad"]').count() == 0 and pg.locator('#yrBasla').count() == 0 and pg.locator('#yrPuan').count() == 0 and 'yolculuk başlayınca' in pg.inner_text('#ekran') and 'İlk siz başlayın' not in pg.inner_text('#ekran') and not errs,
             'Eğlence: yolculuk başlamadan soru açılmıyor; Bugün\'de kart yok, Eğlence\'de "ilk günü açılacak" notu, puan kutusu yok, sıralama "yolculuk başlayınca"', errs)
     c.close()
     c = yr_baglam(); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)

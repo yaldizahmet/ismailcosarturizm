@@ -977,7 +977,7 @@ details.tum[open] summary::after{content:'▴'}
     var c = yrCevaplar(), cozulen = l.filter(function (s) { return c[s.id]; }).length, sonraki = yrSiradaki(), acikSay = yrAcik().length;
     var once = yrOnce();
     if (!once) h += '<div class="puan-kart" id="yrPuan"><div><b>' + yrPuan() + '</b><span>puanınız</span></div><div><b>' + (benSira ? benSira + '.' : '–') + '</b><span>grupta sıranız</span></div><div><b>' + yrBugunCozulen() + '</b><span>bugün çözülen</span></div></div>';
-    if (once) h += '<section class="kart" id="yrBekle"><div class="kart-etiket">Sorular yolculukta açılacak</div><p style="margin:0;font-size:15px;line-height:1.5">İlk sorular yolculuğun ilk günü (<b>' + esc(tarihYaz(v.baslangic)) + '</b>) açılacak. Her gün ' + YR_GUNLUK + ' yeni soru; o gün bulunduğunuz şehirle ilgili.</p></section>';
+    if (once) h += '<section class="kart" id="yrBekle"><div class="kart-etiket">Sorular yolculukta açılacak</div><p style="margin:0;font-size:15px;line-height:1.5">İlk sorular <b>' + esc(tarihYaz(v.baslangic)) + '</b>\'' + ['ta', 'ta', 'ta', 'da', 'ta', 'da', 'da', 'ta', 'de', 'de', 'da', 'ta'][+v.baslangic.split('-')[1] - 1] + ', yolculuğun ilk günü gelecek. Sonra her gün yeni sorular açılacak.</p></section>';
     else if (sonraki) {
       var kalan = yrAcik().filter(function (s) { return !c[s.id]; }).length;
       h += '<button type="button" class="altin-kart" data-eylem="yarisma-basla" id="yrBasla"><div class="kart-etiket" style="width:100%"><span>Bugünün soruları</span><span>' + kalan + ' soru</span></div>' +
@@ -994,7 +994,7 @@ details.tum[open] summary::after{content:'▴'}
       });
       h += '</section>';
     }
-    h += '<p style="font-size:13px;color:var(--soluk);margin:-4px 2px 0;line-height:1.5">Sıralamayı yalnızca grubunuz görür.' + (yrAd() ? ' Adınız “' + esc(yrAd()) + '” olarak görünür.' : '') +
+    if (!once) h += '<p style="font-size:13px;color:var(--soluk);margin:-4px 2px 0;line-height:1.5">Sıralamayı yalnızca grubunuz görür.' + (yrAd() ? ' Adınız “' + esc(yrAd()) + '” olarak görünür.' : '') +
       ' <button type="button" data-eylem="yarisma-ad" style="background:none;border:0;padding:0;font:inherit;color:var(--altin-yazi);font-weight:600;text-decoration:underline;cursor:pointer">' + (yrAd() ? 'Adımı değiştir' : 'Adımı yaz') + '</button></p>';
     return h + '</div>';
   }
