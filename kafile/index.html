@@ -365,7 +365,7 @@ details.tum[open] summary::after{content:'▴'}
   var S = {
     kod: oku('kafile-kod', ''), veri: null, sekme: 'bugun', guncelleme: null, cevrimdisi: false,
     sayac: oku('kafile-sayac', { mod: 'tavaf', tavaf: 0, say: 0 }), valiz: oku('kafile-valiz', {}), gecmis: oku('kafile-gecmis', []),
-    sehir: oku('kafile-sehir', 'mekke'), mekanlar: oku('kafile-mekanlar', []), rehberSehir: null, kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
+    sehirSecim: oku('kafile-sehir', null), mekanlar: oku('kafile-mekanlar', []), rehberSehir: null, kible: null, konumVakit: oku('kafile-konum', null), konumHata: null, bildirim: 'bilinmiyor', yukleIstemi: null, iosIpucu: !oku('kafile-ios-kapat', false)
   };
 
   // ── veri ──
@@ -1055,7 +1055,7 @@ details.tum[open] summary::after{content:'▴'}
       '<circle cx="92" cy="92" r="78" fill="none" stroke="#C9972B" stroke-width="12" stroke-linecap="round" stroke-dasharray="490.1" stroke-dashoffset="' + ofset + '" transform="rotate(-90 92 92)"/></svg>' +
       '<div class="ortada" aria-live="polite"><div class="sayi" id="sayacSayi">' + n + '</div><div style="font-size:14px;color:var(--soluk);margin-top:4px">/ 7 ' + (mod === 'tavaf' ? 'şavt' : 'tur') + '</div></div></div>';
     h += '<div class="ipucu">' + esc(ipucu) + '</div>';
-    h += bitti ? '<button type="button" class="btn-sayac" data-eylem="yeni" style="background:var(--gold);color:var(--navy)">' + (mod === 'tavaf' ? 'Yeni tavafa başla' : 'Yeni sa\'ye başla') + '</button>'
+    h += bitti ? (mod === 'tavaf' ? '<button type="button" class="btn-sayac" data-eylem="mod-say" id="saygec" style="background:var(--gold);color:var(--navy)">Sa\'y sayacına geç →</button><button type="button" class="btn-cizgi" data-eylem="yeni" style="margin-top:8px">Yeni tavafa başla</button>' : '<button type="button" class="btn-sayac" data-eylem="yeni" style="background:var(--gold);color:var(--navy)">Yeni sa\'ye başla</button>')
       : '<button type="button" class="btn-sayac" data-eylem="arttir">' + (mod === 'tavaf' ? 'Şavt tamamlandı +1' : 'Tur tamamlandı +1') + '</button>';
     h += '<div class="ikili"><button type="button" class="btn-ince" data-eylem="azalt">Geri al</button><button type="button" class="btn-ince" data-eylem="sifirla">Sıfırla</button></div>';
     h += '<p class="kucuk-not" style="text-align:center">Sayaç telefonda saklanır; uygulama kapansa da kaldığınız yerden devam eder. 7\'yi tamamlayınca geçmişinize kaydedilir.</p>';
@@ -1285,10 +1285,25 @@ details.tum[open] summary::after{content:'▴'}
     bildir('Bu telefon doğrudan paylaşımı desteklemiyor; “Telefona kaydet” ile kaydedip paylaşabilirsiniz.');
   }
 
+  /* Vakitler hangi şehir için: misafir o gün elle seçtiyse o; değilse otel tarihlerine göre o gün kalınan şehir
+     (yolculuktan önce ilk otel, sonra son otel); bilgi yoksa Mekke */
+  function vakitSehri() {
+    var b = simdi().tarih, sc = S.sehirSecim;
+    if (sc && typeof sc === 'object' && sc.tarih === b && SEHIRLER[sc.sehir]) return sc.sehir;
+    var sh = yrGunSehri(b);
+    if (!SEHIRLER[sh]) {
+      var o = ((S.veri && S.veri.oteller) || []).filter(function (h) { return h && h.sehir && SEHIRLER[yrSehirAnahtar(h.sehir)]; });
+      if (o.length) {
+        var v = S.veri, sonra = v && v.bitis && gunSayisi(v.bitis, b) > 0;
+        sh = yrSehirAnahtar((sonra ? o[o.length - 1] : o[0]).sehir);
+      }
+    }
+    return SEHIRLER[sh] ? sh : 'mekke';
+  }
   var VAKIT_ADLARI = [['imsak', 'İmsak'], ['gunes', 'Güneş'], ['ogle', 'Öğle'], ['ikindi', 'İkindi'], ['aksam', 'Akşam'], ['yatsi', 'Yatsı']];
   function vakitlerEkrani() {
     var n = simdi(), yerel = !kutsalMi(), k0 = S.konumVakit;
-    var s = yerel ? (k0 ? { ad: 'Bulunduğunuz yer', enlem: k0.enlem, boylam: k0.boylam } : null) : (SEHIRLER[S.sehir] || SEHIRLER.mekke);
+    var s = yerel ? (k0 ? { ad: 'Bulunduğunuz yer', enlem: k0.enlem, boylam: k0.boylam } : null) : SEHIRLER[vakitSehri()];
     if (yerel && !s) {
       return '<header class="bas"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></header><div class="icerik">' +
         '<div class="kart"><div class="kart-etiket">Bulunduğunuz yerin vakitleri</div><p class="bos">Namaz vakitlerini bulunduğunuz şehre göre hesaplamak için konumunuzu bir kez paylaşmanız yeterli. Konumunuz bu telefonda saklanır. Ekranda şehir adını göstermek için yalnızca yaklaşık konum (1 km civarı) bir harita servisine sorulur; adınız ya da başka bir bilginiz gönderilmez.</p>' +
@@ -1308,8 +1323,8 @@ details.tum[open] summary::after{content:'▴'}
     kalanDk = Math.max(0, Math.ceil(kalanDk));
     var kalan = (kalanDk >= 60 ? Math.floor(kalanDk / 60) + ' sa ' : '') + (kalanDk % 60) + ' dk';
     var h = '<header class="bas"><div class="bas-ust"><h1>Namaz Vakitleri</h1><div class="bas-alt">' + esc(tarihYaz(n.tarih)) + '</div></div>' +
-      (yerel ? '<div class="bas-alt" id="konumIl">📍 ' + esc(k0.il || 'Bulunduğunuz yer') + (k0.zaman ? ' · alındı: ' + new Date(k0.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' : '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (S.sehir !== 'medine') + '">Mekke</button>' +
-      '<button type="button" data-eylem="sehir-medine" aria-pressed="' + (S.sehir === 'medine') + '">Medine</button></div>') + '</header><div class="icerik">';
+      (yerel ? '<div class="bas-alt" id="konumIl">📍 ' + esc(k0.il || 'Bulunduğunuz yer') + (k0.zaman ? ' · alındı: ' + new Date(k0.zaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' : '<div class="secim" role="group" aria-label="Şehir"><button type="button" data-eylem="sehir-mekke" aria-pressed="' + (vakitSehri() === 'mekke') + '">Mekke</button>' +
+      '<button type="button" data-eylem="sehir-medine" aria-pressed="' + (vakitSehri() === 'medine') + '">Medine</button></div>') + '</header><div class="icerik">';
     h += '<div class="altin-kart" style="flex-direction:row;justify-content:space-between;align-items:center"><div><div class="kart-etiket">Sıradaki vakit</div>' +
       '<div style="font-family:var(--ff-b);font-size:24px;font-weight:700;margin-top:2px" id="siradakiVakit">' + esc(siraAd) + ' · ' + siraSaat + '</div></div><div style="font-size:15px;font-weight:700;text-align:right">' + kalan + '</div></div>';
     h += '<div class="kart" style="padding:4px 18px;gap:0" id="vakitListesi">';
@@ -1511,7 +1526,7 @@ details.tum[open] summary::after{content:'▴'}
       titret(); ciz(); yrGonder();
       return;
     }
-    if (ey === 'mod-tavaf' || ey === 'mod-say') { sc.mod = ey.slice(4); yaz('kafile-sayac', sc); ciz(); }
+    if (ey === 'mod-tavaf' || ey === 'mod-say') { sc.mod = ey.slice(4); if (t.id === 'saygec' && (sc.say || 0) >= 7) { sc.say = 0; delete sc.kayit_say; } yaz('kafile-sayac', sc); ciz(); }
     else if (ey === 'arttir') {
       if ((sc[mod] || 0) >= 7) return;
       sc[mod] = (sc[mod] || 0) + 1; titret();
@@ -1534,7 +1549,7 @@ details.tum[open] summary::after{content:'▴'}
     else if (ey === 'sifirla') { if ((sc[mod] || 0) && (sc[mod] || 0) < 7 && !confirm('Sayaç sıfırlansın mı?')) return; sc[mod] = 0; delete sc['kayit_' + mod]; yaz('kafile-sayac', sc); ciz(); }
     else if (ey === 'gecmis-paylas') { try { navigator.share({ text: gecmisMetni() }).catch(function () {}); } catch (x) {} }
     else if (ey === 'gecmis-temizle') { if (!confirm('Tavaf ve sa\'y geçmişiniz bu telefondan silinsin mi?')) return; S.gecmis = []; yaz('kafile-gecmis', S.gecmis); ciz(); }
-    else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehir = ey.slice(6); yaz('kafile-sehir', S.sehir); ciz(); }
+    else if (ey === 'sehir-mekke' || ey === 'sehir-medine') { S.sehirSecim = { sehir: ey.slice(6), tarih: simdi().tarih }; yaz('kafile-sehir', S.sehirSecim); ciz(); }
     else if (ey === 'kible') kibleBaslat();
     else if (ey === 'konum-vakit') konumVakitAl();
     else if (ey === 'bildirim-ac') bildirimAc();

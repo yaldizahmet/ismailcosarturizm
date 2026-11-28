@@ -188,6 +188,10 @@ with sync_playwright() as p:
     kontrol(pg.inner_text('#sayacSayi') == '3', 'Sayaç: tavaf sayısı sa\'y\'dan etkilenmiyor')
     pg.click('[data-eylem="gecmis-temizle"]'); pg.wait_for_timeout(100)
     kontrol(pg.locator('#gecmisListe').count() == 0 and 'tavaf 3/7' in pg.inner_text('#gecmisDevam') and pg.locator('#gecmisPaylas').count() == 1, 'Geçmiş: "Geçmişi temizle" çalışıyor, devam eden sayaç paylaşılabilir kalıyor')
+    for _ in range(4): pg.click('[data-eylem="arttir"]')
+    kontrol(pg.locator('#saygec').count() == 1 and pg.locator('[data-eylem="yeni"]').count() == 1, "Sayaç: tavaf bitince \"Sa'y sayacına geç\" ve \"Yeni tavafa başla\" çıkıyor")
+    pg.click('#saygec'); pg.wait_for_timeout(150)
+    kontrol(pg.get_attribute('.secim [data-eylem="mod-say"]', 'aria-pressed') == 'true' and pg.inner_text('#sayacSayi') == '0' and 'tur' in pg.inner_text('.halka'), "Sayaç: \"Sa'y sayacına geç\" sa'y sayacını 0'dan açıyor")
     kontrol(not tasma(pg), 'Rehber: telefonda yatay taşma yok')
     kontrol(pg.get_attribute('.yorum-satir', 'href') == 'https://maps.app.goo.gl/kcsyZAUVKr1JB5UH9', 'Google yorumu: bağlantı girilmemişse işletmenin Google Haritalar sayfası')
 
@@ -579,6 +583,21 @@ with sync_playwright() as p:
         sonuc.append((pg.inner_text('#gununSorusu') if pg.locator('#gununSorusu').count() else '', errs)); c.close()
     kontrol('Medine sorusu 8?' in sonuc[0][0] and 'Mekke sorusu 1?' in sonuc[1][0] and not sonuc[0][1] and not sonuc[1][1],
             'Eğlence: şehir etiketli sorular grubun o gün kaldığı şehre göre geliyor (önce Medine, sonra Mekke)', [s[0][:60] for s in sonuc])
+    # Vakitler: şehir otel tarihlerine göre kendiliğinden seçiliyor; elle seçim yalnızca o gün geçerli
+    ky_v = dict(KAFILE, baslangic='2026-11-10', bitis='2026-11-15', oteller=[{'sehir': 'Mekke', 'ad': 'A', 'giris': '2026-11-10', 'cikis': '2026-11-12'}, {'sehir': 'Medine', 'ad': 'B', 'giris': '2026-11-12', 'cikis': '2026-11-15'}])
+    def vk_sehir(simdi, kafile=ky_v, onceki=None):
+        c = yr_baglam(kafile=kafile); c.add_init_script(f"window.__SIMDI = '{simdi}';" + (f"try{{localStorage.setItem('kafile-sehir', '{onceki}')}}catch(e){{}}" if onceki else ''))
+        errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(250)
+        return c, pg, errs
+    def secili(pg): return 'medine' if pg.get_attribute('[data-eylem="sehir-medine"]', 'aria-pressed') == 'true' else 'mekke'
+    c, pg, errs = vk_sehir('2026-11-11T11:00:00+03:00'); s1 = secili(pg); c.close()
+    c, pg, errs = vk_sehir('2026-11-13T11:00:00+03:00'); s2 = secili(pg)
+    pg.click('[data-eylem="sehir-mekke"]'); pg.wait_for_timeout(150); pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(400)
+    pg.click('.alt-menu [data-sekme="vakitler"]'); pg.wait_for_timeout(250); s3 = secili(pg); kayit = pg.evaluate("localStorage.getItem('kafile-sehir')"); c.close()
+    c, pg, errs = vk_sehir('2026-11-14T11:00:00+03:00', onceki=kayit.replace("'", "")); s4 = secili(pg); c.close()
+    c, pg, errs = vk_sehir('2026-11-08T11:00:00+03:00', kafile=dict(ky_v, oteller=list(reversed(ky_v['oteller'])), baslangic='2026-11-10')); s5 = secili(pg); c.close()
+    kontrol((s1, s2, s3, s4) == ('mekke', 'medine', 'mekke', 'medine') and not errs,
+            'Vakitler: şehir otel tarihlerine göre seçili geliyor (Mekke günü Mekke, Medine günü Medine); elle seçim o gün kalıyor, ertesi gün otele dönüyor', (s1, s2, s3, s4))
     c = yr_baglam(kafile=dict(KAFILE, baslangic='2026-11-20', bitis='2026-11-30')); errs = []; pg = sayfa(c, errs, URL + '#TEST-ABCDE'); pg.wait_for_timeout(500)
     _gs0 = pg.locator('#gununSorusu').count(); pg.click('.alt-menu [data-sekme="eglence"]'); pg.wait_for_timeout(400)
     kontrol(_gs0 == 0 and pg.locator('#yrBekle').count() == 1 and "20 Kasım'da, yolculuğun ilk günü" in pg.inner_text('#yrBekle') and 'şehir' not in pg.inner_text('#yrBekle') and not any(ch.isdigit() for ch in pg.inner_text('#yrBekle').split('günü')[1]) and pg.locator('[data-eylem="yarisma-ad"]').count() == 0 and pg.locator('#yrBasla').count() == 0 and pg.locator('#yrPuan').count() == 0 and 'yolculuk başlayınca' in pg.inner_text('#ekran') and 'İlk siz başlayın' not in pg.inner_text('#ekran') and not errs,
