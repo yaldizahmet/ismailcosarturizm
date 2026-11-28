@@ -659,8 +659,8 @@ with sync_playwright() as p:
     with dp.expect_download() as indir: dp.click('#yedekBtn')
     dosya = indir.value; yd = json.load(open(dosya.path(), encoding='utf-8'))
     tb = yd.get('tablolar', {})
-    kontrol(re.match(r'ismailcosar-yedek-\d{4}-\d{2}-\d{2}-\d{4}\.json$', dosya.suggested_filename) and len(tb.get('ziyaretler', [])) == 6 and 'musteriler' in tb and 'kafileler' in tb and len(tb) >= 15,
-            'Ana sayfa: "Yedek indir" tüm tabloları tek JSON dosyası olarak indiriyor', dosya.suggested_filename)
+    kontrol(re.match(r'ismailcosar-yedek-\d{4}-\d{2}-\d{2}-\d{4}\.json$', dosya.suggested_filename) and len(tb.get('ziyaretler', [])) == 6 and 'musteriler' in tb and 'kafileler' in tb and all(k in tb for k in ('bilgi_sorulari', 'yarisma_oyuncular', 'yarisma_cevaplar')) and len(tb) >= 18,
+            'Ana sayfa: "Yedek indir" tüm tabloları (yarışma soruları ve puanlar dahil) tek JSON dosyası olarak indiriyor', dosya.suggested_filename)
     dp.wait_for_timeout(300)
     kontrol('Yedek indirildi' in dp.inner_text('#toast') and not dp.is_disabled('#yedekBtn') and not errs, 'Ana sayfa: yedekten sonra bilgi mesajı, buton yeniden kullanılabilir', errs)
     dp.evaluate("sekmeAc('ziyaret')"); dp.wait_for_timeout(500)
